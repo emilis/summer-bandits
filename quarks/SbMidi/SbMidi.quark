@@ -1,0 +1,4 @@
+(
+  name: "SbMidi",
+  summary: "MIDI utilities for Summer Bandits",
+)
