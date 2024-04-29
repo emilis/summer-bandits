@@ -32,23 +32,16 @@ Server.default.scope( 4 );
 
 SbMidiInput.postln;
 
+/// Sound check:
+~soundCheck = Synth.new( SbSynthsSine.name, [ frequency: 440 ]);
+~soundCheck.free;
+
 /// Main -----------------------------------------------------------------------
 
 /// An example midi to synth setup:
 (
-  var modx = SbMidiInput( "MODX", "MODX MIDI 1" );
-  var notes = Array.newClear( 128 );
-
-  modx.onNoteOff({| key, velocity |
-    [ 'onNoteOff', key, velocity ].postln;
-    notes[key].free;
-  });
-
-  modx.onNoteOn({| key, velocity |
-    [ 'onNoteOn', key, velocity ].postln;
-    notes[key] = Synth.new(
-      SbSynthsSine.name,
-      [ frequency: key.midicps ],
-    )
-  });
+  SbMidiPlayNotes(
+    SbMidiInput( "MODX", "MODX MIDI 1" ),
+    SbSynthsSine.name,
+  );
 )
