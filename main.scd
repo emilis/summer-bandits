@@ -17,7 +17,10 @@
   Server.default.quit;
   Server.default.options.device = "SuperColliderServer";
   Server.default.boot;
+)
+(
   SbSynthsSine.init;
+  SbSynthsGuitar.init;
 )
 (
   // Need to :SCLangRecompile after changes to quarks
@@ -42,6 +45,7 @@ SbMidiInput.postln;
 (
   SbMidiPlayNotes(
     SbMidiInput( "MODX", "MODX MIDI 1" ),
-    SbSynthsSine.name,
+    /// SbSynthsSine.name,
+    SbSynthsGuitar.name,
   );
 )
