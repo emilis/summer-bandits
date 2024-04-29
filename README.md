@@ -23,6 +23,7 @@ WIP.
 - [ ] Tempo switcher
     - [ ] implement swing
     - [ ] MIDI sync with external gear ?
+- [ ] Auto-start on Raspberry boot
 
 ### Guitar
 
