@@ -11,6 +11,7 @@ WIP.
 ## TODO
 
 - [ ] Decide on goals and priorities
+- [ ] Add Setup documentation
 
 ### General
 
