@@ -3,10 +3,34 @@
 WIP.
 
 ## Setup
-### Prerequisites
-### Installation
+
+Should work smoothly on Debian based Linux distributions (Rasbperry Pi OS, Ubuntu).
+
+```bash
+sudo apt install make supercollider supercollider-ide
+```
+
+To configure the Jack server on Raspberry I had to create `$HOME/.jackdrc` file with such contents:
+
+```
+/usr/local/bin/jackd -P75 -p16 -dalsa -dhw:0 -r44100 -p1024 -n3
+```
 
 ## Usage
+
+Launch the SuperCollider IDE:
+
+```
+make gui
+```
+
+Launch Tmux+Vim session:
+
+```
+make vim
+```
+
+This should open `main.scd` in your editor of choice. The rest of the instructions are in the file.
 
 ## TODO
 
