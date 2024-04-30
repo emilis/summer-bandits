@@ -7,23 +7,18 @@
 */
 /// Install --------------------------------------------------------------------
 (
-  Quarks.addFolder( File.getcwd +/+ "quarks" );
-  Quarks.install( "SbMidi" );
-  Quarks.install( "SbSynths" );
+  ~quarksDir = File.getcwd +/+ "quarks";
+  Quarks.install( ~quarksDir +/+ "SbMidi" );
+  Quarks.install( ~quarksDir +/+ "SbSynths" );
   /// do :SCLangRecompile
 )
-/// Initialize -----------------------------------------------------------------
+/// (Re)Boot -------------------------------------------------------------------
 (
   Server.default.quit;
   Server.default.options.device = "SuperColliderServer";
   Server.default.boot;
-)
-(
   SbSynthsSine.init;
   SbSynthsGuitar.init;
-)
-(
-  // Need to :SCLangRecompile after changes to quarks
   MIDIClient.init( 0, 0, false );
   MIDIIn.connectAll;
 )
