@@ -18,6 +18,8 @@
 /// Install --------------------------------------------------------------------
 ( // Evaluate this region when first running SC:
   ~quarksDir = File.getcwd +/+ "quarks";
+  Quarks.install( ~quarksDir +/+ "SbConductor" );
+  Quarks.install( ~quarksDir +/+ "SbGuitar" );
   Quarks.install( ~quarksDir +/+ "SbMidi" );
   Quarks.install( ~quarksDir +/+ "SbSynths" );
 )
@@ -40,6 +42,7 @@ Server.default.scope( 4 );
 SbMidiInput.postln;
 
 /// Sound check:
+SbSynthsSine.init;
 ~soundCheck = Synth.new( SbSynthsSine.name, [ frequency: 440 ]);
 ~soundCheck.free;
 
@@ -54,5 +57,15 @@ SbMidiInput.postln;
     SbMidiInput( "MODX", "MODX MIDI 1" ),
     /// SbSynthsSine.name,
     SbSynthsGuitar.name,
+  );
+)
+
+(
+  ~conductor = SbConductor.new;
+  /// ~conductor.setChord( 'ii' );
+  ~guitar = SbGuitar(
+    ~conductor,
+    SbMidiInput( "MODX", "MODX MIDI 1" ),
+    nil,
   );
 )
