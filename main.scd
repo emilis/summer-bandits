@@ -27,8 +27,6 @@
   Server.default.quit;
   Server.default.options.device = "SuperColliderServer";
   Server.default.boot;
-  SbSynthsSine.init;
-  SbSynthsGuitar.init;
   MIDIClient.init( 0, 0, false );
   MIDIIn.connectAll;
 )
@@ -50,6 +48,8 @@ SbMidiInput.postln;
 /// An example midi to synth setup.
 /// Replace the strings for your MIDI controller:
 (
+  /// SbSynthsSine.init;
+  SbSynthsGuitar.init;
   SbMidiPlayNotes(
     SbMidiInput( "MODX", "MODX MIDI 1" ),
     /// SbSynthsSine.name,
