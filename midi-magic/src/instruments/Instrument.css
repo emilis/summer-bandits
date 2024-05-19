@@ -1,0 +1,15 @@
+.com-instruments-instrument {
+
+  background-color:         #eef;
+  border-radius:            1ch;
+  padding:                  calc( 3rem / 4 ) 1ch;
+}
+
+.com-instruments-instrument > * {
+
+  margin-block:             0;
+}
+.com-instruments-instrument > * + * {
+
+  margin-block-start:       calc( 3em / 2 );
+}

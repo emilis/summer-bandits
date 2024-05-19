@@ -1,0 +1,59 @@
+:root {
+
+  font-family:              Ubuntu, Helvetica, sans-serif;
+  font-size:                100%;
+  line-height:              1.5;
+
+  --lh:                     1.5rem;
+}
+
+a {
+
+  color: #646cff;
+}
+a:hover {
+
+  color: #535bf2;
+}
+
+body {
+
+  margin:               0;
+  padding:              0;
+}
+
+h1 {
+  font-size:            200%;
+  line-height:          calc( var(--lh) * 2 );
+}
+h2 {
+  font-size:            168%;
+  line-height:          calc( var(--lh) * 2 );
+}
+h3 {
+  font-size:            141%;
+  line-height:          var(--lh);
+}
+h4 {
+  font-size:            119%;
+  line-height:          var(--lh);
+}
+h5 {
+  font-size:            100%;
+  line-height:          var(--lh);
+}
+h6 {
+  font-size:            84%;
+  line-height:          var(--lh);
+}
+
+/*  Layouts  ---------------------------------------------------------------- */
+
+.layout-stack > * {
+
+  margin-block:         0;
+}
+.layout-stack > * + * {
+
+  margin-block-start:   var(--lh);
+}

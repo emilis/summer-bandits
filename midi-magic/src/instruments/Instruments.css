@@ -1,0 +1,5 @@
+.com-instruments > .instrument-list {
+
+  display:                  flex;
+  gap:                      1ch;
+}
