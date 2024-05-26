@@ -4,6 +4,13 @@ import { effect, signal } from "@preact/signals";
 import { type ChordNumber } from "../harmony/scales";
 import { type Instrument } from "../instruments/types";
 import { activeChord, setActiveChord } from "../conductor/state";
+import {
+  CombinedStrumming,
+  FullStrumming,
+  PickedStrumming,
+  PowerChordStrumming,
+  Strumming,
+} from "./strumming";
 
 /// Types ----------------------------------------------------------------------
 
@@ -25,43 +32,6 @@ const CHORDS: Record<number, ChordNumber> = {
   52: "vi",
   53: "vii",
 };
-const LOWEST_GUITAR_NOTE = 40;
-
-/// Chord shapes ---------------------------------------------------------------
-
-const makeMajorBarre = (root: number) => [
-  root,
-  root + 7,
-  root + 12,
-  root + 16,
-  root + 19,
-  root + 24,
-];
-
-const makeMinorBarre = (root: number) => [
-  root,
-  root + 7,
-  root + 12,
-  root + 15,
-  root + 19,
-  root + 24,
-];
-
-const makeDiminished = (root: number) => [root, root + 6, root + 10, root + 15];
-
-const openMajorChords: Record<number, number[]> = {
-  /* E */ 40: makeMajorBarre(40),
-  /* G */ 43: [43, 47, 50, 55, 62, 67],
-  /* A */ 45: [45, 52, 57, 61, 64],
-  /* C */ 48: [48, 52, 55, 60, 64],
-  /* D */ 50: [50, 57, 62, 66],
-};
-
-const openMinorChords: Record<number, number[]> = {
-  /* E */ 40: makeMinorBarre(40),
-  /* A */ 45: [45, 52, 57, 60, 64],
-  /* D */ 50: [50, 57, 62, 65],
-};
 
 /// State ----------------------------------------------------------------------
 
@@ -73,6 +43,17 @@ const options = signal<Options>({
 
 let activeNote = OPEN_CHORD_NOTE;
 const notesDown = new Set<number>();
+
+const STRUMMINGS: Record<number, Strumming> = {
+  67: FullStrumming(activeChord, notesOut),
+  68: PickedStrumming(activeChord, notesOut, { resetOnChordChange: false }),
+  69: PickedStrumming(activeChord, notesOut, { resetOnChordChange: true }),
+  70: CombinedStrumming(activeChord, notesOut, { rootNoteCount: 1 }),
+  71: CombinedStrumming(activeChord, notesOut, { rootNoteCount: 2 }),
+  72: PowerChordStrumming(activeChord, notesOut),
+};
+
+let currentStrumming = FullStrumming(activeChord, notesOut);
 
 /// Private functions ----------------------------------------------------------
 
@@ -106,49 +87,21 @@ const onNoteOff = ({ note }: { note: Note }) => {
   }
 };
 
-const getCurrentChordNotes = () => {
-  const chord = activeChord.value;
-  let root = chord.notes[0] + 36;
-  if (root < LOWEST_GUITAR_NOTE) {
-    root += 12;
-  }
-  switch (chord.flavour) {
-    case "maj":
-      return openMajorChords[root] || makeMajorBarre(root);
-    case "min":
-      return openMinorChords[root] || makeMinorBarre(root);
-    case "dim":
-      return makeDiminished(root);
-    default:
-      return [];
-  }
-};
-
 const onNoteOn = ({ note }: { note: Note }) => {
   console.debug("guitar onNoteOn", note);
   switch (true) {
-    case isDownNote(note) || isUpNote(note):
-      if (!notesOut.value) {
-        return;
-      }
-      notesOut.value?.sendAllNotesOff();
-      let notes = getCurrentChordNotes();
-      if (isUpNote(note)) {
-        notes = [...notes].reverse();
-      }
-      const varietyNumber = Math.random();
-      const baseVelocity = 0.9 - 0.3 * varietyNumber;
-      const strumSpeed = 20 - 10 * varietyNumber;
-      notes.forEach((chordNote, index) => {
-        notesOut.value?.sendNoteOn(
-          new Note(chordNote, { attack: baseVelocity - 0.05 * index }),
-          { time: `+${index * strumSpeed}` }
-        );
-      });
+    case isDownNote(note):
+      currentStrumming.handleDown();
+      return;
+    case isUpNote(note):
+      currentStrumming.handleUp();
       return;
     case note.number in CHORDS:
       notesDown.add(note.number);
       maybeApplyChordChange();
+      return;
+    case note.number in STRUMMINGS:
+      currentStrumming = STRUMMINGS[note.number];
       return;
   }
 };
