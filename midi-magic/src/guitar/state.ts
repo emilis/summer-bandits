@@ -57,7 +57,22 @@ const noteSender: NoteSender = {
     const { pitch, velocity, delay } = note;
     const now = performance.now();
     const scheduledAt = delay ? now + delay : undefined;
-    playingNotes.push({ pitch, scheduledAt });
+    const existingIndex = playingNotes.findIndex(
+      (playing) => playing.pitch == pitch
+    );
+    // TODO: this doesn't mute notes before retriggering them.
+    // Not sure if it's a problem though.
+    if (existingIndex == -1) {
+      playingNotes.push({ pitch, scheduledAt });
+    } else {
+      // Only keep latest scheduled note to not send multiple notes offs for same note.
+      const alreadyScheduledAt = playingNotes[existingIndex].scheduledAt;
+      if (scheduledAt) {
+        if (!alreadyScheduledAt || scheduledAt > alreadyScheduledAt) {
+          playingNotes[existingIndex] = { pitch, scheduledAt };
+        }
+      }
+    }
     notesOut.value?.sendNoteOn(new Note(pitch, { attack: velocity }), {
       time: scheduledAt,
     });
