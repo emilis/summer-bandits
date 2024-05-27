@@ -33,17 +33,21 @@ const calcStrumDelay = (
   rand: number,
   options: Required<StrumOpts>,
   index: number
-) => `+${index * (options.strumSpeed - options.strumSpeedRand * rand)}`;
+): number => index * (options.strumSpeed - options.strumSpeedRand * rand);
+
+export type NoteSender = {
+  playNote(note: { pitch: number; velocity: number; delay?: number }): void;
+  muteAll(): void;
+};
 
 export type Strumming = {
   handleDown(): void;
   handleUp(): void;
 };
 
-
 export const FullStrumming = (
   activeChord: Signal<Chord>,
-  notesOut: Signal<OutputChannel | null>,
+  noteSender: NoteSender,
   options: { velocityDecay?: number } & StrumOpts & VelocityOpts = {}
 ): Strumming => {
   const opts = {
@@ -53,16 +57,15 @@ export const FullStrumming = (
     ...options,
   };
   const strum = (notes: number[]) => {
-    notesOut.value?.sendAllNotesOff();
+    noteSender.muteAll();
     const varietyNumber = Math.random();
     const baseVelocity = calcVelocity(varietyNumber, opts);
     notes.forEach((chordNote, index) => {
-      notesOut.value?.sendNoteOn(
-        new Note(chordNote, {
-          attack: baseVelocity - opts.velocityDecay * index,
-        }),
-        { time: calcStrumDelay(varietyNumber, opts, index) }
-      );
+      noteSender.playNote({
+        pitch: chordNote,
+        velocity: baseVelocity - opts.velocityDecay * index,
+        delay: calcStrumDelay(varietyNumber, opts, index),
+      });
     });
   };
 
@@ -78,7 +81,7 @@ export const FullStrumming = (
 
 export const PickedStrumming = (
   activeChord: Signal<Chord>,
-  notesOut: Signal<OutputChannel | null>,
+  noteSender: NoteSender,
   options: {
     resetOnChordChange?: boolean;
   } = {}
@@ -98,9 +101,10 @@ export const PickedStrumming = (
 
   const playNote = (note: number) => {
     const varietyNumber = Math.random();
-    notesOut.value?.sendNoteOn(
-      new Note(note, { attack: calcVelocity(varietyNumber, opts) })
-    );
+    noteSender.playNote({
+      pitch: note,
+      velocity: calcVelocity(varietyNumber, opts),
+    });
   };
 
   return {
@@ -121,7 +125,7 @@ export const PickedStrumming = (
 
 export const CombinedStrumming = (
   activeChord: Signal<Chord>,
-  notesOut: Signal<OutputChannel | null>,
+  noteSender: NoteSender,
   options: {
     rootNoteCount?: number;
     strummedNoteCount?: number;
@@ -147,18 +151,20 @@ export const CombinedStrumming = (
 
   const playNote = (note: number) => {
     const varietyNumber = Math.random();
-    notesOut.value?.sendNoteOn(
-      new Note(note, { attack: calcVelocity(varietyNumber, opts) })
-    );
+    noteSender.playNote({
+      pitch: note,
+      velocity: calcVelocity(varietyNumber, opts),
+    });
   };
 
   const strum = (notes: number[]) => {
     const varietyNumber = Math.random();
     const baseVelocity = calcVelocity(varietyNumber, opts);
     notes.forEach((chordNote, index) => {
-      notesOut.value?.sendNoteOn(
-        new Note(chordNote, { attack: baseVelocity - 0.05 * index })
-      );
+      noteSender.playNote({
+        pitch: chordNote,
+        velocity: baseVelocity - 0.05 * index,
+      });
     });
   };
 
@@ -179,7 +185,7 @@ export const CombinedStrumming = (
 
 export const PowerChordStrumming = (
   activeChord: Signal<Chord>,
-  notesOut: Signal<OutputChannel | null>,
+  noteSender: NoteSender,
   options: { noteCount?: 1 | 2 | 3 } & VelocityOpts & StrumOpts = {}
 ): Strumming => {
   const opts = {
@@ -191,14 +197,15 @@ export const PowerChordStrumming = (
     ...options,
   };
   const strum = (notes: number[]) => {
-    notesOut.value?.sendAllNotesOff();
+    noteSender.muteAll();
     const varietyNumber = Math.random();
     const baseVelocity = calcVelocity(varietyNumber, opts);
     notes.slice(0, opts.noteCount).forEach((chordNote, index) => {
-      notesOut.value?.sendNoteOn(
-        new Note(chordNote, { attack: baseVelocity - 0.05 * index }),
-        { time: calcStrumDelay(varietyNumber, opts, index) }
-      );
+      noteSender.playNote({
+        pitch: chordNote,
+        velocity: baseVelocity - 0.05 * index,
+        delay: calcStrumDelay(varietyNumber, opts, index),
+      });
     });
   };
 

@@ -7,6 +7,7 @@ import { activeChord, setActiveChord } from "../conductor/state";
 import {
   CombinedStrumming,
   FullStrumming,
+  NoteSender,
   PickedStrumming,
   PowerChordStrumming,
   Strumming,
@@ -44,16 +45,52 @@ const options = signal<Options>({
 let activeNote = OPEN_CHORD_NOTE;
 const notesDown = new Set<number>();
 
-const STRUMMINGS: Record<number, Strumming> = {
-  67: FullStrumming(activeChord, notesOut),
-  68: PickedStrumming(activeChord, notesOut, { resetOnChordChange: false }),
-  69: PickedStrumming(activeChord, notesOut, { resetOnChordChange: true }),
-  70: CombinedStrumming(activeChord, notesOut, { rootNoteCount: 1 }),
-  71: CombinedStrumming(activeChord, notesOut, { rootNoteCount: 2 }),
-  72: PowerChordStrumming(activeChord, notesOut),
+type PlayingNote = {
+  pitch: number;
+  scheduledAt?: number;
 };
 
-let currentStrumming = FullStrumming(activeChord, notesOut);
+const playingNotes: PlayingNote[] = [];
+
+const noteSender: NoteSender = {
+  playNote: (note) => {
+    const { pitch, velocity, delay } = note;
+    const now = performance.now();
+    const scheduledAt = delay ? now + delay : undefined;
+    playingNotes.push({ pitch, scheduledAt });
+    notesOut.value?.sendNoteOn(new Note(pitch, { attack: velocity }), {
+      time: scheduledAt,
+    });
+  },
+  muteAll: () => {
+    playingNotes.forEach((note) => {
+      const { pitch, scheduledAt } = note;
+      if (scheduledAt) {
+        notesOut.value?.sendNoteOff(pitch, { time: scheduledAt + 0.1 });
+      } else {
+        notesOut.value?.sendNoteOff(pitch);
+      }
+    });
+    playingNotes.length = 0;
+  },
+};
+
+const STRUMMINGS: Record<number, Strumming> = {
+  67: FullStrumming(activeChord, noteSender),
+  68: PickedStrumming(activeChord, noteSender, { resetOnChordChange: false }),
+  69: PickedStrumming(activeChord, noteSender, { resetOnChordChange: true }),
+  70: CombinedStrumming(activeChord, noteSender, {
+    rootNoteCount: 1,
+    velocity: 0.8,
+  }),
+  71: CombinedStrumming(activeChord, noteSender, {
+    rootNoteCount: 2,
+    velocity: 0.8,
+  }),
+  72: PowerChordStrumming(activeChord, noteSender),
+};
+
+let currentStrumming = STRUMMINGS[67];
 
 /// Private functions ----------------------------------------------------------
 
@@ -73,7 +110,7 @@ const maybeApplyChordChange = () => {
     return;
   }
   activeNote = maxNote;
-  notesOut.value?.sendAllNotesOff();
+  noteSender.muteAll();
   setActiveChord(CHORDS[maxNote]);
 };
 
