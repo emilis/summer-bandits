@@ -1,4 +1,3 @@
-import { Note, OutputChannel } from "webmidi";
 import { Signal } from "@preact/signals";
 import { Chord } from "../harmony/scales";
 import {

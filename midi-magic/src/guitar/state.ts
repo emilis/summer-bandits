@@ -31,7 +31,7 @@ const CHORDS: Record<number, ChordNumber> = {
   50: "iv",
   51: "v",
   52: "vi",
-  53: "vii",
+  53: "vii", // This one is not accessible with the guitar controller
 };
 
 /// State ----------------------------------------------------------------------
@@ -77,17 +77,16 @@ const noteSender: NoteSender = {
 
 const STRUMMINGS: Record<number, Strumming> = {
   67: FullStrumming(activeChord, noteSender),
-  68: PickedStrumming(activeChord, noteSender, { resetOnChordChange: false }),
-  69: PickedStrumming(activeChord, noteSender, { resetOnChordChange: true }),
-  70: CombinedStrumming(activeChord, noteSender, {
-    rootNoteCount: 1,
-    velocity: 0.8,
-  }),
-  71: CombinedStrumming(activeChord, noteSender, {
+  68: CombinedStrumming(activeChord, noteSender, {
     rootNoteCount: 2,
     velocity: 0.8,
   }),
-  72: PowerChordStrumming(activeChord, noteSender),
+  69: CombinedStrumming(activeChord, noteSender, {
+    rootNoteCount: 1,
+    velocity: 0.8,
+  }),
+  70: PickedStrumming(activeChord, noteSender, { resetOnChordChange: true }),
+  71: PowerChordStrumming(activeChord, noteSender),
 };
 
 let currentStrumming = STRUMMINGS[67];
