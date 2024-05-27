@@ -30,7 +30,7 @@ export const tension =      signal<Tension>( 2 );
 
 const getActiveChordNotes = ( tensionDelta: number ) =>
 
-  activeChord.value.slice(
+  activeChord.value.notes.slice(
     0,
     1 + Math.max( 0, tension.value + tensionDelta ),
   );
@@ -52,7 +52,7 @@ export const getClosestNote = (
 
   const chordNotes = new Set( getActiveChordNotes( tensionDelta ));
 
-  if( activeChord.value.length < 1 ){
+  if( activeChord.value.notes.length < 1 ){
     return note;
   }
 
