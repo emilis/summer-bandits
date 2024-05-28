@@ -1,4 +1,4 @@
-import { signal }           from '@preact/signals';
+import { computed, signal }           from '@preact/signals';
 
 import {
   type Chord,
@@ -21,10 +21,14 @@ const MIDI_COUNT =          128;
 
 /// State ----------------------------------------------------------------------
 
-export const activeScale =  signal<Scale>( createScale( 'major', 0 ));
-export const activeChord =  signal<Chord>( activeScale.value.chords.i );
-export const energy =       signal<Energy>( 3 );
-export const tension =      signal<Tension>( 2 );
+export const activeScale =        signal<Scale>( createScale( 'major', 0 ));
+export const activeChordNumber =  signal<ChordNumber>( 'i' );
+export const energy =             signal<Energy>( 3 );
+export const tension =            signal<Tension>( 2 );
+
+export const activeChord =  computed<Chord>(() =>
+  activeScale.value.chords[activeChordNumber.value]
+);
 
 /// Private functions ----------------------------------------------------------
 
@@ -108,5 +112,5 @@ export function getClosestNoteUp(
 
 export const setActiveChord = ( chord: ChordNumber ) => {
 
-  activeChord.value =       activeScale.value.chords[chord];
+  activeChordNumber.value =       chord;
 };

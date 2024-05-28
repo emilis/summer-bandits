@@ -14,6 +14,7 @@ import {
 }  from '../instruments/types';
 import {
   type MIDINumber,
+  activeChordNumber,
   getClosestNote,
   setActiveChord,
 }                           from '../conductor/state';
@@ -36,6 +37,11 @@ const CHORDS: Record< number, ChordNumber > = {
   118:                      'vii',
   119:                      'i',
 };
+const CHORD_NUMBER_TO_NOTE =
+  Object.fromEntries(
+    Object.entries(CHORDS)
+      .map(([ note, chord ]) => [ chord, Number(note) ])
+  );
 
 /// State ----------------------------------------------------------------------
 
@@ -66,12 +72,7 @@ const onLpNoteOn: NoteEventHandler = ({ note }) => {
 
   if( note.number in CHORDS ){
     setActiveChord( CHORDS[note.number] );
-    Object.keys( CHORDS )
-      .map( Number )
-      .forEach( midiNote =>
-        lpOut.value?.sendNoteOff( midiNote )
-      );
-    lpOut.value?.sendNoteOn( note );
+
   }
 }
 
@@ -114,6 +115,16 @@ effect(() => {
       lpInput.removeListener( 'noteon', onLpNoteOn );
     }
   };
+});
+
+effect(() => {
+  console.log( 'effect', activeChordNumber.value, CHORD_NUMBER_TO_NOTE[activeChordNumber.value] );
+  Object.keys( CHORDS )
+  .map( Number )
+  .forEach( midiNote =>
+    lpOut.value?.sendNoteOff( midiNote )
+  );
+  lpOut.value?.sendNoteOn( CHORD_NUMBER_TO_NOTE[activeChordNumber.value], { attack: 1 } );
 });
 
 /// Exports --------------------------------------------------------------------
