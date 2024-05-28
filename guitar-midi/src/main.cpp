@@ -10,6 +10,8 @@ const int PIN_UP = 19;
 const int PIN_DOWN = 20;
 const int MIDI_CHANNEL = 0;
 
+const int PIN_SELECTOR = A3;
+
 int pinState[20] = {0};
 
 void noteOn(uint8_t channel, uint8_t pitch, uint8_t velocity)
@@ -60,6 +62,25 @@ void updateButton(int buttonPin, int midiNote)
   }
 }
 
+void updateSelector()
+{
+  auto pin = PIN_SELECTOR;
+  auto state = analogRead(pin);
+  state = map(state, 130, 860, 0, 100);
+  state = round(state / 25.0);
+
+  if (state == pinState[pin])
+  {
+    return;
+  }
+
+  pinState[pin] = state;
+
+  noteOn(MIDI_CHANNEL, 67 + state, 127);
+  // Serial.print("Selector: ");
+  // Serial.println(state);
+}
+
 void setup()
 {
   // Serial.begin(9600);
@@ -73,6 +94,8 @@ void setup()
   pinMode(PIN_ORANGE, INPUT_PULLUP);
   pinMode(PIN_UP, INPUT_PULLUP);
   pinMode(PIN_DOWN, INPUT_PULLUP);
+
+  pinMode(PIN_SELECTOR, INPUT);
 }
 
 void loop()
@@ -84,6 +107,8 @@ void loop()
   updateButton(PIN_ORANGE, 52);
   updateButton(PIN_UP, 59);
   updateButton(PIN_DOWN, 58);
+
+  updateSelector();
 
   consumeMidi();
 }
