@@ -108,9 +108,9 @@ let currentStrumming = STRUMMINGS[67];
 
 /// Private functions ----------------------------------------------------------
 
-const isDownNote = (note: Note) => note.number === 58;
+const isDownNote = (note: Note) => note.number === 59;
 
-const isUpNote = (note: Note) => note.number === 59;
+const isUpNote = (note: Note) => note.number === 58;
 
 const midiPanic = () => {
   notesOut.value?.sendAllNotesOff();
