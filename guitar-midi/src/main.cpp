@@ -1,18 +1,18 @@
 #include <Arduino.h>
 #include "MIDIUSB.h"
 
-const int PIN_GREEN = 12;
-const int PIN_RED = 11;
+const int PIN_GREEN = 6;
+const int PIN_RED = 10;
 const int PIN_YELLOW = 8;
-const int PIN_BLUE = 10;
-const int PIN_ORANGE = 6;
+const int PIN_BLUE = 11;
+const int PIN_ORANGE = 12;
 const int PIN_UP = 19;
 const int PIN_DOWN = 20;
 const int MIDI_CHANNEL = 0;
 
 const int PIN_SELECTOR = A3;
 
-int pinState[20] = {0};
+int pinState[64] = {0};
 
 void noteOn(uint8_t channel, uint8_t pitch, uint8_t velocity)
 {
