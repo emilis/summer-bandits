@@ -1,52 +1,57 @@
-import { type InputChannel }  from 'webmidi';
-import { type JSX }           from 'preact';
-import { type Signal }        from '@preact/signals';
-import { useState }           from 'preact/hooks';
+import { type InputChannel } from "webmidi";
+import { type JSX } from "preact";
+import { effect, type Signal } from "@preact/signals";
+import { useState } from "preact/hooks";
 
-import { midiInputs }         from './state';
-import { SelectChannel }      from './SelectChannel';
+import { midiInputs } from "./state";
+import { SelectChannel } from "./SelectChannel";
 
+export function SelectInputChannel({
+  forSignal,
+}: {
+  forSignal: Signal<InputChannel | null>;
+}) {
+  const [channel, setChannel] = useState<number>(forSignal.value?.number || 1);
 
-export function SelectInputChannel(
-  { forSignal }: { forSignal: Signal<InputChannel | null> },
-){
-  const [ channel, setChannel ] =
-    useState<number>( forSignal.value?.number || 1 );
+  effect(() => {
+    const maybeNumber = forSignal.value?.number;
+    if (maybeNumber) {
+      setChannel(maybeNumber);
+    }
+  });
 
   const onChangeInput = (evt: JSX.TargetedEvent<HTMLSelectElement>) => {
-
-    const id =              evt.currentTarget.value;
-    const input =           midiInputs.value.find( input => input.id === id );
+    const id = evt.currentTarget.value;
+    const input = midiInputs.value.find((input) => input.id === id);
     forSignal.value =
-      input?.channels[
-        forSignal.value?.number || channel
-      ] || null;
+      input?.channels[forSignal.value?.number || channel] || null;
   };
 
-  const onChangeChannel = ( channelNumber: number ) => {
+  const onChangeChannel = (channelNumber: number) => {
+    setChannel(channelNumber);
 
-    setChannel( channelNumber );
-
-    if( forSignal.value ){
-      forSignal.value =     forSignal.value.input.channels[channelNumber];
+    if (forSignal.value) {
+      forSignal.value = forSignal.value.input.channels[channelNumber];
     }
   };
 
   return (
     <div>
-      <select
-        onChange={ onChangeInput }
-      >
-        <option value={ undefined }>-- NO INPUT --</option>
-        { midiInputs.value.map( input =>
+      <select onChange={onChangeInput}>
+        <option value={undefined}>- NO INPUT -</option>
+        {midiInputs.value.map((input) => (
           <option
-            key={ input.id }
-            children={ input.name }
-            value={ input.id }
+            key={input.id}
+            children={input.name}
+            value={input.id}
+            selected={input.id === forSignal.value?.input.id}
           />
-        )}
+        ))}
       </select>
-      <SelectChannel onChange={ onChangeChannel } value={ channel } />
+      <SelectChannel
+        onChange={onChangeChannel}
+        value={forSignal.value?.number}
+      />
     </div>
   );
 }

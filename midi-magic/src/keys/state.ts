@@ -18,6 +18,7 @@ import {
   getClosestNote,
   setActiveChord,
 }                           from '../conductor/state';
+import { registerInput, registerOutput } from '../storage';
 
 /// Types ----------------------------------------------------------------------
 
@@ -126,6 +127,11 @@ effect(() => {
   );
   lpOut.value?.sendNoteOn( CHORD_NUMBER_TO_NOTE[activeChordNumber.value], { attack: 1 } );
 });
+
+registerInput("keys.keyboard", notesIn)
+registerOutput("keys.keyboard", notesOut)
+registerInput("keys.lp", lpIn)
+registerOutput("keys.lp", lpOut)
 
 /// Exports --------------------------------------------------------------------
 
