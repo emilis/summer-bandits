@@ -1,5 +1,5 @@
 import { type InputChannel, Note, type OutputChannel } from "webmidi";
-import { Signal, effect, signal } from "@preact/signals";
+import { effect, signal } from "@preact/signals";
 
 import { type ChordNumber } from "../harmony/scales";
 import { type Instrument } from "../instruments/types";
@@ -12,7 +12,6 @@ import {
   PowerChordStrumming,
   Strumming,
 } from "./strumming";
-import { midiInputs, midiOutputs } from "../webmidi/state";
 import { registerInput, registerOutput } from "../storage";
 
 /// Types ----------------------------------------------------------------------

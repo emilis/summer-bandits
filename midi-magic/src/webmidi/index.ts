@@ -6,5 +6,6 @@ const enabled = WebMidi.enable();
 
 window.midiEnabled = enabled;
 
-export const onEnable = fn =>
-  enabled.then( fn );
+export function onEnable<T>(fn: () => T | PromiseLike<T>): Promise<T> {
+  return enabled.then( fn );
+}
