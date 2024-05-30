@@ -1,9 +1,6 @@
-import { render } from 'preact';
+import { render } from "preact";
 
-import { App } from './App.tsx';
-import './global.css';
+import { App } from "./App.tsx";
+import "./global.css";
 
-render(
-  <App />,
-  document.getElementById( 'app' )!,
-);
+render(<App />, document.getElementById("app")!);

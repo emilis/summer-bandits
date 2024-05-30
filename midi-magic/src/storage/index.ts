@@ -13,7 +13,7 @@ const outputChannelKey = (key: string) => `outputs.${key}.channel`;
 export const setInputFromStorage = (
   key: string,
   forSignal: Signal<InputChannel | null>,
-  inputs: Input[]
+  inputs: Input[],
 ): boolean => {
   const savedName = localStorage.getItem(inputKey(key));
   const savedChannel = localStorage.getItem(inputChannelKey(key)) || "1";
@@ -22,16 +22,16 @@ export const setInputFromStorage = (
     const candidate = inputs.find((input) => input.name === savedName);
     if (candidate) {
       forSignal.value = candidate.channels[parseInt(savedChannel)];
-      return true
+      return true;
     }
   }
-  return false
+  return false;
 };
 
 export const setOutputFromStorage = (
   key: string,
   forSignal: Signal<OutputChannel | null>,
-  outputs: Output[]
+  outputs: Output[],
 ): boolean => {
   const savedName = localStorage.getItem(outputKey(key));
   const savedChannel = localStorage.getItem(outputChannelKey(key)) || "1";
@@ -40,16 +40,15 @@ export const setOutputFromStorage = (
     const candidate = outputs.find((outputs) => outputs.name === savedName);
     if (candidate) {
       forSignal.value = candidate.channels[parseInt(savedChannel)];
-      return true
+      return true;
     }
   }
-  return false
+  return false;
 };
-
 
 export const registerInput = (
   key: string,
-  forSignal: Signal<InputChannel | null>
+  forSignal: Signal<InputChannel | null>,
 ): void => {
   if (inputs.has(key)) {
     throw `input ${key} already registered!`;
@@ -67,7 +66,7 @@ export const registerInput = (
 
 export const registerOutput = (
   key: string,
-  forSignal: Signal<OutputChannel | null>
+  forSignal: Signal<OutputChannel | null>,
 ): void => {
   if (outputs.has(key)) {
     throw `output ${key} already registered!`;
@@ -101,13 +100,13 @@ export const save = () => {
 export const load = () => {
   inputs.forEach((forSignal, key) => {
     if (!setInputFromStorage(key, forSignal, midiInputs.value)) {
-      forSignal.value = null
+      forSignal.value = null;
     }
   });
 
   outputs.forEach((forSignal, key) => {
     if (!setOutputFromStorage(key, forSignal, midiOutputs.value)) {
-      forSignal.value = null
+      forSignal.value = null;
     }
   });
 };
