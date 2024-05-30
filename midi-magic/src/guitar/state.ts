@@ -59,7 +59,7 @@ const noteSender: NoteSender = {
     const now = performance.now();
     const scheduledAt = delay ? now + delay : undefined;
     const existingIndex = playingNotes.findIndex(
-      (playing) => playing.pitch == pitch
+      (playing) => playing.pitch == pitch,
     );
     // TODO: this doesn't mute notes before retriggering them.
     // Not sure if it's a problem though.

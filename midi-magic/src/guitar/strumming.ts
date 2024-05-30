@@ -31,7 +31,7 @@ const strumDefaults: Required<StrumOpts> = {
 const calcStrumDelay = (
   rand: number,
   options: Required<StrumOpts>,
-  index: number
+  index: number,
 ): number => index * (options.strumSpeed - options.strumSpeedRand * rand);
 
 export type NoteSender = {
@@ -47,7 +47,7 @@ export type Strumming = {
 export const FullStrumming = (
   activeChord: Signal<Chord>,
   noteSender: NoteSender,
-  options: { velocityDecay?: number } & StrumOpts & VelocityOpts = {}
+  options: { velocityDecay?: number } & StrumOpts & VelocityOpts = {},
 ): Strumming => {
   const opts = {
     ...velocityDefaults,
@@ -83,7 +83,7 @@ export const PickedStrumming = (
   noteSender: NoteSender,
   options: {
     resetOnChordChange?: boolean;
-  } = {}
+  } = {},
 ): Strumming => {
   let opts = {
     ...velocityDefaults,
@@ -129,7 +129,7 @@ export const CombinedStrumming = (
     rootNoteCount?: number;
     strummedNoteCount?: number;
     resetOnChordChange?: boolean;
-  } & VelocityOpts = {}
+  } & VelocityOpts = {},
 ): Strumming => {
   const opts = {
     ...velocityDefaults,
@@ -176,7 +176,7 @@ export const CombinedStrumming = (
     },
     handleUp: () => {
       strum(
-        [...getGuitarChordNotes(activeChord.value)].slice(-opts.strummedCount)
+        [...getGuitarChordNotes(activeChord.value)].slice(-opts.strummedCount),
       );
     },
   };
@@ -185,7 +185,7 @@ export const CombinedStrumming = (
 export const PowerChordStrumming = (
   activeChord: Signal<Chord>,
   noteSender: NoteSender,
-  options: { noteCount?: 1 | 2 | 3 } & VelocityOpts & StrumOpts = {}
+  options: { noteCount?: 1 | 2 | 3 } & VelocityOpts & StrumOpts = {},
 ): Strumming => {
   const opts = {
     velocity: 0.9,
