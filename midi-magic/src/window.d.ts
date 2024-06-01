@@ -1,8 +1,8 @@
-import { WebMidi } from 'webmidi';
+import { WebMidi } from "webmidi";
 
 declare global {
-    interface Window {
-      midiEnabled?: Promise<WebMidi>
-      webmidi?: WebMidi
-    }
+  interface Window {
+    midiEnabled?: Promise<WebMidi>;
+    webmidi?: WebMidi;
   }
+}

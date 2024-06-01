@@ -1,0 +1,45 @@
+.com-scales .active-chord {
+  background-color: #eef;
+}
+
+.com-scales table {
+  text-align: center;
+  border-spacing: 0;
+}
+
+.com-scales td {
+  height: 10px;
+  width: 3rem;
+}
+
+.com-scales table tr td {
+  border-right: 1px solid;
+}
+
+.com-scales table tr td:last-of-type {
+  border: none;
+}
+
+.com-scales .i {
+  background-color: #eef;
+}
+
+.com-scales .ii {
+  background-color: rgb(74, 223, 185);
+}
+
+.com-scales .iii {
+  background-color: rgb(233, 38, 38);
+}
+
+.com-scales .iv {
+  background-color: rgb(234, 236, 65);
+}
+
+.com-scales .v {
+  background-color: rgb(29, 29, 218);
+}
+
+.com-scales .vi {
+  background-color: rgb(236, 151, 39);
+}

@@ -2,15 +2,23 @@ import { Signal, effect } from "@preact/signals";
 import { Input, InputChannel, Output, OutputChannel } from "webmidi";
 import { midiInputs, midiOutputs } from "../webmidi/state";
 
+type StorableValue<T> = {
+  signal: Signal<T>;
+  fromString: (s: string) => T;
+  toString: (t: T) => string;
+};
+
 const inputs: Map<string, Signal<InputChannel | null>> = new Map();
 const outputs: Map<string, Signal<OutputChannel | null>> = new Map();
+const values: Map<string, StorableValue<any>> = new Map();
 
 const inputKey = (key: string) => `inputs.${key}`;
 const inputChannelKey = (key: string) => `inputs.${key}.channel`;
 const outputKey = (key: string) => `outputs.${key}`;
 const outputChannelKey = (key: string) => `outputs.${key}.channel`;
+const valueKey = (key: string) => `value.${key}`;
 
-export const setInputFromStorage = (
+const setInputFromStorage = (
   key: string,
   forSignal: Signal<InputChannel | null>,
   inputs: Input[],
@@ -28,7 +36,7 @@ export const setInputFromStorage = (
   return false;
 };
 
-export const setOutputFromStorage = (
+const setOutputFromStorage = (
   key: string,
   forSignal: Signal<OutputChannel | null>,
   outputs: Output[],
@@ -44,6 +52,16 @@ export const setOutputFromStorage = (
     }
   }
   return false;
+};
+
+const setValueFromStorage = <T>(
+  storable: StorableValue<T>,
+  key: string,
+): void => {
+  const saved = localStorage.getItem(valueKey(key));
+  if (saved !== null) {
+    storable.signal.value = storable.fromString(saved);
+  }
 };
 
 export const registerInput = (
@@ -82,6 +100,25 @@ export const registerOutput = (
   });
 };
 
+export const registerValue = <T>(
+  forSignal: Signal<T>,
+  key: string,
+  toString: (t: T) => string,
+  fromString: (s: string) => T,
+): void => {
+  if (values.has(key)) {
+    throw `value ${key} already registered!`;
+  }
+  const storable = {
+    signal: forSignal,
+    fromString,
+    toString,
+  };
+  values.set(key, storable);
+
+  setValueFromStorage(storable, key);
+};
+
 const setOrRemove = (key: string, name: string | number | undefined) =>
   name ? localStorage.setItem(key, "" + name) : localStorage.removeItem(key);
 
@@ -94,6 +131,10 @@ export const save = () => {
   outputs.forEach((forSignal, key) => {
     setOrRemove(outputKey(key), forSignal.value?.output.name);
     setOrRemove(outputChannelKey(key), forSignal.value?.number);
+  });
+
+  values.forEach((storable, key) => {
+    setOrRemove(valueKey(key), storable.toString(storable.signal.value));
   });
 };
 
@@ -108,5 +149,9 @@ export const load = () => {
     if (!setOutputFromStorage(key, forSignal, midiOutputs.value)) {
       forSignal.value = null;
     }
+  });
+
+  values.forEach((storable, key) => {
+    setValueFromStorage(storable, key);
   });
 };

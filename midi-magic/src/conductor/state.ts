@@ -6,7 +6,9 @@ import {
   type NoteNumber,
   type Scale,
   createScale,
+  ScaleType,
 } from "../harmony/scales";
+import { registerValue } from "../storage";
 
 /// Types ----------------------------------------------------------------------
 
@@ -235,3 +237,15 @@ export function getClosestNoteUp(
 export const setActiveChord = (chord: ChordNumber) => {
   activeChordNumber.value = chord;
 };
+
+/// Effects --------------------------------------------------------------------
+
+registerValue(
+  activeScale,
+  "scale",
+  (t) => `${t.root} ${t.type}`,
+  (s) => {
+    const [rootStr, type] = s.split(" ");
+    return createScale(type as ScaleType, parseInt(rootStr) as NoteNumber);
+  },
+);
