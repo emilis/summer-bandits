@@ -65,32 +65,36 @@ export function Scale() {
       </h4>
 
       <table>
-        <tr>
-          {chordPositions.map((key) => (
-            <td class={key} />
-          ))}
-        </tr>
-        <tr>
-          {chordPositions.map((key) => {
-            const chord = activeScale.value.chords[key];
-            return (
-              <td class={activeChord.value == chord ? "active-chord" : ""}>
-                {key}
-              </td>
-            );
-          })}
-        </tr>
-        <tr>
-          {chordPositions.map((key) => {
-            const chord = activeScale.value.chords[key];
-            return (
-              <td class={activeChord.value == chord ? "active-chord" : ""}>
-                {NOTE_NAMES[chord.notes[0]]}
-                {CHORD_SUFFIXES[chord.flavour]}
-              </td>
-            );
-          })}
-        </tr>
+        <thead>
+          <tr>
+            {chordPositions.map((key) => (
+              <td class={key} />
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {chordPositions.map((key) => {
+              const chord = activeScale.value.chords[key];
+              return (
+                <td class={activeChord.value == chord ? "active-chord" : ""}>
+                  {key}
+                </td>
+              );
+            })}
+          </tr>
+          <tr>
+            {chordPositions.map((key) => {
+              const chord = activeScale.value.chords[key];
+              return (
+                <td class={activeChord.value == chord ? "active-chord" : ""}>
+                  {NOTE_NAMES[chord.notes[0]]}
+                  {CHORD_SUFFIXES[chord.flavour]}
+                </td>
+              );
+            })}
+          </tr>
+        </tbody>
       </table>
     </div>
   );
