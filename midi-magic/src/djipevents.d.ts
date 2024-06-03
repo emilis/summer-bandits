@@ -1,1 +1,1 @@
-declare module "djipevents"
+declare module "djipevents";

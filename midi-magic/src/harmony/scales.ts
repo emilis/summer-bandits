@@ -10,6 +10,8 @@ export type Flavour = "maj" | "min" | "dim";
 export type ScaleChords = Record<ChordNumber, Chord>;
 export type Scale = {
   label: string;
+  root: NoteNumber;
+  type: ScaleType;
   notes: NoteNumber[];
   chords: ScaleChords;
 };
@@ -30,9 +32,10 @@ export const NOTE_NAMES = [
   "B",
 ];
 
-export const SCALE_TYPES: Record<ScaleType, Scale> = {
+export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
   major: {
     label: "Major",
+    type: "major",
     notes: [0, 2, 4, 5, 7, 9, 11],
     chords: {
       i: { flavour: "maj", notes: [0, 7, 4, 2, 9, 11, 5] },
@@ -46,6 +49,7 @@ export const SCALE_TYPES: Record<ScaleType, Scale> = {
   },
   minor: {
     label: "Minor",
+    type: "minor",
     notes: [0, 2, 3, 5, 7, 8, 10],
     chords: {
       i: { flavour: "min", notes: [0, 7, 3, 11, 5, 8, 2] },
@@ -75,6 +79,8 @@ export const createScale = (
 
   return {
     label: `${noteName} ${scale.label}`,
+    root: rootNote,
+    type: scale.type,
     notes: scale.notes.map(getRootedNote(rootNote)),
     chords: Object.fromEntries(
       Object.entries(scale.chords).map(([chordNum, chord]) => [
