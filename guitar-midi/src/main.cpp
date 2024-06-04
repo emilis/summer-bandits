@@ -8,11 +8,13 @@ const int PIN_BLUE = 11;
 const int PIN_ORANGE = 12;
 const int PIN_UP = 19;
 const int PIN_DOWN = 20;
-const int MIDI_CHANNEL = 0;
-
 const int PIN_SELECTOR = A3;
 
+const int MIDI_CHANNEL = 0;
+const unsigned long DEBOUNCE_MILLIS = 50;
+
 int pinState[64] = {0};
+unsigned long debounceState[64] = {0};
 
 void noteOn(uint8_t channel, uint8_t pitch, uint8_t velocity)
 {
@@ -38,18 +40,22 @@ void consumeMidi()
   }
 }
 
-void updateButton(int buttonPin, int midiNote)
+void updateButton(int buttonPin, uint8_t midiNote, unsigned long now, int& currentState, unsigned long& debounceStartedAt)
 {
   auto state = digitalRead(buttonPin);
 
-  // TODO: debounce
-  if (state == pinState[buttonPin])
+  if (now - debounceStartedAt < DEBOUNCE_MILLIS) {
+    return;
+  }
+  
+  if (state == currentState)
   {
     return;
   }
 
-  pinState[buttonPin] = state;
+  currentState = state;
 
+  debounceStartedAt = now;
   if (state == LOW)
   {
     noteOn(MIDI_CHANNEL, midiNote, 127);
@@ -59,6 +65,8 @@ void updateButton(int buttonPin, int midiNote)
   else
   {
     noteOff(MIDI_CHANNEL, midiNote);
+    // Serial.print(buttonPin);
+    // Serial.println(" off");
   }
 }
 
@@ -77,14 +85,14 @@ void updateSelector()
   pinState[pin] = state;
 
   noteOn(MIDI_CHANNEL, 67 + state, 127);
-  // Serial.print("Selector: ");
-  // Serial.println(state);
+  //Serial.print("Selector: ");
+  //Serial.println(state);
 }
 
 void setup()
 {
   // Serial.begin(9600);
-
+  
   pinMode(LED_BUILTIN, OUTPUT);
 
   pinMode(PIN_GREEN, INPUT_PULLUP);
@@ -100,13 +108,17 @@ void setup()
 
 void loop()
 {
-  updateButton(PIN_GREEN, 48);
-  updateButton(PIN_RED, 49);
-  updateButton(PIN_YELLOW, 50);
-  updateButton(PIN_BLUE, 51);
-  updateButton(PIN_ORANGE, 52);
-  updateButton(PIN_UP, 59);
-  updateButton(PIN_DOWN, 58);
+  auto now = millis();
+  updateButton(PIN_GREEN,  48, now, pinState[0], debounceState[0]);
+  updateButton(PIN_RED,    49, now, pinState[1], debounceState[1]);
+  updateButton(PIN_YELLOW, 50, now, pinState[2], debounceState[2]);
+  updateButton(PIN_BLUE,   51, now, pinState[3], debounceState[3]);
+  updateButton(PIN_ORANGE, 52, now, pinState[4], debounceState[4]);
+  // Pins UP and down share the same debounce state intentionally.
+  // When strumming with a particular pattern, the button flies back and opens 
+  // the other switch, which is not something we want.
+  updateButton(PIN_UP,     59, now, pinState[5], debounceState[5]); 
+  updateButton(PIN_DOWN,   58, now, pinState[6], debounceState[5]);
 
   updateSelector();
 
