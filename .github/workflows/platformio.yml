@@ -12,7 +12,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./midi-magic
+        working-directory: ./guitar-midi
 
     steps:
       - uses: actions/checkout@v4
