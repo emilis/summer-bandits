@@ -81,7 +81,7 @@ void updateSelector(int pin, uint8_t midiNoteStart, int& prevState)
     return;
   }
 
-  pinState[pin] = state;
+  prevState = state;
 
   noteOn(MIDI_CHANNEL, midiNoteStart + state, 127);
   //Serial.print("Selector: ");
