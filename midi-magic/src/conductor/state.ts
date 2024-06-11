@@ -38,8 +38,7 @@ const getActiveChordNotes = (tensionDelta: number) =>
     1 + Math.max(0, tension.value + tensionDelta),
   );
 
-const isMidiNum = (num: number) =>
-  num >= 0 && num < MIDI_COUNT;
+const isMidiNum = (num: number) => num >= 0 && num < MIDI_COUNT;
 
 const midiToNote = (midiNum: number): NoteNumber =>
   (midiNum % 12) as NoteNumber;

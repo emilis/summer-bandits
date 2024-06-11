@@ -3,7 +3,7 @@ import { effect, signal } from "@preact/signals";
 
 import { type ChordNumber } from "../harmony/scales";
 import { type Instrument, type NoteEventHandler } from "../instruments/types";
-import { LP_COLORS } from '../launchpad/';
+import { LP_COLORS } from "../launchpad/";
 import {
   activeChordNumber,
   getClosestNote,
@@ -19,7 +19,7 @@ type Options = {
 
 /// Constant values ------------------------------------------------------------
 
-const INSTRUMENT_NOTES = [ 64, 65, 66, 67, 68, 69, 70, 71, 80, 81, 82 ];
+const INSTRUMENT_NOTES = [64, 65, 66, 67, 68, 69, 70, 71, 80, 81, 82];
 
 const CHORDS: Record<number, ChordNumber> = {
   112: "i",
@@ -31,7 +31,7 @@ const CHORDS: Record<number, ChordNumber> = {
   118: "vii",
   119: "i",
 };
-const CHORD_NOTES = Object.keys( CHORDS ).map( Number );
+const CHORD_NOTES = Object.keys(CHORDS).map(Number);
 const CHORD_NUMBER_TO_NOTE = Object.fromEntries(
   Object.entries(CHORDS).map(([note, chord]) => [chord, Number(note)]),
 );
@@ -56,17 +56,17 @@ const midiPanic = () => {
 };
 
 const setButtonColor = (noteNum: number, color: number) =>
-    lpOut.value?.sendNoteOn(noteNum, { rawAttack: color });
+  lpOut.value?.sendNoteOn(noteNum, { rawAttack: color });
 
 const setChordsBackground = () => {
-    CHORD_NOTES.forEach( midiNote =>
-        setButtonColor(midiNote , LP_COLORS.YELLOW_LO ),
-    );
+  CHORD_NOTES.forEach((midiNote) =>
+    setButtonColor(midiNote, LP_COLORS.YELLOW_LO),
+  );
 };
 
 const setInstrumentsBackground = () => {
-  INSTRUMENT_NOTES.forEach( noteNumber =>
-    setButtonColor( noteNumber, LP_COLORS.RED_LO ),
+  INSTRUMENT_NOTES.forEach((noteNumber) =>
+    setButtonColor(noteNumber, LP_COLORS.RED_LO),
   );
 };
 
@@ -79,10 +79,10 @@ const onLpNoteOn: NoteEventHandler = ({ note }) => {
 
   if (note.number in CHORDS) {
     setActiveChord(CHORDS[note.number]);
-  } else if( INSTRUMENT_NOTES.includes( note.number )){
-    notesOut.value?.sendControlChange( 0, INSTRUMENT_NOTES.indexOf( note.number ));
+  } else if (INSTRUMENT_NOTES.includes(note.number)) {
+    notesOut.value?.sendControlChange(0, INSTRUMENT_NOTES.indexOf(note.number));
     setInstrumentsBackground();
-    setButtonColor( note.number, LP_COLORS.RED_HI );
+    setButtonColor(note.number, LP_COLORS.RED_HI);
   }
 };
 
@@ -144,8 +144,8 @@ effect(() => {
   );
   setChordsBackground();
   setButtonColor(
-      CHORD_NUMBER_TO_NOTE[activeChordNumber.value],
-      LP_COLORS.YELLOW_HI,
+    CHORD_NUMBER_TO_NOTE[activeChordNumber.value],
+    LP_COLORS.YELLOW_HI,
   );
 });
 
