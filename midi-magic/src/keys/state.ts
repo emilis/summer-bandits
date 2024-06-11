@@ -1,11 +1,10 @@
 import { type InputChannel, type OutputChannel } from "webmidi";
 import { effect, signal } from "@preact/signals";
 
-import { NoteNumber, type ChordNumber } from "../harmony/scales";
+import { type ChordNumber } from "../harmony/scales";
 import { type Instrument, type NoteEventHandler } from "../instruments/types";
 import { LP_COLORS } from '../launchpad/';
 import {
-  type MIDINumber,
   activeChordNumber,
   getClosestNote,
   setActiveChord,
@@ -20,7 +19,7 @@ type Options = {
 
 /// Constant values ------------------------------------------------------------
 
-const INSTRUMENT_NOTES: MIDINumber[] = [ 64, 65, 66, 67, 68, 69, 70, 71, 80, 81, 82 ];
+const INSTRUMENT_NOTES = [ 64, 65, 66, 67, 68, 69, 70, 71, 80, 81, 82 ];
 
 const CHORDS: Record<number, ChordNumber> = {
   112: "i",
@@ -32,6 +31,7 @@ const CHORDS: Record<number, ChordNumber> = {
   118: "vii",
   119: "i",
 };
+const CHORD_NOTES = Object.keys( CHORDS ).map( Number );
 const CHORD_NUMBER_TO_NOTE = Object.fromEntries(
   Object.entries(CHORDS).map(([note, chord]) => [chord, Number(note)]),
 );
@@ -46,7 +46,7 @@ const options = signal<Options>({
   localChords: false,
 });
 
-const notesOn: Record<number, MIDINumber> = {};
+const notesOn: Record<number, number> = {};
 
 /// Private functions ----------------------------------------------------------
 
@@ -55,14 +55,12 @@ const midiPanic = () => {
   notesOut.value?.sendAllSoundOff();
 };
 
-const setButtonColor = (noteNum: MIDINumber, color: MIDINumber) =>
+const setButtonColor = (noteNum: number, color: number) =>
     lpOut.value?.sendNoteOn(noteNum, { rawAttack: color });
 
 const setChordsBackground = () => {
-    Object.keys(CHORDS)
-    .map(Number)
-    .forEach((midiNote) =>
-        setButtonColor(midiNote as MIDINumber, LP_COLORS.YELLOW_LO as MIDINumber),
+    CHORD_NOTES.forEach( midiNote =>
+        setButtonColor(midiNote , LP_COLORS.YELLOW_LO ),
     );
 };
 
@@ -97,7 +95,7 @@ const onNoteOff: NoteEventHandler = ({ note }) => {
 const onNoteOn: NoteEventHandler = ({ note }) => {
   console.debug("keyboard onNoteOn", note.number, note.rawAttack);
 
-  const midiNote = getClosestNote(note.number as MIDINumber);
+  const midiNote = getClosestNote(note.number);
   notesOn[note.number] = midiNote;
   notesOut.value?.sendNoteOn(midiNote, note);
 };
