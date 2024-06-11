@@ -3,8 +3,8 @@ import { effect, signal } from "@preact/signals";
 
 import { type ChordNumber } from "../harmony/scales";
 import { type Instrument, type NoteEventHandler } from "../instruments/types";
+import { LP_COLORS } from "../launchpad/";
 import {
-  type MIDINumber,
   activeChordNumber,
   getClosestNote,
   setActiveChord,
@@ -19,6 +19,8 @@ type Options = {
 
 /// Constant values ------------------------------------------------------------
 
+const INSTRUMENT_NOTES = [64, 65, 66, 67, 68, 69, 70, 71, 80, 81, 82];
+
 const CHORDS: Record<number, ChordNumber> = {
   112: "i",
   113: "ii",
@@ -29,6 +31,7 @@ const CHORDS: Record<number, ChordNumber> = {
   118: "vii",
   119: "i",
 };
+const CHORD_NOTES = Object.keys(CHORDS).map(Number);
 const CHORD_NUMBER_TO_NOTE = Object.fromEntries(
   Object.entries(CHORDS).map(([note, chord]) => [chord, Number(note)]),
 );
@@ -43,13 +46,28 @@ const options = signal<Options>({
   localChords: false,
 });
 
-const notesOn: Record<number, MIDINumber> = {};
+const notesOn: Record<number, number> = {};
 
 /// Private functions ----------------------------------------------------------
 
 const midiPanic = () => {
   notesOut.value?.sendAllNotesOff();
   notesOut.value?.sendAllSoundOff();
+};
+
+const setButtonColor = (noteNum: number, color: number) =>
+  lpOut.value?.sendNoteOn(noteNum, { rawAttack: color });
+
+const setChordsBackground = () => {
+  CHORD_NOTES.forEach((midiNote) =>
+    setButtonColor(midiNote, LP_COLORS.YELLOW_LO),
+  );
+};
+
+const setInstrumentsBackground = () => {
+  INSTRUMENT_NOTES.forEach((noteNumber) =>
+    setButtonColor(noteNumber, LP_COLORS.RED_LO),
+  );
 };
 
 const onLpNoteOff: NoteEventHandler = ({ note }) => {
@@ -61,6 +79,10 @@ const onLpNoteOn: NoteEventHandler = ({ note }) => {
 
   if (note.number in CHORDS) {
     setActiveChord(CHORDS[note.number]);
+  } else if (INSTRUMENT_NOTES.includes(note.number)) {
+    notesOut.value?.sendControlChange(0, INSTRUMENT_NOTES.indexOf(note.number));
+    setInstrumentsBackground();
+    setButtonColor(note.number, LP_COLORS.RED_HI);
   }
 };
 
@@ -73,7 +95,7 @@ const onNoteOff: NoteEventHandler = ({ note }) => {
 const onNoteOn: NoteEventHandler = ({ note }) => {
   console.debug("keyboard onNoteOn", note.number, note.rawAttack);
 
-  const midiNote = getClosestNote(note.number as MIDINumber);
+  const midiNote = getClosestNote(note.number);
   notesOn[note.number] = midiNote;
   notesOut.value?.sendNoteOn(midiNote, note);
 };
@@ -81,26 +103,35 @@ const onNoteOn: NoteEventHandler = ({ note }) => {
 /// Effects --------------------------------------------------------------------
 
 effect(() => {
-  const notesInput = notesIn.value?.input;
   const lpInput = lpIn.value?.input;
+
+  if (lpInput) {
+    lpInput.addListener("noteoff", onLpNoteOff);
+    lpInput.addListener("noteon", onLpNoteOn);
+
+    setChordsBackground();
+  }
+
+  return () => {
+    if (lpInput) {
+      lpInput.removeListener("noteoff", onLpNoteOff);
+      lpInput.removeListener("noteon", onLpNoteOn);
+    }
+  };
+});
+
+effect(() => {
+  const notesInput = notesIn.value?.input;
 
   if (notesInput) {
     notesInput.addListener("noteoff", onNoteOff);
     notesInput.addListener("noteon", onNoteOn);
-  }
-  if (lpInput) {
-    lpInput.addListener("noteoff", onLpNoteOff);
-    lpInput.addListener("noteon", onLpNoteOn);
   }
 
   return () => {
     if (notesInput) {
       notesInput.removeListener("noteoff", onNoteOff);
       notesInput.removeListener("noteon", onNoteOn);
-    }
-    if (lpInput) {
-      lpInput.removeListener("noteoff", onLpNoteOff);
-      lpInput.removeListener("noteon", onLpNoteOn);
     }
   };
 });
@@ -111,12 +142,11 @@ effect(() => {
     activeChordNumber.value,
     CHORD_NUMBER_TO_NOTE[activeChordNumber.value],
   );
-  Object.keys(CHORDS)
-    .map(Number)
-    .forEach((midiNote) => lpOut.value?.sendNoteOff(midiNote));
-  lpOut.value?.sendNoteOn(CHORD_NUMBER_TO_NOTE[activeChordNumber.value], {
-    attack: 1,
-  });
+  setChordsBackground();
+  setButtonColor(
+    CHORD_NUMBER_TO_NOTE[activeChordNumber.value],
+    LP_COLORS.YELLOW_HI,
+  );
 });
 
 registerInput("keys.keyboard", notesIn);
