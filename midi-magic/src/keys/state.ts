@@ -1,8 +1,9 @@
 import { type InputChannel, type OutputChannel } from "webmidi";
 import { effect, signal } from "@preact/signals";
 
-import { type ChordNumber } from "../harmony/scales";
+import { NoteNumber, type ChordNumber } from "../harmony/scales";
 import { type Instrument, type NoteEventHandler } from "../instruments/types";
+import { LP_COLORS } from '../launchpad/';
 import {
   type MIDINumber,
   activeChordNumber,
@@ -78,29 +79,49 @@ const onNoteOn: NoteEventHandler = ({ note }) => {
   notesOut.value?.sendNoteOn(midiNote, note);
 };
 
+const setButtonColor = (noteNum: MIDINumber, color: MIDINumber) =>
+    lpOut.value?.sendNoteOn(noteNum, { rawAttack: color });
+
+const setChordsBackground = () => {
+    Object.keys(CHORDS)
+    .map(Number)
+    .forEach((midiNote) =>
+        setButtonColor(midiNote as MIDINumber, LP_COLORS.GREEN_LO as MIDINumber),
+    );
+};
+
 /// Effects --------------------------------------------------------------------
 
 effect(() => {
-  const notesInput = notesIn.value?.input;
   const lpInput = lpIn.value?.input;
+
+  if (lpInput) {
+    lpInput.addListener("noteoff", onLpNoteOff);
+    lpInput.addListener("noteon", onLpNoteOn);
+
+    setChordsBackground();
+  }
+
+  return () => {
+    if (lpInput) {
+      lpInput.removeListener("noteoff", onLpNoteOff);
+      lpInput.removeListener("noteon", onLpNoteOn);
+    }
+  };
+});
+
+effect(() => {
+  const notesInput = notesIn.value?.input;
 
   if (notesInput) {
     notesInput.addListener("noteoff", onNoteOff);
     notesInput.addListener("noteon", onNoteOn);
-  }
-  if (lpInput) {
-    lpInput.addListener("noteoff", onLpNoteOff);
-    lpInput.addListener("noteon", onLpNoteOn);
   }
 
   return () => {
     if (notesInput) {
       notesInput.removeListener("noteoff", onNoteOff);
       notesInput.removeListener("noteon", onNoteOn);
-    }
-    if (lpInput) {
-      lpInput.removeListener("noteoff", onLpNoteOff);
-      lpInput.removeListener("noteon", onLpNoteOn);
     }
   };
 });
@@ -111,12 +132,11 @@ effect(() => {
     activeChordNumber.value,
     CHORD_NUMBER_TO_NOTE[activeChordNumber.value],
   );
-  Object.keys(CHORDS)
-    .map(Number)
-    .forEach((midiNote) => lpOut.value?.sendNoteOff(midiNote));
-  lpOut.value?.sendNoteOn(CHORD_NUMBER_TO_NOTE[activeChordNumber.value], {
-    attack: 1,
-  });
+  setChordsBackground();
+  setButtonColor(
+      CHORD_NUMBER_TO_NOTE[activeChordNumber.value],
+      LP_COLORS.GREEN_HI,
+  );
 });
 
 registerInput("keys.keyboard", notesIn);
