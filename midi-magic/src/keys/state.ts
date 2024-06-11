@@ -20,6 +20,8 @@ type Options = {
 
 /// Constant values ------------------------------------------------------------
 
+const INSTRUMENT_NOTES: MIDINumber[] = [ 64, 65, 66, 67, 68, 69, 70, 71, 80, 81, 82, 83, 84, 85, 86, 87 ];
+
 const CHORDS: Record<number, ChordNumber> = {
   112: "i",
   113: "ii",
@@ -53,6 +55,23 @@ const midiPanic = () => {
   notesOut.value?.sendAllSoundOff();
 };
 
+const setButtonColor = (noteNum: MIDINumber, color: MIDINumber) =>
+    lpOut.value?.sendNoteOn(noteNum, { rawAttack: color });
+
+const setChordsBackground = () => {
+    Object.keys(CHORDS)
+    .map(Number)
+    .forEach((midiNote) =>
+        setButtonColor(midiNote as MIDINumber, LP_COLORS.GREEN_LO as MIDINumber),
+    );
+};
+
+const setInstrumentsBackground = () => {
+  INSTRUMENT_NOTES.forEach( noteNumber =>
+    setButtonColor( noteNumber, LP_COLORS.RED_LO ),
+  );
+};
+
 const onLpNoteOff: NoteEventHandler = ({ note }) => {
   console.debug("keyboard onLpNoteOff", note.number);
 };
@@ -62,6 +81,10 @@ const onLpNoteOn: NoteEventHandler = ({ note }) => {
 
   if (note.number in CHORDS) {
     setActiveChord(CHORDS[note.number]);
+  } else if( INSTRUMENT_NOTES.includes( note.number )){
+    notesOut.value?.sendControlChange( 0, INSTRUMENT_NOTES.findIndex( note.number ));
+    setInstrumentsBackground();
+    setButtonColor( note.number, LP_COLORS.RED_HI );
   }
 };
 
@@ -77,17 +100,6 @@ const onNoteOn: NoteEventHandler = ({ note }) => {
   const midiNote = getClosestNote(note.number as MIDINumber);
   notesOn[note.number] = midiNote;
   notesOut.value?.sendNoteOn(midiNote, note);
-};
-
-const setButtonColor = (noteNum: MIDINumber, color: MIDINumber) =>
-    lpOut.value?.sendNoteOn(noteNum, { rawAttack: color });
-
-const setChordsBackground = () => {
-    Object.keys(CHORDS)
-    .map(Number)
-    .forEach((midiNote) =>
-        setButtonColor(midiNote as MIDINumber, LP_COLORS.GREEN_LO as MIDINumber),
-    );
 };
 
 /// Effects --------------------------------------------------------------------
