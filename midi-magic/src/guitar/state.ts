@@ -46,6 +46,8 @@ const options = signal<Options>({
 let activeNote = OPEN_CHORD_NOTE;
 const notesDown = new Set<number>();
 
+let previousChord = activeChord.peek();
+
 type PlayingNote = {
   pitch: number;
   scheduledAt?: number;
@@ -78,16 +80,24 @@ const noteSender: NoteSender = {
       time: scheduledAt,
     });
   },
-  muteAll: () => {
+  muteAll: (except?: Set<number>) => {
+    const exceptNotes = except || new Set();
+    console.log(exceptNotes);
+    const keptNotes: PlayingNote[] = [];
     playingNotes.forEach((note) => {
-      const { pitch, scheduledAt } = note;
-      if (scheduledAt) {
-        notesOut.value?.sendNoteOff(pitch, { time: scheduledAt + 0.1 });
+      if (exceptNotes.has(note.pitch)) {
+        keptNotes.push(note);
       } else {
-        notesOut.value?.sendNoteOff(pitch);
+        const { pitch, scheduledAt } = note;
+        if (scheduledAt) {
+          notesOut.value?.sendNoteOff(pitch, { time: scheduledAt + 0.1 });
+        } else {
+          notesOut.value?.sendNoteOff(pitch);
+        }
       }
     });
     playingNotes.length = 0;
+    playingNotes.push(...keptNotes);
   },
 };
 
@@ -101,7 +111,10 @@ const STRUMMINGS: Record<number, Strumming> = {
     rootNoteCount: 1,
     velocity: 0.8,
   }),
-  70: PickedStrumming(activeChord, noteSender, { resetOnChordChange: true }),
+  70: PickedStrumming(activeChord, noteSender, {
+    resetOnChordChange: true,
+    keepOverlapping: true,
+  }),
   71: PowerChordStrumming(activeChord, noteSender),
 };
 
@@ -125,7 +138,6 @@ const maybeApplyChordChange = () => {
     return;
   }
   activeNote = maxNote;
-  noteSender.muteAll();
   setActiveChord(CHORDS[maxNote]);
 };
 
@@ -159,6 +171,11 @@ const onNoteOn = ({ note }: { note: Note }) => {
 };
 
 /// Effects --------------------------------------------------------------------
+
+effect(() => {
+  currentStrumming.handleChordChange(previousChord);
+  previousChord = activeChord.value;
+});
 
 effect(() => {
   const input = guitarIn.value?.input;

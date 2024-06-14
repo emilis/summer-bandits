@@ -4,6 +4,7 @@ import {
   getChordNotes as getGuitarChordNotes,
   getPowerChordNotes,
 } from "./chords";
+import { activeChord } from "../conductor/state";
 
 type VelocityOpts = {
   velocity?: number;
@@ -28,6 +29,33 @@ const strumDefaults: Required<StrumOpts> = {
   strumSpeedRand: 10,
 };
 
+type KeepOverlappingOpts = {
+  keepOverlapping?: boolean;
+};
+
+const keepOverlappingDefaults: Required<KeepOverlappingOpts> = {
+  keepOverlapping: false,
+};
+
+const handleOverlappingChordChange = (
+  noteSender: NoteSender,
+  previous: Chord,
+  chordFn: (chord: Chord) => number[],
+  options: Required<KeepOverlappingOpts>,
+) => {
+  if (options.keepOverlapping) {
+    const prevNotes = new Set(chordFn(previous));
+    const currNotes = new Set(chordFn(activeChord.value));
+    const intersection = new Set<number>();
+    prevNotes.forEach((note) => {
+      if (currNotes.has(note)) intersection.add(note);
+    });
+    noteSender.muteAll(intersection);
+  } else {
+    noteSender.muteAll();
+  }
+};
+
 const calcStrumDelay = (
   rand: number,
   options: Required<StrumOpts>,
@@ -36,22 +64,26 @@ const calcStrumDelay = (
 
 export type NoteSender = {
   playNote(note: { pitch: number; velocity: number; delay?: number }): void;
-  muteAll(): void;
+  muteAll(except?: Set<number>): void;
 };
 
 export type Strumming = {
   handleDown(): void;
   handleUp(): void;
+  handleChordChange(previous: Chord): void;
 };
 
 export const FullStrumming = (
   activeChord: Signal<Chord>,
   noteSender: NoteSender,
-  options: { velocityDecay?: number } & StrumOpts & VelocityOpts = {},
+  options: { velocityDecay?: number } & StrumOpts &
+    VelocityOpts &
+    KeepOverlappingOpts = {},
 ): Strumming => {
   const opts = {
     ...velocityDefaults,
     ...strumDefaults,
+    ...keepOverlappingDefaults,
     velocityDecay: 0.05,
     ...options,
   };
@@ -75,6 +107,13 @@ export const FullStrumming = (
     handleUp: () => {
       strum([...getGuitarChordNotes(activeChord.value)].reverse());
     },
+    handleChordChange: (previous: Chord) =>
+      handleOverlappingChordChange(
+        noteSender,
+        previous,
+        getGuitarChordNotes,
+        opts,
+      ),
   };
 };
 
@@ -83,10 +122,11 @@ export const PickedStrumming = (
   noteSender: NoteSender,
   options: {
     resetOnChordChange?: boolean;
-  } = {},
+  } & KeepOverlappingOpts = {},
 ): Strumming => {
   let opts = {
     ...velocityDefaults,
+    ...keepOverlappingDefaults,
     resetOnChordChange: true,
     ...options,
   };
@@ -119,6 +159,13 @@ export const PickedStrumming = (
       current--;
       if (current < 0) current = notes.length - 1;
     },
+    handleChordChange: (previous: Chord) =>
+      handleOverlappingChordChange(
+        noteSender,
+        previous,
+        getGuitarChordNotes,
+        opts,
+      ),
   };
 };
 
@@ -129,11 +176,13 @@ export const CombinedStrumming = (
     rootNoteCount?: number;
     strummedNoteCount?: number;
     resetOnChordChange?: boolean;
-  } & VelocityOpts = {},
+  } & VelocityOpts &
+    KeepOverlappingOpts = {},
 ): Strumming => {
   const opts = {
     ...velocityDefaults,
     ...strumDefaults,
+    ...keepOverlappingDefaults,
     rootNoteCount: 1,
     strummedCount: 3,
     resetOnChordChange: true,
@@ -179,6 +228,13 @@ export const CombinedStrumming = (
         [...getGuitarChordNotes(activeChord.value)].slice(-opts.strummedCount),
       );
     },
+    handleChordChange: (previous: Chord) =>
+      handleOverlappingChordChange(
+        noteSender,
+        previous,
+        getGuitarChordNotes,
+        opts,
+      ),
   };
 };
 
@@ -214,6 +270,9 @@ export const PowerChordStrumming = (
     },
     handleUp: () => {
       strum([...getPowerChordNotes(activeChord.value)].reverse());
+    },
+    handleChordChange: () => {
+      noteSender.muteAll();
     },
   };
 };
