@@ -125,7 +125,7 @@ effect(() => {
 });
 
 effect(() => {
-  const notesInput = notesIn.value?.input;
+  const notesInput = notesIn.value;
 
   if (notesInput) {
     notesInput.addListener("noteoff", onNoteOff);

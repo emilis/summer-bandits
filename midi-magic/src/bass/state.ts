@@ -155,7 +155,7 @@ const onNoteOn = ({ note }: { note: Note }) => {
 /// Effects --------------------------------------------------------------------
 
 effect(() => {
-  const input = bassIn.value?.input;
+  const input = bassIn.value;
   if (input) {
     input.addListener("noteoff", onNoteOff);
     input.addListener("noteon", onNoteOn);
