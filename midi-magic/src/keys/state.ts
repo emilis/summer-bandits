@@ -29,7 +29,6 @@ const CHORDS: Record<number, ChordNumber> = {
   116: "v",
   117: "vi",
   118: "vii",
-  119: "i",
 };
 const CHORD_NOTES = Object.keys(CHORDS).map(Number);
 const CHORD_NUMBER_TO_NOTE = Object.fromEntries(
@@ -108,8 +107,6 @@ effect(() => {
   if (lpInput) {
     lpInput.addListener("noteoff", onLpNoteOff);
     lpInput.addListener("noteon", onLpNoteOn);
-
-    setChordsBackground();
   }
 
   return () => {
@@ -118,6 +115,13 @@ effect(() => {
       lpInput.removeListener("noteon", onLpNoteOn);
     }
   };
+});
+effect(() => {
+    if (lpOut.value) {
+        lpOut.value.sendControlChange( 0, 0 );
+        setChordsBackground();
+        setInstrumentsBackground();
+    }
 });
 
 effect(() => {
