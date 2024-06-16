@@ -33,8 +33,7 @@ const CHORD_NUMBER_TO_NOTE = Object.fromEntries(
   Object.entries(CHORDS).map(([note, chord]) => [chord, Number(note)]),
 );
 const INSTRUMENT_NOTES = [64, 65, 66, 67, 68, 69, 70, 71, 80, 81, 82];
-const SPICE_LEVELS = [ 96, 97, 98, 99, 100, 101, 103 ];
-
+const SPICE_LEVELS = [96, 97, 98, 99, 100, 101, 103];
 
 /// State ----------------------------------------------------------------------
 
@@ -73,22 +72,16 @@ const setInstrumentsBackground = () => {
 };
 
 const setSpiceLevelColors = () => {
-    const {
-        GREEN_HI,
-        GREEN_LO,
-        RED_HI,
-        RED_LO,
-        YELLOW_HI,
-        YELLOW_LO,
-    } = LP_COLORS;
-    const level = spiceLevel.value;
-    setButtonColor( SPICE_LEVELS[0], level === 0 ? GREEN_HI : GREEN_LO );
-    setButtonColor( SPICE_LEVELS[1], level === 1 ? GREEN_HI : GREEN_LO );
-    setButtonColor( SPICE_LEVELS[2], level === 2 ? GREEN_HI : GREEN_LO );
-    setButtonColor( SPICE_LEVELS[3], level === 3 ? YELLOW_HI : YELLOW_LO );
-    setButtonColor( SPICE_LEVELS[4], level === 4 ? YELLOW_HI : YELLOW_LO );
-    setButtonColor( SPICE_LEVELS[5], level === 5 ? RED_HI : RED_LO );
-    setButtonColor( SPICE_LEVELS[6], level === 6 ? RED_HI : RED_LO );
+  const { GREEN_HI, GREEN_LO, RED_HI, RED_LO, YELLOW_HI, YELLOW_LO } =
+    LP_COLORS;
+  const level = spiceLevel.value;
+  setButtonColor(SPICE_LEVELS[0], level === 0 ? GREEN_HI : GREEN_LO);
+  setButtonColor(SPICE_LEVELS[1], level === 1 ? GREEN_HI : GREEN_LO);
+  setButtonColor(SPICE_LEVELS[2], level === 2 ? GREEN_HI : GREEN_LO);
+  setButtonColor(SPICE_LEVELS[3], level === 3 ? YELLOW_HI : YELLOW_LO);
+  setButtonColor(SPICE_LEVELS[4], level === 4 ? YELLOW_HI : YELLOW_LO);
+  setButtonColor(SPICE_LEVELS[5], level === 5 ? RED_HI : RED_LO);
+  setButtonColor(SPICE_LEVELS[6], level === 6 ? RED_HI : RED_LO);
 };
 
 const onLpNoteOff: NoteEventHandler = ({ note }) => {
@@ -104,7 +97,7 @@ const onLpNoteOn: NoteEventHandler = ({ note }) => {
     notesOut.value?.sendControlChange(0, INSTRUMENT_NOTES.indexOf(note.number));
     setInstrumentsBackground();
     setButtonColor(note.number, LP_COLORS.RED_HI);
-  } else if (SPICE_LEVELS.includes(note.number)){
+  } else if (SPICE_LEVELS.includes(note.number)) {
     const index = SPICE_LEVELS.indexOf(note.number);
     spiceLevel.value = index;
     allNotesMode.value = index > 5;
@@ -146,12 +139,12 @@ effect(() => {
   };
 });
 effect(() => {
-    if (lpOut.value) {
-        lpOut.value.sendControlChange( 0, 0 );
-        setChordsBackground();
-        setInstrumentsBackground();
-        setSpiceLevelColors();
-    }
+  if (lpOut.value) {
+    lpOut.value.sendControlChange(0, 0);
+    setChordsBackground();
+    setInstrumentsBackground();
+    setSpiceLevelColors();
+  }
 });
 
 effect(() => {

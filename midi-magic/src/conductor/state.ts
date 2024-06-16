@@ -33,11 +33,11 @@ export const activeChord = computed<Chord>(
 /// Private functions ----------------------------------------------------------
 
 const getActiveChordNotes = (level: number) =>
-    level === 0
-        ? activeChord.value.notes
+  level === 0
+    ? activeChord.value.notes
     : level < 5
-        ? activeChord.value.levels[level - 1]
-        : activeScale.value.notes;
+      ? activeChord.value.levels[level - 1]
+      : activeScale.value.notes;
 
 const isMidiNum = (num: number) => num >= 0 && num < MIDI_COUNT;
 
@@ -46,10 +46,7 @@ const midiToNote = (midiNum: number): NoteNumber =>
 
 /// Exported functions ---------------------------------------------------------
 
-export const getClosestNote = (
-  note: number,
-  level: number = 0,
-): number => {
+export const getClosestNote = (note: number, level: number = 0): number => {
   const chordNotes = new Set(getActiveChordNotes(level));
 
   if (activeChord.value.notes.length < 1) {
@@ -69,10 +66,7 @@ export const getClosestNote = (
 
   return note;
 };
-export function getClosestNoteDown(
-  note: number,
-  level: number = 0,
-): number {
+export function getClosestNoteDown(note: number, level: number = 0): number {
   const chordNotes = new Set(getActiveChordNotes(level));
 
   for (let i = 1; i < 12; i++) {
@@ -86,10 +80,7 @@ export function getClosestNoteDown(
 
   return note;
 }
-export function getClosestNoteUp(
-  note: number,
-  level: number = 0,
-): number {
+export function getClosestNoteUp(note: number, level: number = 0): number {
   const chordNotes = new Set(getActiveChordNotes(level));
 
   for (let i = 1; i < 12; i++) {
