@@ -15,6 +15,7 @@ const CHORD_SUFFIXES: Record<Flavour, string> = {
   maj: "",
   min: "m",
   dim: "dim",
+  aug: "aug",
 };
 
 export function Scale() {

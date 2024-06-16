@@ -178,7 +178,7 @@ effect(() => {
 });
 
 effect(() => {
-  const input = guitarIn.value?.input;
+  const input = guitarIn.value;
   if (input) {
     input.addListener("noteoff", onNoteOff);
     input.addListener("noteon", onNoteOn);
