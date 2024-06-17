@@ -32,6 +32,13 @@ const makeMinorBarre = (root: number) =>
 
 const makeDiminished = (root: number) => [root, root + 6, root + 10, root + 15];
 
+const makeAugmented = (root: number) => {
+  if (root < 47) {
+    root += 12;
+  }
+  return [root, root + 4, root + 8, root + 12];
+};
+
 const openMajorChords: Record<number, number[]> = {
   /* E */ 40: makeMajorBarre6(40),
   /* G */ 43: [43, 47, 50, 55, 62, 67],
@@ -63,6 +70,8 @@ export const getChordNotes = (chord: Chord): number[] => {
       return openMinorChords[root] || makeMinorBarre(root);
     case "dim":
       return makeDiminished(root);
+    case "aug":
+      return makeAugmented(root);
     default:
       return [];
   }
