@@ -26,19 +26,24 @@
 
 #define SERVICE_GUID "ef2f139c-686c-4580-a250-58ca64466fd6"
 #define SERVICE_CHARACTERISTICS_GUID "cdceab82-634e-4c4b-992a-e7ae1c97aac8"
+#define PARAM_SIZE 7
+#define LED_PIN 2
 
 void blePeripheralConnectHandler(BLEDevice central);
 void blePeripheralDisconnectHandler(BLEDevice central);
 void getPinStates(uint8_t* pinStates);
+void blink(int ms, short times);
 
 BLEDevice peripheral;
 BLECharacteristic pinCharacteristic;
 bool deviceConnected = false;
-uint8_t pinStates[7];
+bool changesSent = true;
+uint8_t currentPinStates[PARAM_SIZE] = {0};
+uint8_t previousPinStates[PARAM_SIZE] = {0};
 
 void setup() {
-    // Serial.begin(115200);
-    // while (!Serial);
+    Serial.begin(9600);
+    while (!Serial);
 
     pinMode(PIN_GREEN, INPUT_PULLUP);
     pinMode(PIN_RED, INPUT_PULLUP);
@@ -55,9 +60,21 @@ void setup() {
         while (1);
     }
     BLE.scanForName(RECEIVER_DEVICE_NAME);
+    pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
+    getPinStates(currentPinStates);
+
+    for (int i = 0; i < PARAM_SIZE; i++) {
+        if (currentPinStates[i] != previousPinStates[i]) {
+            changesSent = false;
+            previousPinStates[i] = currentPinStates[i];
+        }
+    }
+
+     //   if (changesSent) return;
+
     if (!deviceConnected) {
         // Check if we found a peripheral
         BLEDevice discoveredPeripheral = BLE.available();
@@ -92,11 +109,14 @@ void loop() {
             deviceConnected = false;
             BLE.scanForName(RECEIVER_DEVICE_NAME); // Restart scanning
         } else if (pinCharacteristic) {
-            getPinStates(pinStates);
-            pinCharacteristic.writeValue(pinStates, 7);
-            delay(5);
+          //  pinCharacteristic.writeValue(currentPinStates, 7);
+        //    delay(5);
         }
     }
+
+    Serial.write(currentPinStates, sizeof(currentPinStates));
+    blink(1000, 1);
+    //changesSent = true;
 }
 
 void getPinStates(uint8_t* pinStates) {
@@ -107,4 +127,13 @@ void getPinStates(uint8_t* pinStates) {
     pinStates[4] = digitalRead(PIN_ORANGE);
     pinStates[5] = digitalRead(PIN_UP);
     pinStates[6] = digitalRead(PIN_DOWN);
+}
+
+void blink(int ms, short times) {
+  for(int i = 0; i < times; i++) {
+    digitalWrite(LED_PIN, HIGH);
+    delay(ms);
+    digitalWrite(LED_PIN, LOW);
+    delay(ms);
+  }
 }
