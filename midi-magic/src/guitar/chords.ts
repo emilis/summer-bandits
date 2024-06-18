@@ -1,56 +1,104 @@
 import { Chord } from "../harmony/scales";
 
-const LOWEST_GUITAR_NOTE = 40;
+const E = 40;
+const A = 45;
+const D = 50;
+const G = 55;
+const B = 59;
+const Ehigh = 64;
 
-const makeMajorBarre6 = (root: number) => [
-  root,
-  root + 7,
-  root + 12,
-  root + 16,
-  root + 19,
-  root + 24,
-];
+const LOWEST_GUITAR_NOTE = E;
 
-const makeMajorBarre5 = (root: number) => makeMajorBarre6(root).slice(0, -1);
+const x: "x" = "x";
 
-const makeMajorBarre = (root: number) =>
-  root > 45 ? makeMajorBarre6(root) : makeMajorBarre5(root);
+type Fret =
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15
+  | 16
+  | 17
+  | 18
+  | 19;
 
-const makeMinorBarre6 = (root: number) => [
-  root,
-  root + 7,
-  root + 12,
-  root + 15,
-  root + 19,
-  root + 24,
-];
+type FingerPosition = "x" | Fret;
 
-const makeMinorBarre5 = (root: number) => makeMinorBarre6(root).slice(0, -1);
-
-const makeMinorBarre = (root: number) =>
-  root > 45 ? makeMinorBarre6(root) : makeMinorBarre5(root);
-
-const makeDiminished = (root: number) => [root, root + 6, root + 10, root + 15];
-
-const makeAugmented = (root: number) => {
-  if (root < 47) {
-    root += 12;
-  }
-  return [root, root + 4, root + 8, root + 12];
+const literalChord = (
+  s6: FingerPosition,
+  s5: FingerPosition,
+  s4: FingerPosition,
+  s3: FingerPosition,
+  s2: FingerPosition,
+  s1: FingerPosition,
+): number[] => {
+  const notes: number[] = [];
+  if (s6 != "x") notes.push(E + s6);
+  if (s5 != "x") notes.push(A + s5);
+  if (s4 != "x") notes.push(D + s4);
+  if (s3 != "x") notes.push(G + s3);
+  if (s2 != "x") notes.push(B + s2);
+  if (s1 != "x") notes.push(Ehigh + s1);
+  return notes;
 };
 
+const calculatedChord = (
+  fret: Fret,
+  s6: FingerPosition,
+  s5: FingerPosition,
+  s4: FingerPosition,
+  s3: FingerPosition,
+  s2: FingerPosition,
+  s1: FingerPosition,
+): number[] => literalChord(s6, s5, s4, s3, s2, s1).map((note) => note + fret);
+
+const makeMajorBarreOnE = (root: number) =>
+  calculatedChord((root - E) as Fret, 0, 2, 2, 1, 0, 0);
+
+const makeMajorBarreOnA = (root: number) =>
+  calculatedChord((root - A) as Fret, x, 0, 2, 2, 2, 0);
+
+const makeMajorBarre = (root: number) =>
+  root > A ? makeMajorBarreOnE(root) : makeMajorBarreOnA(root);
+
+const makeMinorBarreOnE = (root: number) =>
+  calculatedChord((root - E) as Fret, 0, 2, 2, 0, 0, 0);
+
+const makeMinorBarreOnA = (root: number) =>
+  calculatedChord((root - A) as Fret, x, 0, 2, 2, 1, 0);
+
+const makeMinorBarre = (root: number) =>
+  root > A ? makeMinorBarreOnE(root) : makeMinorBarreOnA(root);
+
+const makeDiminished = (root: number) =>
+  calculatedChord((root - E) as Fret, 0, 1, 0, 0, x, x);
+
+const makeAugmented = (root: number) =>
+  calculatedChord((root - E) as Fret, 0, 3, 2, 1, x, x);
+
 const openMajorChords: Record<number, number[]> = {
-  /* E */ 40: makeMajorBarre6(40),
-  /* G */ 43: [43, 47, 50, 55, 62, 67],
-  /* A */ 45: [45, 52, 57, 61, 64],
-  /* C */ 48: [48, 52, 55, 60, 64],
-  /* D */ 50: [50, 57, 62, 66],
+  /* E */ 40: makeMajorBarreOnE(E),
+  /* G */ 43: literalChord(3, 2, 0, 0, 3, 3),
+  /* A */ 45: makeMajorBarreOnA(A),
+  /* C */ 48: literalChord(x, 3, 2, 0, 1, 0),
+  /* D */ 50: literalChord(x, x, 0, 3, 2, 3),
 };
 
 const openMinorChords: Record<number, number[]> = {
-  /* E */ 40: makeMinorBarre6(40),
-  /* A */ 45: [45, 52, 57, 60, 64],
-  /* D */ 50: [50, 57, 62, 65],
+  /* E */ 40: makeMinorBarreOnE(E),
+  /* A */ 45: makeMinorBarreOnA(A),
+  /* D */ 50: literalChord(x, x, 0, 2, 3, 1),
 };
 
 const getRoot = (chord: Chord) => {
@@ -77,7 +125,5 @@ export const getChordNotes = (chord: Chord): number[] => {
   }
 };
 
-export const getPowerChordNotes = (chord: Chord): number[] => {
-  const root = getRoot(chord);
-  return [root, root + 7, root + 12];
-};
+export const getPowerChordNotes = (chord: Chord): number[] =>
+  calculatedChord((getRoot(chord) - E) as Fret, 0, 2, 2, x, x, x);
