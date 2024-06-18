@@ -121,11 +121,11 @@ const STRUMMINGS: Record<number, Strumming> = {
   67: FullStrumming(activeGuitarChord, noteSender),
   68: CombinedStrumming(activeGuitarChord, noteSender, {
     rootNoteCount: 2,
-    velocity: 0.8,
+    velocity: 0.7,
   }),
   69: CombinedStrumming(activeGuitarChord, noteSender, {
     rootNoteCount: 1,
-    velocity: 0.8,
+    velocity: 0.7,
   }),
   70: PickedStrumming(activeGuitarChord, noteSender, {
     resetOnChordChange: true,

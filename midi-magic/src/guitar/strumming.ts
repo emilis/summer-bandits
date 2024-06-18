@@ -172,6 +172,7 @@ export const CombinedStrumming = (
   noteSender: NoteSender,
   options: {
     rootNoteCount?: number;
+    rootVelocityBoost?: number;
     strummedNoteCount?: number;
     resetOnChordChange?: boolean;
   } & VelocityOpts &
@@ -183,6 +184,7 @@ export const CombinedStrumming = (
     ...keepOverlappingDefaults,
     rootNoteCount: 1,
     strummedCount: 3,
+    rootVelocityBoost: 0.2,
     resetOnChordChange: true,
     ...options,
   };
@@ -199,7 +201,10 @@ export const CombinedStrumming = (
     const varietyNumber = Math.random();
     noteSender.playNote({
       pitch: note,
-      velocity: calcVelocity(varietyNumber, opts),
+      velocity: Math.min(
+        calcVelocity(varietyNumber, opts) + opts.rootVelocityBoost,
+        0.99,
+      ),
     });
   };
 
