@@ -1,5 +1,5 @@
 import { type InputChannel, Note, type OutputChannel } from "webmidi";
-import { effect, signal } from "@preact/signals";
+import { batch, effect, signal } from "@preact/signals";
 
 import { type ChordNumber } from "../harmony/scales";
 import { type Instrument } from "../instruments/types";
@@ -13,6 +13,7 @@ import {
   Strumming,
 } from "./strumming";
 import { registerInput, registerOutput } from "../storage";
+import { GuitarChord } from "./chords";
 
 /// Types ----------------------------------------------------------------------
 
@@ -24,6 +25,8 @@ type Options = {
 
 const OPEN_CHORD_NOTE = 47;
 
+const SPICY_THRESHOLD = 52;
+
 // This mapping is not final, but here just for testing the playback of all chords
 const CHORDS: Record<number, ChordNumber> = {
   [OPEN_CHORD_NOTE]: "i",
@@ -32,7 +35,11 @@ const CHORDS: Record<number, ChordNumber> = {
   50: "iv",
   51: "v",
   52: "vi",
-  53: "vii", // This one is not accessible with the guitar controller
+  53: "ii",
+  54: "iii",
+  55: "iv",
+  56: "v",
+  57: "vi",
 };
 
 /// State ----------------------------------------------------------------------
@@ -43,10 +50,17 @@ const options = signal<Options>({
   localChords: false,
 });
 
+const spicy = signal<boolean>(false);
+
+const activeGuitarChord = signal<GuitarChord>({
+  chord: activeChord.peek(),
+  spicy: spicy.peek(),
+});
+
 let activeNote = OPEN_CHORD_NOTE;
 const notesDown = new Set<number>();
 
-let previousChord = activeChord.peek();
+let previousChord = activeGuitarChord.peek();
 
 type PlayingNote = {
   pitch: number;
@@ -102,20 +116,20 @@ const noteSender: NoteSender = {
 };
 
 const STRUMMINGS: Record<number, Strumming> = {
-  67: FullStrumming(activeChord, noteSender),
-  68: CombinedStrumming(activeChord, noteSender, {
+  67: FullStrumming(activeGuitarChord, noteSender),
+  68: CombinedStrumming(activeGuitarChord, noteSender, {
     rootNoteCount: 2,
     velocity: 0.8,
   }),
-  69: CombinedStrumming(activeChord, noteSender, {
+  69: CombinedStrumming(activeGuitarChord, noteSender, {
     rootNoteCount: 1,
     velocity: 0.8,
   }),
-  70: PickedStrumming(activeChord, noteSender, {
+  70: PickedStrumming(activeGuitarChord, noteSender, {
     resetOnChordChange: true,
     keepOverlapping: true,
   }),
-  71: PowerChordStrumming(activeChord, noteSender),
+  71: PowerChordStrumming(activeGuitarChord, noteSender),
 };
 
 let currentStrumming = STRUMMINGS[67];
@@ -138,7 +152,10 @@ const maybeApplyChordChange = () => {
     return;
   }
   activeNote = maxNote;
-  setActiveChord(CHORDS[maxNote]);
+  batch(() => {
+    setActiveChord(CHORDS[maxNote]);
+    spicy.value = activeNote > SPICY_THRESHOLD;
+  });
 };
 
 const onNoteOff = ({ note }: { note: Note }) => {
@@ -173,8 +190,15 @@ const onNoteOn = ({ note }: { note: Note }) => {
 /// Effects --------------------------------------------------------------------
 
 effect(() => {
+  activeGuitarChord.value = {
+    chord: activeChord.value,
+    spicy: spicy.value,
+  };
+});
+
+effect(() => {
   currentStrumming.handleChordChange(previousChord);
-  previousChord = activeChord.value;
+  previousChord = activeGuitarChord.value;
 });
 
 effect(() => {

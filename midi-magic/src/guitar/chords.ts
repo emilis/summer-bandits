@@ -101,6 +101,42 @@ const openMinorChords: Record<number, number[]> = {
   /* D */ 50: literalChord(x, x, 0, 2, 3, 1),
 };
 
+const makeMajor7BarreOnE = (root: number) =>
+  calculatedChord((root - E) as Fret, 0, 2, 1, 1, 0, 0);
+
+const makeMajor7BarreOnA = (root: number) =>
+  calculatedChord((root - A) as Fret, x, 0, 2, 1, 2, 0);
+
+const makeMajor7Barre = (root: number) =>
+  root > A ? makeMajor7BarreOnE(root) : makeMajor7BarreOnA(root);
+
+const openMajor7Chords: Record<number, number[]> = {
+  /* E */ 40: literalChord(0, 2, 1, 1, 0, 0),
+  /* F */ 41: literalChord(x, x, 3, 2, 1, 0),
+  /* G */ 43: literalChord(3, 2, 0, 0, 0, 2),
+  /* A */ 45: literalChord(x, 0, 2, 1, 2, 0),
+  /* B */ 47: literalChord(x, 2, 1, 3, 0, x),
+  /* C */ 48: literalChord(x, 3, 2, 0, 0, 0),
+  /* D */ 50: literalChord(x, x, 0, 2, 2, 2),
+};
+
+const makeMinor7BarreOnE = (root: number) =>
+  calculatedChord((root - E) as Fret, 0, 2, 0, 0, 0, 0);
+
+const makeMinor7BarreOnA = (root: number) =>
+  calculatedChord((root - A) as Fret, x, 0, 2, 0, 1, 0);
+
+const makeMinor7Barre = (root: number) =>
+  root > A ? makeMinor7BarreOnE(root) : makeMinor7BarreOnA(root);
+
+const openMinor7Chords: Record<number, number[]> = {
+  /* E */ 40: literalChord(0, 2, 2, 0, 3, 0),
+  /* A */ 45: literalChord(x, 0, 2, 0, 1, 0),
+  /* B */ 47: literalChord(x, 2, 0, 2, 0, 2),
+  /* C */ 48: literalChord(x, 3, x, 3, 4, 3),
+  /* D */ 50: literalChord(x, x, 0, 2, 1, 1),
+};
+
 const getRoot = (chord: Chord) => {
   let root = chord.notes[0] + 36;
   if (root < LOWEST_GUITAR_NOTE) {
@@ -109,8 +145,8 @@ const getRoot = (chord: Chord) => {
   return root;
 };
 
-export const getChordNotes = (chord: Chord): number[] => {
-  let root = getRoot(chord);
+const getChordNotes = (chord: Chord): number[] => {
+  const root = getRoot(chord);
   switch (chord.flavour) {
     case "maj":
       return openMajorChords[root] || makeMajorBarre(root);
@@ -125,5 +161,29 @@ export const getChordNotes = (chord: Chord): number[] => {
   }
 };
 
-export const getPowerChordNotes = (chord: Chord): number[] =>
-  calculatedChord((getRoot(chord) - E) as Fret, 0, 2, 2, x, x, x);
+const getSpicyChordNotes = (chord: Chord): number[] => {
+  const root = getRoot(chord);
+  switch (chord.flavour) {
+    case "maj":
+      return openMajor7Chords[root] || makeMajor7Barre(root);
+    case "min":
+      return openMinor7Chords[root] || makeMinor7Barre(root);
+    case "dim":
+      return makeDiminished(root);
+    case "aug":
+      return makeAugmented(root);
+    default:
+      return [];
+  }
+};
+
+export type GuitarChord = {
+  chord: Chord;
+  spicy: boolean;
+};
+
+export const getGuitarChordNotes = (chord: GuitarChord) =>
+  chord.spicy ? getSpicyChordNotes(chord.chord) : getChordNotes(chord.chord);
+
+export const getPowerChordNotes = (chord: GuitarChord): number[] =>
+  calculatedChord((getRoot(chord.chord) - E) as Fret, 0, 2, 2, x, x, x);
