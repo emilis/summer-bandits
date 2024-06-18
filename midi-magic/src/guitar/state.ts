@@ -62,6 +62,9 @@ const notesDown = new Set<number>();
 
 let previousChord = activeGuitarChord.peek();
 
+let lastStrumAt = performance.now();
+let lastStrumDirection: "UP" | "DOWN" = "DOWN";
+
 type PlayingNote = {
   pitch: number;
   scheduledAt?: number;
@@ -96,7 +99,6 @@ const noteSender: NoteSender = {
   },
   muteAll: (except?: Set<number>) => {
     const exceptNotes = except || new Set();
-    console.log(exceptNotes);
     const keptNotes: PlayingNote[] = [];
     playingNotes.forEach((note) => {
       if (exceptNotes.has(note.pitch)) {
@@ -156,6 +158,13 @@ const maybeApplyChordChange = () => {
     setActiveChord(CHORDS[maxNote]);
     spicy.value = activeNote > SPICY_THRESHOLD;
   });
+  if (performance.now() - lastStrumAt < 50) {
+    if (lastStrumDirection == "UP") {
+      currentStrumming.handleUp();
+    } else {
+      currentStrumming.handleDown();
+    }
+  }
 };
 
 const onNoteOff = ({ note }: { note: Note }) => {
@@ -173,9 +182,13 @@ const onNoteOn = ({ note }: { note: Note }) => {
   switch (true) {
     case isDownNote(note):
       currentStrumming.handleDown();
+      lastStrumDirection = "DOWN";
+      lastStrumAt = performance.now();
       return;
     case isUpNote(note):
       currentStrumming.handleUp();
+      lastStrumDirection = "UP";
+      lastStrumAt = performance.now();
       return;
     case note.number in CHORDS:
       notesDown.add(note.number);
