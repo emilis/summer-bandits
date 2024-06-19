@@ -8,6 +8,8 @@ const makeMinor = (root: number) => [root, root + 3, root + 7, root + 12];
 
 const makeDiminished = (root: number) => [root, root + 3, root + 6, root + 12];
 
+const makeAugmented = (root: number) => [root, root + 4, root + 8, root + 12];
+
 const getRoot = (chord: Chord) => {
   let root = chord.notes[0] + 24;
   if (root < LOWEST_BASS_NOTE) {
@@ -25,6 +27,8 @@ export const getChordNotes = (chord: Chord): number[] => {
       return makeMinor(root);
     case "dim":
       return makeDiminished(root);
+    case "aug":
+      return makeAugmented(root);
     default:
       return [];
   }
