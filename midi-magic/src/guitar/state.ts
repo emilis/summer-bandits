@@ -158,13 +158,6 @@ const maybeApplyChordChange = () => {
     setActiveChord(CHORDS[maxNote]);
     spicy.value = activeNote > SPICY_THRESHOLD;
   });
-  if (performance.now() - lastStrumAt < 50) {
-    if (lastStrumDirection == "UP") {
-      currentStrumming.handleUp();
-    } else {
-      currentStrumming.handleDown();
-    }
-  }
 };
 
 const onNoteOff = ({ note }: { note: Note }) => {
@@ -212,6 +205,13 @@ effect(() => {
 effect(() => {
   currentStrumming.handleChordChange(previousChord);
   previousChord = activeGuitarChord.value;
+  if (performance.now() - lastStrumAt < 50) {
+    if (lastStrumDirection == "UP") {
+      currentStrumming.handleUp();
+    } else {
+      currentStrumming.handleDown();
+    }
+  }
 });
 
 effect(() => {
