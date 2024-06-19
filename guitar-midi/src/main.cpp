@@ -15,8 +15,8 @@ const int PIN_YELLOW_HIGH = 4;
 const int PIN_BLUE_HIGH = 16;
 const int PIN_ORANGE_HIGH = 32;
 
-const int PIN_UP = 5;
-const int PIN_DOWN = 23;
+const int PIN_UP = 23;
+const int PIN_DOWN = 5;
 const int PIN_SELECTOR = 19;
 
 const int MIDI_CHANNEL = 0;
