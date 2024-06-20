@@ -1,6 +1,7 @@
 export type NoteNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
 export type Chord = {
+  number: ChordNumber;
   flavour: Flavour;
   notes: NoteNumber[];
   levels: NoteNumber[][];
@@ -40,6 +41,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
     notes: [0, 2, 4, 5, 7, 9, 11],
     chords: {
       i: {
+        number: "i",
         flavour: "maj",
         notes: [0, 7, 4],
         levels: [
@@ -50,6 +52,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       ii: {
+        number: "ii",
         flavour: "min",
         notes: [2, 9, 5],
         levels: [
@@ -60,6 +63,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       iii: {
+        number: "iii",
         flavour: "min",
         notes: [4, 11, 7],
         levels: [
@@ -70,6 +74,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       iv: {
+        number: "iv",
         flavour: "maj",
         notes: [5, 0, 9],
         levels: [
@@ -80,6 +85,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       v: {
+        number: "v",
         flavour: "maj",
         notes: [7, 2, 11, 5],
         levels: [
@@ -90,6 +96,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       vi: {
+        number: "vi",
         flavour: "min",
         notes: [9, 4, 0],
         levels: [
@@ -100,6 +107,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       vii: {
+        number: "vii",
         flavour: "dim",
         notes: [11, 2, 5],
         levels: [
@@ -117,6 +125,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
     notes: [0, 2, 3, 5, 7, 8, 10],
     chords: {
       i: {
+        number: "i",
         flavour: "min",
         notes: [0, 7, 3],
         levels: [
@@ -127,6 +136,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       ii: {
+        number: "ii",
         flavour: "dim",
         notes: [2, 5, 8],
         levels: [
@@ -137,6 +147,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       iii: {
+        number: "iii",
         flavour: "maj",
         notes: [3, 10, 7],
         levels: [
@@ -147,6 +158,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       iv: {
+        number: "iv",
         flavour: "min",
         notes: [5, 0, 8],
         levels: [
@@ -157,6 +169,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       v: {
+        number: "v",
         flavour: "min",
         notes: [7, 2, 10],
         levels: [
@@ -167,6 +180,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       vi: {
+        number: "vi",
         flavour: "maj",
         notes: [8, 3, 0],
         levels: [
@@ -177,6 +191,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       vii: {
+        number: "vii",
         flavour: "maj",
         notes: [10, 5, 2],
         levels: [
@@ -194,6 +209,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
     notes: [0, 2, 3, 5, 7, 8, 11],
     chords: {
       i: {
+        number: "i",
         flavour: "min",
         notes: [0, 7, 3],
         levels: [
@@ -204,6 +220,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       ii: {
+        number: "ii",
         flavour: "dim",
         notes: [2, 5, 8],
         levels: [
@@ -214,6 +231,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       iii: {
+        number: "iii",
         flavour: "aug",
         notes: [3, 11, 7],
         levels: [
@@ -224,6 +242,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       iv: {
+        number: "iv",
         flavour: "min",
         notes: [5, 0, 8],
         levels: [
@@ -234,6 +253,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       v: {
+        number: "v",
         flavour: "maj",
         notes: [7, 2, 11, 5],
         levels: [
@@ -244,6 +264,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       vi: {
+        number: "vi",
         flavour: "maj",
         notes: [8, 3, 0],
         levels: [
@@ -254,6 +275,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
         ],
       },
       vii: {
+        number: "vii",
         flavour: "dim",
         notes: [11, 5, 2],
         levels: [

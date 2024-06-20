@@ -1,9 +1,9 @@
 import { type InputChannel, Note, type OutputChannel } from "webmidi";
-import { batch, effect, signal } from "@preact/signals";
+import { Signal, batch, effect, signal } from "@preact/signals";
 
 import { type ChordNumber } from "../harmony/scales";
 import { type Instrument } from "../instruments/types";
-import { activeChord, setActiveChord } from "../conductor/state";
+import { activeChord, activeScale, activeChordNumber } from "../conductor/state";
 import {
   CombinedStrumming,
   FullStrumming,
@@ -50,11 +50,9 @@ const options = signal<Options>({
   localChords: false,
 });
 
-const spicy = signal<boolean>(false);
-
 const activeGuitarChord = signal<GuitarChord>({
   chord: activeChord.peek(),
-  spicy: spicy.peek(),
+  spicy: false,
 });
 
 let activeNote = OPEN_CHORD_NOTE;
@@ -64,6 +62,8 @@ let previousChord = activeGuitarChord.peek();
 
 let lastStrumAt = performance.now();
 let lastStrumDirection: "UP" | "DOWN" = "DOWN";
+
+let mode: Signal<"LEAD" | "FOLLOW" | "INDEPENDENT"> = signal("LEAD")
 
 type PlayingNote = {
   pitch: number;
@@ -154,9 +154,11 @@ const maybeApplyChordChange = () => {
     return;
   }
   activeNote = maxNote;
-  batch(() => {
-    setActiveChord(CHORDS[maxNote]);
-    spicy.value = activeNote > SPICY_THRESHOLD;
+  batch(() => {    
+    activeGuitarChord.value = {
+      chord: activeScale.value.chords[CHORDS[maxNote]],
+      spicy: activeNote > SPICY_THRESHOLD,
+    };
   });
 };
 
@@ -173,17 +175,23 @@ const onNoteOff = ({ note }: { note: Note }) => {
 const onNoteOn = ({ note }: { note: Note }) => {
   console.debug("guitar onNoteOn", note);
   switch (true) {
-    case isDownNote(note):
+    case isDownNote(note):      
+      if (mode.peek() == "LEAD") {
+        activeChordNumber.value = activeGuitarChord.value.chord.number
+      }
       currentStrumming.handleDown();
       lastStrumDirection = "DOWN";
       lastStrumAt = performance.now();
       return;
     case isUpNote(note):
+      if (mode.peek() == "LEAD") {
+        activeChordNumber.value = activeGuitarChord.value.chord.number
+      }
       currentStrumming.handleUp();
       lastStrumDirection = "UP";
       lastStrumAt = performance.now();
       return;
-    case note.number in CHORDS:
+    case note.number in CHORDS:      
       notesDown.add(note.number);
       maybeApplyChordChange();
       return;
@@ -196,22 +204,25 @@ const onNoteOn = ({ note }: { note: Note }) => {
 /// Effects --------------------------------------------------------------------
 
 effect(() => {
-  activeGuitarChord.value = {
-    chord: activeChord.value,
-    spicy: spicy.value,
-  };
+  const currentActiveChord = activeChord.value
+  if (mode.value == "FOLLOW") {
+    activeGuitarChord.value = {
+      ...activeGuitarChord.peek(),
+      chord: currentActiveChord,
+    };
+    if (performance.now() - lastStrumAt < 50) {
+      if (lastStrumDirection == "UP") {
+        currentStrumming.handleUp();
+      } else {
+        currentStrumming.handleDown();
+      }
+    }
+  }
 });
 
 effect(() => {
   currentStrumming.handleChordChange(previousChord);
   previousChord = activeGuitarChord.value;
-  if (performance.now() - lastStrumAt < 50) {
-    if (lastStrumDirection == "UP") {
-      currentStrumming.handleUp();
-    } else {
-      currentStrumming.handleDown();
-    }
-  }
 });
 
 effect(() => {
