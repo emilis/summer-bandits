@@ -3,7 +3,11 @@ import { Signal, batch, effect, signal } from "@preact/signals";
 
 import { type ChordNumber } from "../harmony/scales";
 import { type Instrument } from "../instruments/types";
-import { activeChord, activeScale, activeChordNumber } from "../conductor/state";
+import {
+  activeChord as globalActiveChord,
+  activeScale,
+  activeChordNumber,
+} from "../conductor/state";
 import {
   CombinedStrumming,
   FullStrumming,
@@ -50,20 +54,20 @@ const options = signal<Options>({
   localChords: false,
 });
 
-const activeGuitarChord = signal<GuitarChord>({
-  chord: activeChord.peek(),
+const localGuitarChord = signal<GuitarChord>({
+  chord: globalActiveChord.peek(),
   spicy: false,
 });
 
 let activeNote = OPEN_CHORD_NOTE;
 const notesDown = new Set<number>();
 
-let previousChord = activeGuitarChord.peek();
+let previousChord = localGuitarChord.peek();
 
 let lastStrumAt = performance.now();
 let lastStrumDirection: "UP" | "DOWN" = "DOWN";
 
-let mode: Signal<"LEAD" | "FOLLOW" | "INDEPENDENT"> = signal("LEAD")
+let mode: Signal<"LEAD" | "FOLLOW" | "INDEPENDENT"> = signal("LEAD");
 
 type PlayingNote = {
   pitch: number;
@@ -118,20 +122,20 @@ const noteSender: NoteSender = {
 };
 
 const STRUMMINGS: Record<number, Strumming> = {
-  67: FullStrumming(activeGuitarChord, noteSender),
-  68: CombinedStrumming(activeGuitarChord, noteSender, {
+  67: FullStrumming(localGuitarChord, noteSender),
+  68: CombinedStrumming(localGuitarChord, noteSender, {
     rootNoteCount: 2,
     velocity: 0.7,
   }),
-  69: CombinedStrumming(activeGuitarChord, noteSender, {
+  69: CombinedStrumming(localGuitarChord, noteSender, {
     rootNoteCount: 1,
     velocity: 0.7,
   }),
-  70: PickedStrumming(activeGuitarChord, noteSender, {
+  70: PickedStrumming(localGuitarChord, noteSender, {
     resetOnChordChange: true,
     keepOverlapping: true,
   }),
-  71: PowerChordStrumming(activeGuitarChord, noteSender),
+  71: PowerChordStrumming(localGuitarChord, noteSender),
 };
 
 let currentStrumming = STRUMMINGS[67];
@@ -154,8 +158,8 @@ const maybeApplyChordChange = () => {
     return;
   }
   activeNote = maxNote;
-  batch(() => {    
-    activeGuitarChord.value = {
+  batch(() => {
+    localGuitarChord.value = {
       chord: activeScale.value.chords[CHORDS[maxNote]],
       spicy: activeNote > SPICY_THRESHOLD,
     };
@@ -175,9 +179,9 @@ const onNoteOff = ({ note }: { note: Note }) => {
 const onNoteOn = ({ note }: { note: Note }) => {
   console.debug("guitar onNoteOn", note);
   switch (true) {
-    case isDownNote(note):      
+    case isDownNote(note):
       if (mode.peek() == "LEAD") {
-        activeChordNumber.value = activeGuitarChord.value.chord.number
+        activeChordNumber.value = localGuitarChord.value.chord.number;
       }
       currentStrumming.handleDown();
       lastStrumDirection = "DOWN";
@@ -185,13 +189,13 @@ const onNoteOn = ({ note }: { note: Note }) => {
       return;
     case isUpNote(note):
       if (mode.peek() == "LEAD") {
-        activeChordNumber.value = activeGuitarChord.value.chord.number
+        activeChordNumber.value = localGuitarChord.value.chord.number;
       }
       currentStrumming.handleUp();
       lastStrumDirection = "UP";
       lastStrumAt = performance.now();
       return;
-    case note.number in CHORDS:      
+    case note.number in CHORDS:
       notesDown.add(note.number);
       maybeApplyChordChange();
       return;
@@ -204,10 +208,11 @@ const onNoteOn = ({ note }: { note: Note }) => {
 /// Effects --------------------------------------------------------------------
 
 effect(() => {
-  const currentActiveChord = activeChord.value
+  const currentActiveChord = globalActiveChord.value;
   if (mode.value == "FOLLOW") {
-    activeGuitarChord.value = {
-      ...activeGuitarChord.peek(),
+    localGuitarChord.value = {
+      ...localGuitarChord.peek(),
+
       chord: currentActiveChord,
     };
     if (performance.now() - lastStrumAt < 50) {
@@ -222,7 +227,7 @@ effect(() => {
 
 effect(() => {
   currentStrumming.handleChordChange(previousChord);
-  previousChord = activeGuitarChord.value;
+  previousChord = localGuitarChord.value;
 });
 
 effect(() => {
