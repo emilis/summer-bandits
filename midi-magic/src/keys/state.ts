@@ -1,5 +1,5 @@
 import { type InputChannel, type OutputChannel } from "webmidi";
-import { effect, signal } from "@preact/signals";
+import { computed, effect, signal } from "@preact/signals";
 
 import { type ChordNumber } from "../harmony/scales";
 import { type Instrument, type NoteEventHandler } from "../instruments/types";
@@ -37,7 +37,6 @@ const SPICE_LEVELS = [96, 97, 98, 99, 100, 101, 103];
 
 /// State ----------------------------------------------------------------------
 
-const allNotesMode = signal<boolean>(false);
 const lpIn = signal<InputChannel | null>(null);
 const lpOut = signal<OutputChannel | null>(null);
 const notesIn = signal<InputChannel | null>(null);
@@ -46,6 +45,8 @@ const options = signal<Options>({
   localChords: false,
 });
 const spiceLevel = signal<number>(0);
+
+const allNotesMode = computed<boolean>(() => spiceLevel.value > 5);
 
 const notesOn: Record<number, number> = {};
 
@@ -98,9 +99,7 @@ const onLpNoteOn: NoteEventHandler = ({ note }) => {
     setInstrumentsBackground();
     setButtonColor(note.number, LP_COLORS.RED_HI);
   } else if (SPICE_LEVELS.includes(note.number)) {
-    const index = SPICE_LEVELS.indexOf(note.number);
-    spiceLevel.value = index;
-    allNotesMode.value = index > 5;
+    spiceLevel.value = SPICE_LEVELS.indexOf(note.number);
     setSpiceLevelColors();
   }
 };
