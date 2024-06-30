@@ -16,7 +16,8 @@ enum Mode {
 typedef struct controller_message {
   DeviceType device;
   Mode mode;
-  char message[32];
+  int pitch;
+  int velocity;
 } controller_message;
 
 #endif

@@ -23,6 +23,9 @@ const int PIN_SELECTOR = 19;
 ADS1115 ADS(0x48);
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; //Broadcast to all
 controller_message data;
+controller_message pingMessage;
+unsigned long previousMillis = 0;
+const long pingInterval = 1000; 
 
 DeviceType getDeviceType() {
     #ifdef DEVICE
@@ -81,21 +84,29 @@ void setup() {
         return;
     }
 
-    data.device = getDeviceType();
-    strcpy(data.message, "Hello ESP-NOW");
+    data = {getDeviceType(), Mode::DATA, 0, 0};
+    data.pitch = 50;
+    data.velocity = 127;
+    pingMessage = {getDeviceType(), Mode::PING, 0, 0};
 
     setupPins();
 
     Serial.println("Dongle booted up.");
 }
 
-void loop() {
-    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &data, sizeof(data));
+void sendPing() {
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &pingMessage, sizeof(pingMessage));
 
     if (result != ESP_OK) {
-        Serial.println("Error sending the data");
+        Serial.println("Error pinging");
         Serial.println(result);
     }
+}
 
-    delay(5000);
+void loop() {
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= pingInterval) {
+        previousMillis = currentMillis;
+        sendPing();
+    }
 }
