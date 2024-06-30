@@ -1,11 +1,17 @@
 import { type InputChannel, Note, type OutputChannel } from "webmidi";
 import { effect, signal } from "@preact/signals";
 
-import { type ChordNumber } from "../harmony/scales";
 import { type Instrument } from "../instruments/types";
 import { activeChord, setActiveChord } from "../conductor/state";
-import { NoteSender, PickedStrumming, Strumming } from "./strumming";
 import { registerInput, registerOutput } from "../storage";
+import {
+    CHORDS,
+    OPEN_CHORD_NOTE,
+    isDownNote,
+    isUpNote,
+} from '../guitar/controls';
+
+import { NoteSender, PickedStrumming, Strumming } from "./strumming";
 
 /// Types ----------------------------------------------------------------------
 
@@ -14,19 +20,6 @@ type Options = {
 };
 
 /// Constant values ------------------------------------------------------------
-
-const OPEN_CHORD_NOTE = 47;
-
-// This mapping is not final, but here just for testing the playback of all chords
-const CHORDS: Record<number, ChordNumber> = {
-  [OPEN_CHORD_NOTE]: "i",
-  48: "ii",
-  49: "iii",
-  50: "iv",
-  51: "v",
-  52: "vi",
-  53: "vii", // This one is not accessible with the guitar controller
-};
 
 /// State ----------------------------------------------------------------------
 
@@ -102,10 +95,6 @@ const STRUMMINGS: Record<number, Strumming> = {
 let currentStrumming = STRUMMINGS[67];
 
 /// Private functions ----------------------------------------------------------
-
-const isDownNote = (note: Note) => note.number === 59;
-
-const isUpNote = (note: Note) => note.number === 58;
 
 const midiPanic = () => {
   notesOut.value?.sendAllNotesOff();
