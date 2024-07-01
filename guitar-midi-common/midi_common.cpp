@@ -11,11 +11,11 @@ int getChannel(DeviceType device) {
 }
 
 void serialNoteOn(int channel, uint8_t pitch, uint8_t velocity) {
-  uint8_t data[3] = {static_cast<uint8_t>(0x90 | channel), pitch, velocity};
-  Serial.write(data, 3);
+  uint8_t data[MIDI_DATA_LEN] = {static_cast<uint8_t>(0x90 | channel), pitch, velocity};
+  Serial.write(data, MIDI_DATA_LEN);
 }
 
 void serialNoteOff(int channel, uint8_t pitch) {
-  uint8_t data[3] = {static_cast<uint8_t>(0x80 | channel), pitch, 0};
-  Serial.write(data, 3);
+  uint8_t data[MIDI_DATA_LEN] = {static_cast<uint8_t>(0x80 | channel), pitch, 0};
+  Serial.write(data, MIDI_DATA_LEN);
 }

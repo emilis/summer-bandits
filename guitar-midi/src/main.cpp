@@ -120,7 +120,6 @@ void setupPins() {
 void setup() {
     Serial.begin(MIDI_SERIAL_RATE);
 
-    WiFi.disconnect();
     WiFi.mode(WIFI_STA);
 
     esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
