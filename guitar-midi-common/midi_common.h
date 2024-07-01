@@ -1,4 +1,7 @@
 #define WIFI_CHANNEL 5
+#define MIDI_DATA_LEN 3
+//#define MIDI_SERIAL_RATE 9600
+#define MIDI_SERIAL_RATE 31250
 
 #ifndef MIDI_COMMON_H
 #define MIDI_COMMON_H
@@ -19,5 +22,9 @@ typedef struct controller_message {
   int pitch;
   int velocity;
 } controller_message;
+
+int getChannel(DeviceType device);
+void serialNoteOn(int channel, uint8_t pitch, uint8_t velocity);
+void serialNoteOff(int channel, uint8_t pitch);
 
 #endif
