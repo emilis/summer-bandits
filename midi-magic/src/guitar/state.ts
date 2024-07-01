@@ -12,13 +12,14 @@ import {
   Strumming,
 } from "./strumming";
 import { registerInput, registerOutput } from "../storage";
+
 import { GuitarChord } from "./chords";
 import {
-    OPEN_CHORD_NOTE,
     CHORDS,
     CLOSER_CHORD_NOTES,
-    isUpNote,
+    OPEN_CHORD_NOTE,
     isDownNote,
+    isUpNote,
 } from './controls';
 
 /// Types ----------------------------------------------------------------------
@@ -28,6 +29,7 @@ type Options = {
 };
 
 /// Constant values ------------------------------------------------------------
+
 /// State ----------------------------------------------------------------------
 
 const guitarIn = signal<InputChannel | null>(null);
