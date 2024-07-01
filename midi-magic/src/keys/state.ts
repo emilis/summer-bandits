@@ -33,6 +33,9 @@ const CHORD_NUMBER_TO_NOTE = Object.fromEntries(
   Object.entries(CHORDS).map(([note, chord]) => [chord, Number(note)]),
 );
 const INSTRUMENT_NOTES = [64, 65, 66, 67, 68, 69, 70, 71, 80, 81, 82];
+const LEADER_NOTE = 88;
+const FOLLOWER_NOTE = 104;
+const FREE_PLAY_NOTE = 120;
 const SPICE_LEVELS = [96, 97, 98, 99, 100, 101, 103];
 
 /// State ----------------------------------------------------------------------
