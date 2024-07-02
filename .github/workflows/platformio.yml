@@ -26,4 +26,9 @@ jobs:
       - name: Install platformIO libraries
         run: pio lib install
       - name: Build Guitar controller
-        run: platformio run --environment esp32
+        run: platformio run --environment guitar
+      - name: Build Bass controller
+        run: platformio run --environment bass
+      - name: Build Receiver controller
+        working-directory: ./midi-receiver
+        run: platformio run --environment midi-receiver
