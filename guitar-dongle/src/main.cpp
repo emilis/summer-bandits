@@ -19,7 +19,6 @@ enum Protocol {
 typedef struct state {
   uint8_t value;
   Protocol protocol;
-  unsigned long changedAt;
 } state;
 
 typedef struct channel_state {
@@ -37,7 +36,7 @@ std::map<int, channel_state> channelStates = {
 
 void saveState(int channel, Protocol protocol, uint8_t pitch, uint8_t velocity) {
   std::unordered_map<uint8_t, state>& states = channelStates[channel].states;
-  states[pitch] = {velocity, protocol, now};
+  states[pitch] = {velocity, protocol};
 }
 
 void noteOn(uint8_t channel, Protocol protocol, uint8_t pitch, uint8_t velocity) {
@@ -125,7 +124,7 @@ void loop() {
     uint8_t pitch = data[1];
     uint8_t velocity = data[2];
 
-    channelStates[channel].lastMidiSerialWrite = now;    
+    channelStates[channel].lastMidiSerialWrite = now;
     saveState(channel, Protocol::MIDI, pitch, velocity);
   }
 

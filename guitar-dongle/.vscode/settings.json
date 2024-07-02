@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "*.cpp_bkcp": "c"
+        ".fantomasignore": "ignore",
+        "*.cpp_bkcp": "c",
+        "unordered_map": "cpp"
     }
 }
