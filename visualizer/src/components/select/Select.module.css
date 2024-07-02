@@ -1,0 +1,43 @@
+.select {
+  all: unset;
+  text-align: start;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  font: inherit;
+  padding: 8px 32px 8px 16px;
+  background: 
+    url(https://upload.wikimedia.org/wikipedia/commons/9/9d/Caret_down_font_awesome_whitevariation.svg) no-repeat right 12px center/16px,
+    #1a1a1a;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.select::-ms-expand {
+  display: none;
+}
+
+.select[data-placeholder="true"] {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.select:active {
+  outline: none;
+}
+
+.select:focus {
+  outline: none;
+}
+
+.select:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
+
+.select option {
+  color: #fff;
+  background: #1a1a1a;
+}
