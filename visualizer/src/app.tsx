@@ -5,6 +5,8 @@ import {QlcEditor} from './qlcEditor/QlcEditor'
 
 const qlcClient = new QlcClient('ws://127.0.0.1:9999/qlcplusWS')
 
+qlcClient.connect()
+
 const audioNodePromise = navigator.mediaDevices
   .getUserMedia({audio: true}) //
   .then((inputStream) => {
