@@ -6,8 +6,6 @@
 #include "esp_wifi.h" 
 #include "midi_common.h"
 
-#define MIDI_RX_PIN 16
-
 const unsigned long WIRELESS_TIMEOUT_MILLIS = 1500;                 //If we don't receive wireless (esp-now) ping from the device in 1.5s we note off currently on'ed notes.
 const unsigned long WIRELESS_IGNORE_AFTER_LAST_SERIAL_WRITE = 3000; //We will ignore wireless (esp-now) messages if we received direct MIDI messages in last 3s
 
@@ -98,7 +96,6 @@ void noteOffExpiredEspNowMessages() {
 
 void setup() {
   Serial.begin(MIDI_SERIAL_RATE);
-  Serial1.begin(MIDI_SERIAL_RATE, SERIAL_8N1, MIDI_RX_PIN, -1); 
 
   WiFi.mode(WIFI_STA);
   esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
@@ -115,9 +112,9 @@ void setup() {
 
 void loop() {
   now = millis();
-  if (Serial1.available() >= MIDI_DATA_LEN) {
+  if (Serial.available() >= MIDI_DATA_LEN) {
     uint8_t data[MIDI_DATA_LEN];
-    Serial1.readBytes(data, MIDI_DATA_LEN);
+    Serial.readBytes(data, MIDI_DATA_LEN);
     Serial.write(data, MIDI_DATA_LEN);
 
     uint8_t channel = data[0] & 0x0F;
