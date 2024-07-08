@@ -23,9 +23,9 @@ const createInstrument = (
     chordNumber: ChordNumber = 'i',
 ): LeadershipInstrument => ({
     chordNumber,
-    isFollower: mode === 'LEAD',
+    isFollower: mode === 'FOLLOW',
     isFreePlay: mode === 'FREE_PLAY',
-    isLeader: mode === 'FOLLOW',
+    isLeader: mode === 'LEAD',
     mode,
     name,
 });
@@ -40,9 +40,9 @@ const changeChordNumber = (instrument: InstrumentSignal, chordNumber: ChordNumbe
 const changeMode = (instrument: InstrumentSignal, mode: LeadershipMode) => {
     instrument.value = {
       ...instrument.value,
-      isFollower: mode === 'LEAD',
+      isFollower: mode === 'FOLLOW',
       isFreePlay: mode === 'FREE_PLAY',
-      isLeader: mode === 'FOLLOW',
+      isLeader: mode === 'LEAD',
       mode,
     };
 };
