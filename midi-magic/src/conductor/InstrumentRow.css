@@ -1,7 +1,7 @@
 .com-conductor-instrument-row {
 
   &.mode-follow {     --active-color: green; }
-  &.mode-free_play {  --active-color: yellow; }
+  &.mode-free_play {  --active-color: orange; }
   &.mode-lead {       --active-color: red; }
 
   & > td {
