@@ -1,13 +1,12 @@
 import { Instruments } from "../instruments/Instruments";
 
 import "./App.css";
-import { Scale } from "../conductor/Scale";
+import { Conductor } from "../conductor/Conductor";
 
 export function App() {
   return (
     <div className="com-app layout-stack">
-      <h1>MIDI Magic</h1>
-      <Scale />
+      <Conductor />
       <Instruments />
     </div>
   );

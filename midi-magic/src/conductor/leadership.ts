@@ -13,9 +13,9 @@ type LeadershipInstrument = {
     name: string;
 }
 
-type InstrumentSignal = Signal<LeadershipInstrument>;
+export type InstrumentSignal = Signal<LeadershipInstrument>;
 
-const instruments: InstrumentSignal[] = [];
+export const instruments: InstrumentSignal[] = [];
 
 const createInstrument = (
     name: string,
