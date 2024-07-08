@@ -1,10 +1,12 @@
 #define WIFI_CHANNEL 5
 #define MIDI_DATA_LEN 3
-//#define MIDI_SERIAL_RATE 9600
 #define MIDI_SERIAL_RATE 31250
+#define BLUE_LED_PIN 2
 
 #ifndef MIDI_COMMON_H
 #define MIDI_COMMON_H
+
+extern HardwareSerial MIDI;
 
 enum DeviceType {
   GUITAR,

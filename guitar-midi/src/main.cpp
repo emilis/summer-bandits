@@ -118,7 +118,7 @@ void setupPins() {
 }
 
 void setup() {
-    Serial.begin(MIDI_SERIAL_RATE);
+    MIDI.begin(MIDI_SERIAL_RATE);
 
     WiFi.mode(WIFI_STA);
 

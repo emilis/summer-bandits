@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <WiFi.h>
 #include <map>
 #include <unordered_map>
@@ -10,7 +9,7 @@ const unsigned long WIRELESS_TIMEOUT_MILLIS = 1500;                 //If we don'
 const unsigned long WIRELESS_IGNORE_AFTER_LAST_SERIAL_WRITE = 3000; //We will ignore wireless (esp-now) messages if we received direct MIDI messages in last 3s
 
 enum Protocol {
-  MIDI,
+  MIDI_SERIAL,
   ESP_NOW,
 };
 
@@ -57,7 +56,6 @@ void processWirelessMidiMessage(controller_message *receivedData) {
       break;
     case DATA:
       if (now - lastSerialWrite < WIRELESS_IGNORE_AFTER_LAST_SERIAL_WRITE) return;
-
       if (receivedData->velocity == 0) {
         noteOff(channel, Protocol::ESP_NOW, receivedData->pitch);
       } else {
@@ -77,10 +75,11 @@ void OnDataReceived(const uint8_t * mac, const uint8_t *espNowData, int len) {
 
 void noteOffExpiredEspNowMessages(int channel, unsigned long& lastPing, std::unordered_map<uint8_t, state>& states) {
   if (now - lastPing < WIRELESS_TIMEOUT_MILLIS) return;
+
   for (const auto& entry : states) {
       uint8_t pitch = entry.first;
       const state& currentState = entry.second;
-      if (currentState.protocol == Protocol::ESP_NOW && currentState.value > 0) {
+      if (currentState.protocol == Protocol::ESP_NOW && currentState.value != 0) {
           noteOff(channel, currentState.protocol, pitch);
       }
   }
@@ -95,7 +94,9 @@ void noteOffExpiredEspNowMessages() {
 }
 
 void setup() {
-  Serial.begin(MIDI_SERIAL_RATE);
+  MIDI.begin(MIDI_SERIAL_RATE);
+
+  pinMode(BLUE_LED_PIN, OUTPUT);
 
   WiFi.mode(WIFI_STA);
   esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
@@ -112,17 +113,17 @@ void setup() {
 
 void loop() {
   now = millis();
-  if (Serial.available() >= MIDI_DATA_LEN) {
+  if (MIDI.available() >= MIDI_DATA_LEN) {
     uint8_t data[MIDI_DATA_LEN];
-    Serial.readBytes(data, MIDI_DATA_LEN);
-    Serial.write(data, MIDI_DATA_LEN);
+    MIDI.readBytes(data, MIDI_DATA_LEN);
+    MIDI.write(data, MIDI_DATA_LEN);
 
     uint8_t channel = data[0] & 0x0F;
     uint8_t pitch = data[1];
     uint8_t velocity = data[2];
 
     channelStates[channel].lastMidiSerialWrite = now;
-    saveState(channel, Protocol::MIDI, pitch, velocity);
+    saveState(channel, Protocol::MIDI_SERIAL, pitch, velocity);
   }
 
   noteOffExpiredEspNowMessages();
