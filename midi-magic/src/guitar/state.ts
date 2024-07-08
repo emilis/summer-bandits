@@ -2,7 +2,7 @@ import { type InputChannel, Note, type OutputChannel } from "webmidi";
 import { batch, effect, signal } from "@preact/signals";
 
 import { type Instrument } from "../instruments/types";
-import { activeChord, setActiveChord } from "../conductor/state";
+import { getChordByNumber } from "../conductor/state";
 import {
   CombinedStrumming,
   FullStrumming,
@@ -21,6 +21,7 @@ import {
     isDownNote,
     isUpNote,
 } from './controls';
+import { registerPlayer, setChordNumber } from "../conductor/players";
 
 /// Constant values ------------------------------------------------------------
 
@@ -30,11 +31,12 @@ const LABEL = "Guitar";
 
 const guitarIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
+const player = registerPlayer(LABEL, 'LEAD');
 
 const spicy = signal<boolean>(false);
 
 const activeGuitarChord = signal<GuitarChord>({
-  chord: activeChord.peek(),
+  chord: getChordByNumber(player.peek().chordNumber),
   spicy: spicy.peek(),
 });
 
@@ -132,7 +134,7 @@ const maybeApplyChordChange = () => {
   }
   activeNote = maxNote;
   batch(() => {
-    setActiveChord(CHORDS[maxNote]);
+    setChordNumber(player, CHORDS[maxNote]);
     spicy.value = CLOSER_CHORD_NOTES.has(activeNote);
   });
 };
@@ -174,7 +176,7 @@ const onNoteOn = ({ note }: { note: Note }) => {
 
 effect(() => {
   activeGuitarChord.value = {
-    chord: activeChord.value,
+    chord: getChordByNumber(player.value.chordNumber),
     spicy: spicy.value,
   };
 });

@@ -1,8 +1,8 @@
 import { type InputChannel, Note, type OutputChannel } from "webmidi";
-import { effect, signal } from "@preact/signals";
+import { computed, effect, signal } from "@preact/signals";
 
 import { type Instrument } from "../instruments/types";
-import { activeChord, setActiveChord } from "../conductor/state";
+import { getChordByNumber } from "../conductor/state";
 import { registerInput, registerOutput } from "../storage";
 import {
     CHORDS,
@@ -10,6 +10,7 @@ import {
     isDownNote,
     isUpNote,
 } from '../guitar/controls';
+import { registerPlayer, setChordNumber } from "../conductor/players";
 
 import { NoteSender, PickedStrumming, Strumming } from "./strumming";
 
@@ -21,6 +22,11 @@ const LABEL = "Bass";
 
 const bassIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
+const player = registerPlayer(LABEL, 'FREE_PLAY');
+
+const activeChord = computed(() =>
+  getChordByNumber(player.value.chordNumber)
+);
 
 let activeNote = OPEN_CHORD_NOTE;
 const notesDown = new Set<number>();
@@ -102,7 +108,7 @@ const maybeApplyChordChange = () => {
   }
   activeNote = maxNote;
   noteSender.muteAll();
-  setActiveChord(CHORDS[maxNote]);
+  setChordNumber(player, CHORDS[maxNote]);
 };
 
 const onNoteOff = ({ note }: { note: Note }) => {

@@ -53,7 +53,7 @@ const groupOtherPlayers = (withoutPlayer: PlayerSignal): PlayerSignal[][] => {
     const freePlayers: PlayerSignal[] = [];
     for( const player of players ){
         if( player === withoutPlayer ){
-            break;
+            continue;
         } else if( player.value.isFollower ){
             followers.push( player );
         } else if( player.value.isFreePlay ){
@@ -62,7 +62,7 @@ const groupOtherPlayers = (withoutPlayer: PlayerSignal): PlayerSignal[][] => {
             leaders.push( player );
         }
     }
-    return [leaders, followers, freePlayers];
+    return [followers, freePlayers, leaders];
 };
 
 /// Exports --------------------------------------------------------------------
@@ -91,7 +91,8 @@ export const setChordNumber = (player: PlayerSignal, chordNumber: ChordNumber) =
       changeChordNumber( player, chordNumber );
     }
     if( player.value.mode === 'LEAD' ){
-      const [_, followers] = groupOtherPlayers(player);
+      const [followers] = groupOtherPlayers(player);
+      console.log('setChordNumber/followers', followers.length);
       for( const follower of followers ){
         changeChordNumber( follower, chordNumber );
       }
@@ -101,11 +102,16 @@ export const setChordNumber = (player: PlayerSignal, chordNumber: ChordNumber) =
 
 export const setFollower = (player: PlayerSignal) => {
     batch(() => {
-        const [ _, freePlayers, leaders ] = groupOtherPlayers( player );
+        const [ followers, freePlayers, leaders ] = groupOtherPlayers( player );
         if( leaders.length || freePlayers.length ){
+            const leader = leaders[0] || freePlayers[0];
             changeMode(player, 'FOLLOW');
-            if( ! leaders.length ){
-                changeMode( freePlayers[0], 'LEAD' );
+            changeChordNumber(player, leader.value.chordNumber);
+            if( ! leader.value.isLeader ){
+              changeMode( leader, 'LEAD' );
+              for( const follower of followers ){
+                changeChordNumber(follower, leader.value.chordNumber);
+              }
             }
         }
     });
@@ -118,27 +124,30 @@ export const setFreePlay = (player: PlayerSignal) => {
         } else if( player.value.isFollower ){
             changeMode(player, 'FREE_PLAY');
         } else {
-            const [ _, freePlayers, leaders ] = groupOtherPlayers( player );
-            const potentialLeaders = [...leaders, ...freePlayers];
-            if( potentialLeaders.length ){
-                changeMode(potentialLeaders[0], 'LEAD');
-                changeMode(player, 'FREE_PLAY');
+            const [ followers, freePlayers, leaders ] = groupOtherPlayers( player );
+            const nextLeader = leaders[0] || freePlayers[0];
+            if( ! nextLeader ){
+              return;
             } else {
-                changeMode(player, 'LEAD');
+              changeMode( nextLeader, 'LEAD' );
+              for( const follower of followers ){
+                changeChordNumber(follower, nextLeader.value.chordNumber);
+              }
             }
         }
     });
 };
 
-export const setLeader = (sourcePlayer: PlayerSignal) => {
+export const setLeader = (player: PlayerSignal) => {
     batch(() => {
-        for (const player of players) {
-            if (player === sourcePlayer) {
-                changeMode(player, 'LEAD');
-            } else if (player.value.isLeader) {
-                changeMode(player, 'FREE_PLAY');
-            }
-        }
+      const [ followers, _, leaders ] = groupOtherPlayers( player );
+      changeMode(player, 'LEAD');
+      for( const oldLeader of leaders ){
+        changeMode(oldLeader, 'FREE_PLAY');
+      }
+      for( const follower of followers ){
+        changeChordNumber(follower, player.value.chordNumber);
+      }
     });
 };
 

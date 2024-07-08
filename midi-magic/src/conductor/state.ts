@@ -32,6 +32,9 @@ const midiToNote = (midiNum: number): NoteNumber =>
 
 /// Exported functions ---------------------------------------------------------
 
+export const getChordByNumber = (chordNumber: ChordNumber): Chord =>
+  activeScale.value.chords[chordNumber];
+
 export const getClosestChordNote = (
   chordNumber: ChordNumber,
   note: number,
