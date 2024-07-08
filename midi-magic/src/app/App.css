@@ -1,5 +1,11 @@
 .com-app {
 
-  padding:              1rem 2ch;
+  padding:              1.5rem 2ch;
   width:                42ch;
+
+  & > h1 {
+
+    line-height:        1.5rem;
+    margin-block:       0;
+  }
 }
