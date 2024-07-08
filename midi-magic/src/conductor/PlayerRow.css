@@ -1,4 +1,4 @@
-.com-conductor-instrument-row {
+.com-conductor-player-row {
 
   &.mode-follow {     --active-color: green; }
   &.mode-free_play {  --active-color: orange; }

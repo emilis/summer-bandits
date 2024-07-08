@@ -1,8 +1,8 @@
 import { ChordNumber } from "../harmony/scales";
 
-import type { InstrumentSignal } from "./leadership";
+import type { PlayerSignal } from "./players";
 
-import "./InstrumentRow.css"
+import "./PlayerRow.css"
 
 
 function ChordCell({ cellChordNumber, chordNumber }: {
@@ -17,10 +17,10 @@ function ChordCell({ cellChordNumber, chordNumber }: {
   );
 }
 
-export function ConductorInstrumentRow({ instrument }: { instrument: InstrumentSignal }){
-  const { chordNumber, name, mode } = instrument.value;
+export function ConductorPlayerRow({ player }: { player: PlayerSignal }){
+  const { chordNumber, name, mode } = player.value;
   return (
-    <tr className={`com-conductor-instrument-row mode-${ mode.toLowerCase() }`}>
+    <tr className={`com-conductor-player-row mode-${ mode.toLowerCase() }`}>
       <td className="name">{name}</td>
       <ChordCell chordNumber={chordNumber} cellChordNumber="i"    key="i" />
       <ChordCell chordNumber={chordNumber} cellChordNumber="ii"   key="ii" />

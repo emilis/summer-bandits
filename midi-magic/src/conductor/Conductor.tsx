@@ -1,7 +1,7 @@
 import { Scale } from "./Scale";
 
-import { instruments } from "./leadership";
-import { ConductorInstrumentRow } from "./InstrumentRow";
+import { players } from "./players";
+import { ConductorPlayerRow } from "./PlayerRow";
 import "./Conductor.css";
 
 
@@ -11,8 +11,8 @@ export function Conductor() {
       <Scale />
       <table>
         <tbody>
-          { instruments.map( instrument => 
-            <ConductorInstrumentRow key={instrument.value.name} instrument={instrument} />
+          { players.map( player =>
+            <ConductorPlayerRow key={player.value.name} player={player} />
           )}
         </tbody>
       </table>
