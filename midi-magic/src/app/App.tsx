@@ -3,15 +3,12 @@ import { midiInputs, midiOutputs } from "../webmidi/state";
 import { Instruments } from "../instruments/Instruments";
 
 import "./App.css";
-import { save, load } from "../storage";
 import { Scale } from "../conductor/Scale";
 
 export function App() {
   return (
     <div className="com-app layout-stack">
       <h1>MIDI Magic</h1>
-      <button onClick={save}>Save</button>
-      <button onClick={load}>Load</button>
       <Scale />
       <Instruments />
       <h2>I / O</h2>
