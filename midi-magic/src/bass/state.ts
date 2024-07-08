@@ -5,11 +5,11 @@ import { type Instrument } from "../instruments/types";
 import { getChordByNumber } from "../conductor/state";
 import { registerInput, registerOutput } from "../storage";
 import {
-    CHORDS,
-    OPEN_CHORD_NOTE,
-    isDownNote,
-    isUpNote,
-} from '../guitar/controls';
+  CHORDS,
+  OPEN_CHORD_NOTE,
+  isDownNote,
+  isUpNote,
+} from "../guitar/controls";
 import { registerPlayer, setChordNumber } from "../conductor/players";
 
 import { NoteSender, PickedStrumming, Strumming } from "./strumming";
@@ -22,11 +22,9 @@ const LABEL = "Bass";
 
 const bassIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
-const player = registerPlayer(LABEL, 'FREE_PLAY');
+const player = registerPlayer(LABEL, "FREE_PLAY");
 
-const activeChord = computed(() =>
-  getChordByNumber(player.value.chordNumber)
-);
+const activeChord = computed(() => getChordByNumber(player.value.chordNumber));
 
 let activeNote = OPEN_CHORD_NOTE;
 const notesDown = new Set<number>();

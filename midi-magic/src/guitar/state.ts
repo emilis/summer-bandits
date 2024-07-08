@@ -15,12 +15,12 @@ import { registerInput, registerOutput } from "../storage";
 
 import { GuitarChord } from "./chords";
 import {
-    CHORDS,
-    CLOSER_CHORD_NOTES,
-    OPEN_CHORD_NOTE,
-    isDownNote,
-    isUpNote,
-} from './controls';
+  CHORDS,
+  CLOSER_CHORD_NOTES,
+  OPEN_CHORD_NOTE,
+  isDownNote,
+  isUpNote,
+} from "./controls";
 import { registerPlayer, setChordNumber } from "../conductor/players";
 
 /// Constant values ------------------------------------------------------------
@@ -31,7 +31,7 @@ const LABEL = "Guitar";
 
 const guitarIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
-const player = registerPlayer(LABEL, 'LEAD');
+const player = registerPlayer(LABEL, "LEAD");
 
 const spicy = signal<boolean>(false);
 

@@ -40,30 +40,30 @@ export const getClosestChordNote = (
   note: number,
   level: number = 0,
 ): number => {
-    if( level > 6 ){
-      return note;
-    }
-    const chord = activeScale.value.chords[chordNumber];
-    const notes = new Set<number>(
-      level === 0
-        ? chord.notes
+  if (level > 6) {
+    return note;
+  }
+  const chord = activeScale.value.chords[chordNumber];
+  const notes = new Set<number>(
+    level === 0
+      ? chord.notes
       : level < 5
         ? chord.levels[level - 1]
-        : activeScale.value.notes
-    );
+        : activeScale.value.notes,
+  );
 
-    for (let i = 0; i < 7; i++) {
-      const noteDown = note - i;
-      const noteUp = note + i;
+  for (let i = 0; i < 7; i++) {
+    const noteDown = note - i;
+    const noteUp = note + i;
 
-      if (isMidiNum(noteUp) && notes.has(midiToNote(noteUp))) {
-        return noteUp;
-      } else if (isMidiNum(noteDown) && notes.has(midiToNote(noteDown))) {
-        return noteDown;
-      }
+    if (isMidiNum(noteUp) && notes.has(midiToNote(noteUp))) {
+      return noteUp;
+    } else if (isMidiNum(noteDown) && notes.has(midiToNote(noteDown))) {
+      return noteDown;
     }
+  }
 
-    return note;
+  return note;
 };
 
 export const setActiveChord = (chord: ChordNumber) => {

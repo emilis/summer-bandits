@@ -4,9 +4,7 @@ import { computed, effect, signal } from "@preact/signals";
 import { type ChordNumber } from "../harmony/scales";
 import { type Instrument, type NoteEventHandler } from "../instruments/types";
 import { LP_COLORS } from "../launchpad/";
-import {
-  getClosestChordNote,
-} from "../conductor/state";
+import { getClosestChordNote } from "../conductor/state";
 import { registerInput, registerOutput } from "../storage";
 import {
   Player,
@@ -47,7 +45,7 @@ const lpIn = signal<InputChannel | null>(null);
 const lpOut = signal<OutputChannel | null>(null);
 const notesIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
-const player = registerPlayer(LABEL, 'FOLLOW');
+const player = registerPlayer(LABEL, "FOLLOW");
 const spiceLevel = signal<number>(0);
 
 const allNotesMode = computed<boolean>(() => spiceLevel.value > 5);
@@ -69,19 +67,9 @@ const setButtonColor = (noteNum: number, color: number) =>
 const showChordsUi = (playerValue: Player) => {
   const { chordNumber, isFollower, isFreePlay } = playerValue;
 
-  const bgColor =
-    isFollower
-      ? GREEN_LO
-    : isFreePlay
-      ? YELLOW_LO
-      : RED_LO;
-  const fgColor =
-    isFollower
-      ? GREEN_HI
-    : isFreePlay
-      ? YELLOW_HI
-      : RED_HI;
-  for( const midiNote of CHORD_NOTES ){
+  const bgColor = isFollower ? GREEN_LO : isFreePlay ? YELLOW_LO : RED_LO;
+  const fgColor = isFollower ? GREEN_HI : isFreePlay ? YELLOW_HI : RED_HI;
+  for (const midiNote of CHORD_NOTES) {
     setButtonColor(
       midiNote,
       midiNote === CHORD_NUMBER_TO_NOTE[chordNumber] ? fgColor : bgColor,
@@ -90,15 +78,13 @@ const showChordsUi = (playerValue: Player) => {
 };
 
 const showInstrumentsBackground = () => {
-  INSTRUMENT_NOTES.forEach((noteNumber) =>
-    setButtonColor(noteNumber, RED_LO),
-  );
+  INSTRUMENT_NOTES.forEach((noteNumber) => setButtonColor(noteNumber, RED_LO));
 };
 
 const showPlayerModeUi = ({ mode }: Player) => {
-  setButtonColor( FOLLOWER_NOTE, mode === 'FOLLOW' ? GREEN_HI : GREEN_LO );
-  setButtonColor( FREE_PLAY_NOTE, mode === 'FREE_PLAY' ? YELLOW_HI : YELLOW_LO );
-  setButtonColor( LEADER_NOTE, mode === 'LEAD' ? RED_HI : RED_LO );
+  setButtonColor(FOLLOWER_NOTE, mode === "FOLLOW" ? GREEN_HI : GREEN_LO);
+  setButtonColor(FREE_PLAY_NOTE, mode === "FREE_PLAY" ? YELLOW_HI : YELLOW_LO);
+  setButtonColor(LEADER_NOTE, mode === "LEAD" ? RED_HI : RED_LO);
 };
 
 const showSpiceLevelUi = (level: number) => {
@@ -113,37 +99,37 @@ const showSpiceLevelUi = (level: number) => {
 
 /// Note On handlers -----------------------------------------------------------
 
-const onLpNoteOn: NoteEventHandler = ({ note: { number }}) => {
+const onLpNoteOn: NoteEventHandler = ({ note: { number } }) => {
   /// console.debug("keyboard onLpNoteOn", note.number);
 
-  switch( true ){
-  case number in CHORDS: {
-    setChordNumber(player, CHORDS[number]);
-    return;
-  }
-  case INSTRUMENT_NOTES.includes(number): {
-    notesOut.value?.sendControlChange(0, INSTRUMENT_NOTES.indexOf(number));
-    showInstrumentsBackground();
-    setButtonColor(number, RED_HI);
-    return;
-  }
-  case SPICE_LEVELS.includes(number): {
-    spiceLevel.value = SPICE_LEVELS.indexOf(number);
-    showSpiceLevelUi(spiceLevel.peek());
-    return;
-  }
-  case number === FOLLOWER_NOTE: {
-    setFollower(player);
-    return;
-  }
-  case number === FREE_PLAY_NOTE: {
-    setFreePlay(player);
-    return;
-  }
-  case number === LEADER_NOTE: {
-    setLeader(player);
-    return;
-  }
+  switch (true) {
+    case number in CHORDS: {
+      setChordNumber(player, CHORDS[number]);
+      return;
+    }
+    case INSTRUMENT_NOTES.includes(number): {
+      notesOut.value?.sendControlChange(0, INSTRUMENT_NOTES.indexOf(number));
+      showInstrumentsBackground();
+      setButtonColor(number, RED_HI);
+      return;
+    }
+    case SPICE_LEVELS.includes(number): {
+      spiceLevel.value = SPICE_LEVELS.indexOf(number);
+      showSpiceLevelUi(spiceLevel.peek());
+      return;
+    }
+    case number === FOLLOWER_NOTE: {
+      setFollower(player);
+      return;
+    }
+    case number === FREE_PLAY_NOTE: {
+      setFreePlay(player);
+      return;
+    }
+    case number === LEADER_NOTE: {
+      setLeader(player);
+      return;
+    }
   }
 };
 
@@ -158,7 +144,11 @@ const onNoteOn: NoteEventHandler = ({ note }) => {
 
   const midiNote = allNotesMode.value
     ? note.number
-    : getClosestChordNote(player.value.chordNumber, note.number, spiceLevel.value);
+    : getClosestChordNote(
+        player.value.chordNumber,
+        note.number,
+        spiceLevel.value,
+      );
   notesOn[note.number] = midiNote;
   notesOut.value?.sendNoteOn(midiNote, note);
 };
@@ -169,7 +159,7 @@ effect(() => {
   const lpInput = lpIn.value?.input;
 
   if (lpInput) {
-    console.log(LABEL, 'effect lpIn.value truthy');
+    console.log(LABEL, "effect lpIn.value truthy");
     lpInput.addListener("noteon", onLpNoteOn);
   }
 
@@ -181,7 +171,7 @@ effect(() => {
 });
 effect(() => {
   if (lpOut.value) {
-    console.log(LABEL, 'effect lpOut.value truthy');
+    console.log(LABEL, "effect lpOut.value truthy");
 
     lpOut.value.sendControlChange(0, 0); // turn off all buttons
     showChordsUi(player.peek());
@@ -194,7 +184,7 @@ effect(() => {
   const notesInput = notesIn.value;
 
   if (notesInput) {
-    console.log(LABEL, 'effect notesInput truthy');
+    console.log(LABEL, "effect notesInput truthy");
     notesInput.addListener("noteoff", onNoteOff);
     notesInput.addListener("noteon", onNoteOn);
   }
@@ -207,7 +197,7 @@ effect(() => {
   };
 });
 effect(() => {
-  console.log(LABEL, 'effect player', player.value);
+  console.log(LABEL, "effect player", player.value);
 
   showChordsUi(player.value);
   showPlayerModeUi(player.value);
