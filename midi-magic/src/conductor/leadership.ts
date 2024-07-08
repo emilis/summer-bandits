@@ -1,13 +1,16 @@
 import { batch, signal, type Signal } from "@preact/signals";
 
+import { type ChordNumber } from "../harmony/scales";
+
 type LeadershipMode = 'LEAD' | 'FOLLOW' | 'FREE_PLAY';
 
 type LeadershipInstrument = {
-    name: string;
+    chordNumber: ChordNumber;
     isFollower: boolean;
     isFreePlay: boolean;
     isLeader: boolean;
     mode: LeadershipMode;
+    name: string;
 }
 
 type InstrumentSignal = Signal<LeadershipInstrument>;
@@ -17,16 +20,31 @@ const instruments: InstrumentSignal[] = [];
 const createInstrument = (
     name: string,
     mode: LeadershipMode = 'FREE_PLAY',
+    chordNumber: ChordNumber = 'i',
 ): LeadershipInstrument => ({
-    name,
+    chordNumber,
     isFollower: mode === 'LEAD',
     isFreePlay: mode === 'FREE_PLAY',
     isLeader: mode === 'FOLLOW',
     mode,
+    name,
 });
 
+const changeChordNumber = (instrument: InstrumentSignal, chordNumber: ChordNumber) => {
+  instrument.value = {
+    ...instrument.value,
+    chordNumber,
+  };
+};
+
 const changeMode = (instrument: InstrumentSignal, mode: LeadershipMode) => {
-    instrument.value = createInstrument(instrument.value.name, mode);
+    instrument.value = {
+      ...instrument.value,
+      isFollower: mode === 'LEAD',
+      isFreePlay: mode === 'FREE_PLAY',
+      isLeader: mode === 'FOLLOW',
+      mode,
+    };
 };
 
 const groupOtherInstruments = (withoutInstrument: InstrumentSignal): InstrumentSignal[][] => {
@@ -47,6 +65,8 @@ const groupOtherInstruments = (withoutInstrument: InstrumentSignal): InstrumentS
     return [leaders, followers, freePlayers];
 };
 
+/// Exports --------------------------------------------------------------------
+
 export const registerLeadership = (
     instrumentName: string,
     mode: LeadershipMode = 'FREE_PLAY',
@@ -61,6 +81,22 @@ export const registerLeadership = (
         instruments.push(instrument);
         return instrument;
     }
+};
+
+export const setChordNumber = (instrument: InstrumentSignal, chordNumber: ChordNumber) => {
+  batch(() => {
+    if( instrument.value.mode === 'FREE_PLAY'
+      || instrument.value.mode === 'LEAD'
+    ){
+      changeChordNumber( instrument, chordNumber );
+    }
+    if( instrument.value.mode === 'LEAD' ){
+      const [_, followers] = groupOtherInstruments(instrument);
+      for( const follower of followers ){
+        changeChordNumber( follower, chordNumber );
+      }
+    }
+  });
 };
 
 export const setFollower = (instrument: InstrumentSignal) => {
