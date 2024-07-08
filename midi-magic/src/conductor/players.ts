@@ -4,7 +4,7 @@ import { type ChordNumber } from "../harmony/scales";
 
 type LeadershipMode = 'LEAD' | 'FOLLOW' | 'FREE_PLAY';
 
-type Player = {
+export type Player = {
     chordNumber: ChordNumber;
     isFollower: boolean;
     isFreePlay: boolean;
