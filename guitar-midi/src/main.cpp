@@ -71,12 +71,11 @@ void noteOff(uint8_t pitch) {
     sendEspNowMidi(pitch, 0);
 }
 
-void updateButton(int buttonPin, uint8_t midiNote, int& prevState, unsigned long& debounceStartedAt, unsigned long now)
-{
+void updateButton(int buttonPin, uint8_t midiNote, int& prevState, unsigned long& debounceStartedAt, unsigned long now) {
+  if (now - debounceStartedAt < DEBOUNCE_MILLIS) return;
+
   auto state = digitalRead(buttonPin);
 
-  if (now - debounceStartedAt < DEBOUNCE_MILLIS) return;
-  
   if (state == prevState) return;
   
   prevState = state;
@@ -111,7 +110,9 @@ void setupPins() {
     pinMode(PIN_BLUE_HIGH, INPUT_PULLUP);
     pinMode(PIN_ORANGE_HIGH, INPUT_PULLUP);
     pinMode(PIN_UP, INPUT_PULLUP);
-    pinMode(PIN_DOWN, INPUT_PULLUP); 
+    pinMode(PIN_DOWN, INPUT_PULLUP);
+
+    pinMode(BLUE_LED_PIN, OUTPUT);
 
     Wire.begin();
     ADS.begin();
