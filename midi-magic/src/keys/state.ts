@@ -11,14 +11,9 @@ import {
 } from "../conductor/state";
 import { registerInput, registerOutput } from "../storage";
 
-/// Types ----------------------------------------------------------------------
-
-type Options = {
-  localChords: boolean;
-};
-
 /// Constant values ------------------------------------------------------------
 
+const LABEL = "Keyboard";
 const CHORDS: Record<number, ChordNumber> = {
   112: "i",
   113: "ii",
@@ -44,9 +39,6 @@ const lpIn = signal<InputChannel | null>(null);
 const lpOut = signal<OutputChannel | null>(null);
 const notesIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
-const options = signal<Options>({
-  localChords: false,
-});
 const spiceLevel = signal<number>(0);
 
 const allNotesMode = computed<boolean>(() => spiceLevel.value > 5);
@@ -89,11 +81,11 @@ const setSpiceLevelColors = () => {
 };
 
 const onLpNoteOff: NoteEventHandler = ({ note }) => {
-  console.debug("keyboard onLpNoteOff", note.number);
+  /// console.debug("keyboard onLpNoteOff", note.number);
 };
 
 const onLpNoteOn: NoteEventHandler = ({ note }) => {
-  console.debug("keyboard onLpNoteOn", note.number);
+  /// console.debug("keyboard onLpNoteOn", note.number);
 
   if (note.number in CHORDS) {
     setActiveChord(CHORDS[note.number]);
@@ -194,17 +186,9 @@ export const outputs = {
   LaunchPad: lpOut,
 };
 
-export const setOptions = (newOptions: Options) => {
-  options.value = {
-    ...options.value,
-    ...newOptions,
-  };
-};
-
 export const keyboard: Instrument = {
-  label: "Keyboard",
+  label: LABEL,
   inputs,
   midiPanic,
   outputs,
-  setOptions,
 };

@@ -13,21 +13,14 @@ import {
 
 import { NoteSender, PickedStrumming, Strumming } from "./strumming";
 
-/// Types ----------------------------------------------------------------------
-
-type Options = {
-  localChords: boolean;
-};
-
 /// Constant values ------------------------------------------------------------
+
+const LABEL = "Bass";
 
 /// State ----------------------------------------------------------------------
 
 const bassIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
-const options = signal<Options>({
-  localChords: false,
-});
 
 let activeNote = OPEN_CHORD_NOTE;
 const notesDown = new Set<number>();
@@ -170,17 +163,9 @@ export const outputs = {
   "Bass track": notesOut,
 };
 
-export const setOptions = (newOptions: Options) => {
-  options.value = {
-    ...options.value,
-    ...newOptions,
-  };
-};
-
 export const bass: Instrument = {
-  label: "Bass",
+  label: LABEL,
   inputs,
   midiPanic,
   outputs,
-  setOptions,
 };

@@ -6,7 +6,6 @@ export type Instrument = {
   inputs: Record<string, Signal<InputChannel | null>>;
   midiPanic: () => void;
   outputs: Record<string, Signal<OutputChannel | null>>;
-  setOptions: (options: any) => void;
 };
 
 export type NoteEventHandler = ({ note }: { note: Note }) => void;

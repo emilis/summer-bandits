@@ -22,21 +22,14 @@ import {
     isUpNote,
 } from './controls';
 
-/// Types ----------------------------------------------------------------------
-
-type Options = {
-  localChords: boolean;
-};
-
 /// Constant values ------------------------------------------------------------
+
+const LABEL = "Guitar";
 
 /// State ----------------------------------------------------------------------
 
 const guitarIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
-const options = signal<Options>({
-  localChords: false,
-});
 
 const spicy = signal<boolean>(false);
 
@@ -225,17 +218,9 @@ export const outputs = {
   "Guitar track": notesOut,
 };
 
-export const setOptions = (newOptions: Options) => {
-  options.value = {
-    ...options.value,
-    ...newOptions,
-  };
-};
-
 export const guitar: Instrument = {
-  label: "Guitar",
+  label: LABEL,
   inputs,
   midiPanic,
   outputs,
-  setOptions,
 };
