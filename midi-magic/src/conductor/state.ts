@@ -10,11 +10,6 @@ import {
 } from "../harmony/scales";
 import { registerValue } from "../storage";
 
-/// Types ----------------------------------------------------------------------
-
-export type Energy = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-export type Tension = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
 /// Const values ---------------------------------------------------------------
 
 const MIDI_COUNT = 128;
@@ -23,21 +18,12 @@ const MIDI_COUNT = 128;
 
 export const activeScale = signal<Scale>(createScale("major", 0));
 export const activeChordNumber = signal<ChordNumber>("i");
-export const energy = signal<Energy>(3);
-export const tension = signal<Tension>(2);
 
 export const activeChord = computed<Chord>(
   () => activeScale.value.chords[activeChordNumber.value],
 );
 
 /// Private functions ----------------------------------------------------------
-
-const getActiveChordNotes = (level: number) =>
-  level === 0
-    ? activeChord.value.notes
-    : level < 5
-      ? activeChord.value.levels[level - 1]
-      : activeScale.value.notes;
 
 const isMidiNum = (num: number) => num >= 0 && num < MIDI_COUNT;
 
@@ -46,54 +32,39 @@ const midiToNote = (midiNum: number): NoteNumber =>
 
 /// Exported functions ---------------------------------------------------------
 
-export const getClosestNote = (note: number, level: number = 0): number => {
-  const chordNotes = new Set(getActiveChordNotes(level));
+export const getChordByNumber = (chordNumber: ChordNumber): Chord =>
+  activeScale.value.chords[chordNumber];
 
-  if (activeChord.value.notes.length < 1) {
+export const getClosestChordNote = (
+  chordNumber: ChordNumber,
+  note: number,
+  level: number = 0,
+): number => {
+  if (level > 6) {
     return note;
   }
+  const chord = activeScale.value.chords[chordNumber];
+  const notes = new Set<number>(
+    level === 0
+      ? chord.notes
+      : level < 5
+        ? chord.levels[level - 1]
+        : activeScale.value.notes,
+  );
 
   for (let i = 0; i < 7; i++) {
     const noteDown = note - i;
     const noteUp = note + i;
 
-    if (chordNotes.has(midiToNote(noteUp))) {
+    if (isMidiNum(noteUp) && notes.has(midiToNote(noteUp))) {
       return noteUp;
-    } else if (chordNotes.has(midiToNote(noteDown))) {
+    } else if (isMidiNum(noteDown) && notes.has(midiToNote(noteDown))) {
       return noteDown;
     }
   }
 
   return note;
 };
-export function getClosestNoteDown(note: number, level: number = 0): number {
-  const chordNotes = new Set(getActiveChordNotes(level));
-
-  for (let i = 1; i < 12; i++) {
-    const noteDown = note - i;
-    if (!isMidiNum(noteDown)) {
-      return getClosestNoteUp(note);
-    } else if (chordNotes.has(midiToNote(noteDown))) {
-      return noteDown;
-    }
-  }
-
-  return note;
-}
-export function getClosestNoteUp(note: number, level: number = 0): number {
-  const chordNotes = new Set(getActiveChordNotes(level));
-
-  for (let i = 1; i < 12; i++) {
-    const noteUp = note + i;
-    if (!isMidiNum(noteUp)) {
-      return getClosestNoteUp(note);
-    } else if (chordNotes.has(midiToNote(noteUp))) {
-      return noteUp;
-    }
-  }
-
-  return note;
-}
 
 export const setActiveChord = (chord: ChordNumber) => {
   activeChordNumber.value = chord;

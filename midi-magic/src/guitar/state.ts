@@ -1,9 +1,8 @@
 import { type InputChannel, Note, type OutputChannel } from "webmidi";
 import { batch, effect, signal } from "@preact/signals";
 
-import { type ChordNumber } from "../harmony/scales";
 import { type Instrument } from "../instruments/types";
-import { activeChord, setActiveChord } from "../conductor/state";
+import { getChordByNumber } from "../conductor/state";
 import {
   CombinedStrumming,
   FullStrumming,
@@ -13,47 +12,31 @@ import {
   Strumming,
 } from "./strumming";
 import { registerInput, registerOutput } from "../storage";
+
 import { GuitarChord } from "./chords";
-
-/// Types ----------------------------------------------------------------------
-
-type Options = {
-  localChords: boolean;
-};
+import {
+  CHORDS,
+  CLOSER_CHORD_NOTES,
+  OPEN_CHORD_NOTE,
+  isDownNote,
+  isUpNote,
+} from "./controls";
+import { registerPlayer, setChordNumber } from "../conductor/players";
 
 /// Constant values ------------------------------------------------------------
 
-const OPEN_CHORD_NOTE = 47;
-
-const SPICY_THRESHOLD = 52;
-
-// This mapping is not final, but here just for testing the playback of all chords
-const CHORDS: Record<number, ChordNumber> = {
-  [OPEN_CHORD_NOTE]: "i",
-  48: "ii",
-  49: "iii",
-  50: "iv",
-  51: "v",
-  52: "vi",
-  53: "ii",
-  54: "iii",
-  55: "iv",
-  56: "v",
-  57: "vi",
-};
+const LABEL = "Guitar";
 
 /// State ----------------------------------------------------------------------
 
 const guitarIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
-const options = signal<Options>({
-  localChords: false,
-});
+const player = registerPlayer(LABEL, "LEAD");
 
 const spicy = signal<boolean>(false);
 
 const activeGuitarChord = signal<GuitarChord>({
-  chord: activeChord.peek(),
+  chord: getChordByNumber(player.peek().chordNumber),
   spicy: spicy.peek(),
 });
 
@@ -78,11 +61,11 @@ const noteSender: NoteSender = {
     const now = performance.now();
     const scheduledAt = delay ? now + delay : undefined;
     const existingIndex = playingNotes.findIndex(
-      (playing) => playing.pitch == pitch,
+      (playing) => playing.pitch === pitch,
     );
     // TODO: this doesn't mute notes before retriggering them.
     // Not sure if it's a problem though.
-    if (existingIndex == -1) {
+    if (existingIndex === -1) {
       playingNotes.push({ pitch, scheduledAt });
     } else {
       // Only keep latest scheduled note to not send multiple notes offs for same note.
@@ -138,10 +121,6 @@ let currentStrumming = STRUMMINGS[67];
 
 /// Private functions ----------------------------------------------------------
 
-const isDownNote = (note: Note) => note.number === 59;
-
-const isUpNote = (note: Note) => note.number === 58;
-
 const midiPanic = () => {
   notesOut.value?.sendAllNotesOff();
   notesOut.value?.sendAllSoundOff();
@@ -150,13 +129,13 @@ const midiPanic = () => {
 const maybeApplyChordChange = () => {
   const maxNote =
     notesDown.size != 0 ? Math.max(...notesDown) : OPEN_CHORD_NOTE;
-  if (maxNote == activeNote) {
+  if (maxNote === activeNote) {
     return;
   }
   activeNote = maxNote;
   batch(() => {
-    setActiveChord(CHORDS[maxNote]);
-    spicy.value = activeNote > SPICY_THRESHOLD;
+    setChordNumber(player, CHORDS[maxNote]);
+    spicy.value = CLOSER_CHORD_NOTES.has(activeNote);
   });
 };
 
@@ -197,7 +176,7 @@ const onNoteOn = ({ note }: { note: Note }) => {
 
 effect(() => {
   activeGuitarChord.value = {
-    chord: activeChord.value,
+    chord: getChordByNumber(player.value.chordNumber),
     spicy: spicy.value,
   };
 });
@@ -206,7 +185,7 @@ effect(() => {
   currentStrumming.handleChordChange(previousChord);
   previousChord = activeGuitarChord.value;
   if (performance.now() - lastStrumAt < 50) {
-    if (lastStrumDirection == "UP") {
+    if (lastStrumDirection === "UP") {
       currentStrumming.handleUp();
     } else {
       currentStrumming.handleDown();
@@ -241,17 +220,9 @@ export const outputs = {
   "Guitar track": notesOut,
 };
 
-export const setOptions = (newOptions: Options) => {
-  options.value = {
-    ...options.value,
-    ...newOptions,
-  };
-};
-
 export const guitar: Instrument = {
-  label: "Guitar",
+  label: LABEL,
   inputs,
   midiPanic,
   outputs,
-  setOptions,
 };

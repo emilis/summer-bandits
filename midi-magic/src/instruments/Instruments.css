@@ -1,5 +1,23 @@
-.com-instruments > .instrument-list {
+.com-instruments {
 
-  display:                  flex;
-  gap:                      1ch;
+  & > header {
+
+    align-items:            center;
+    display:                flex;
+    gap:                    1ch;
+
+    & > h2 {
+
+      margin:               0;
+    }
+    & > button {
+
+      height:               1.5rem;
+    }
+  }
+  & > .instrument-list {
+
+    display:                flex;
+    gap:                    1ch;
+  }
 }
