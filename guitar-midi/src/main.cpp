@@ -83,7 +83,7 @@ void updateSelector(uint8_t midiNoteStart, int& prevState) {
     state = map(state, 2300, 15000, 0, 100);
     state = round(state / 25.0);
     #else
-    state = digitalRead(PIN_SELECTOR);
+    state = analogRead(PIN_SELECTOR);
     #endif
     if (state == prevState) return;
 
