@@ -161,16 +161,19 @@ const onNoteOn = ({ note }: { note: Note }) => {
       return;
     case CROSS_NOTES.has(note.number):
       notesOut.value?.sendControlChange(
-        notes.number - FIRST_CROSS_NOTE + CROSS_CC_START,
-        (crossValues[notes.number] =
-          (crossValues[notes.number] + 1) % CROSS_VALUE_COUNT),
+        note.number - FIRST_CROSS_NOTE + CROSS_CC_START,
+        (crossValues[note.number] =
+          (crossValues[note.number] + 1) % CROSS_VALUE_COUNT),
       );
       return;
   }
 };
 
-const onWhammy = ({ rawValue }: { rawValue: number }) =>
-  notesOut.value?.sendControlChange(1, rawValue);
+const onWhammy = ({ rawValue }: { rawValue?: number }) => {
+  if (rawValue) {
+    notesOut.value?.sendControlChange(1, rawValue);
+  }
+};
 
 /// Effects --------------------------------------------------------------------
 
@@ -179,14 +182,14 @@ effect(() => {
   if (input) {
     input.addListener("noteoff", onNoteOff);
     input.addListener("noteon", onNoteOn);
-    input.addListener("controlchange-modulationwheelcoarse", onWhammy);
+    input.addListener("controlchange-controller1", onWhammy);
   }
 
   return () => {
     if (input) {
       input.removeListener("noteoff", onNoteOff);
       input.removeListener("noteon", onNoteOn);
-      input.removeListener("controlchange-modulationwheelcoarse");
+      input.removeListener("controlchange-controller1");
     }
   };
 });
