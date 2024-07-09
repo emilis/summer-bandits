@@ -1,4 +1,3 @@
-import { Note } from "webmidi";
 import { type ChordNumber } from "../harmony/scales";
 
 export const OPEN_CHORD_NOTE = 47;
@@ -28,6 +27,3 @@ export const SET_FREE_PLAY_NOTE = 66;
 export type STRUMMINGS_NOTE = 67 | 68 | 69 | 70 | 71;
 
 export const WHAMMY_CC = 1;
-
-export const isDownNote = (note: Note) => note.number === DOWN_NOTE;
-export const isUpNote = (note: Note) => note.number === UP_NOTE;

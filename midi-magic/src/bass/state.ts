@@ -11,10 +11,13 @@ import {
   SET_FREE_PLAY_NOTE,
   TOGGLE_LEADER_NOTE,
   UP_NOTE,
-  isDownNote,
-  isUpNote,
 } from "../guitar/controls";
-import { registerPlayer, setChordNumber, setFreePlay, toggleLeadership } from "../conductor/players";
+import {
+  registerPlayer,
+  setChordNumber,
+  setFreePlay,
+  toggleLeadership,
+} from "../conductor/players";
 
 import { NoteSender, PickedStrumming, Strumming } from "./strumming";
 

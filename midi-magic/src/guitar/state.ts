@@ -23,7 +23,12 @@ import {
   TOGGLE_LEADER_NOTE,
   UP_NOTE,
 } from "./controls";
-import { registerPlayer, setChordNumber, setFreePlay, toggleLeadership } from "../conductor/players";
+import {
+  registerPlayer,
+  setChordNumber,
+  setFreePlay,
+  toggleLeadership,
+} from "../conductor/players";
 
 /// Constant values ------------------------------------------------------------
 
