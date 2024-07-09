@@ -10,7 +10,7 @@ ADS1115 ADS(0x48);
 #endif
 
 const long PING_INTERVAL = 1000; 
-const unsigned long DEBOUNCE_MILLIS = 50;
+const unsigned long DEBOUNCE_MILLIS = 30;
 
 DeviceType device = 
     #ifdef DEVICE
@@ -94,11 +94,14 @@ void updateSelector(uint8_t midiNoteStart, int& prevState) {
 }
 
 void setupPins() {
+    //TODO: remove this condition when guitar is mapped
+    #if DEVICE == BASS
     pinMode(PIN_GREEN, INPUT_PULLUP);
     pinMode(PIN_RED, INPUT_PULLUP);
     pinMode(PIN_YELLOW, INPUT_PULLUP);
     pinMode(PIN_BLUE, INPUT_PULLUP);
     pinMode(PIN_ORANGE, INPUT_PULLUP);
+    #endif
     pinMode(PIN_GREEN_HIGH, INPUT_PULLUP);
     pinMode(PIN_RED_HIGH, INPUT_PULLUP);
     pinMode(PIN_YELLOW_HIGH, INPUT_PULLUP);
@@ -107,7 +110,9 @@ void setupPins() {
     pinMode(PIN_UP, INPUT_PULLUP);
     pinMode(PIN_DOWN, INPUT_PULLUP);
 
+    #if USE_BLUE_LED == true
     pinMode(BLUE_LED_PIN, OUTPUT);
+    #endif
 
     #if USE_ADS == true
     Wire.begin();
@@ -151,11 +156,14 @@ void loop() {
         sendEspNowPing();
     }
     
+    //TODO: remove this condition when guitar is mapped
+    #if DEVICE == BASS
     updateButton(PIN_GREEN,       48, pinState[0], debounceState[0], now);
     updateButton(PIN_RED,         49, pinState[1], debounceState[1], now);
     updateButton(PIN_YELLOW,      50, pinState[2], debounceState[2], now);
     updateButton(PIN_BLUE,        51, pinState[3], debounceState[3], now);
     updateButton(PIN_ORANGE,      52, pinState[4], debounceState[4], now);  
+    #endif
     updateButton(PIN_GREEN_HIGH,  53, pinState[5], debounceState[5], now);
     updateButton(PIN_RED_HIGH,    54, pinState[6], debounceState[6], now);
     updateButton(PIN_YELLOW_HIGH, 55, pinState[7], debounceState[7], now);
