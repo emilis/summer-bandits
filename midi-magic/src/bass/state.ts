@@ -47,7 +47,7 @@ type PlayingNote = {
 
 const playingNotes: PlayingNote[] = [];
 
-const crossValues: Record<number,number> = {
+const crossValues: Record<number, number> = {
   60: 0,
   61: 0,
   62: 0,
@@ -162,7 +162,8 @@ const onNoteOn = ({ note }: { note: Note }) => {
     case CROSS_NOTES.has(note.number):
       notesOut.value?.sendControlChange(
         notes.number - FIRST_CROSS_NOTE + CROSS_CC_START,
-        crossValues[notes.number] = (crossValues[notes.number] + 1) % CROSS_VALUE_COUNT,
+        (crossValues[notes.number] =
+          (crossValues[notes.number] + 1) % CROSS_VALUE_COUNT),
       );
       return;
   }
@@ -185,7 +186,7 @@ effect(() => {
     if (input) {
       input.removeListener("noteoff", onNoteOff);
       input.removeListener("noteon", onNoteOn);
-      input.removeListener("controlchange-modulationwheelcoarse")
+      input.removeListener("controlchange-modulationwheelcoarse");
     }
   };
 });
