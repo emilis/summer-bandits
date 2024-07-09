@@ -17,11 +17,13 @@ import { GuitarChord } from "./chords";
 import {
   CHORDS,
   CLOSER_CHORD_NOTES,
+  DOWN_NOTE,
   OPEN_CHORD_NOTE,
-  isDownNote,
-  isUpNote,
+  SET_FREE_PLAY_NOTE,
+  TOGGLE_LEADER_NOTE,
+  UP_NOTE,
 } from "./controls";
-import { registerPlayer, setChordNumber } from "../conductor/players";
+import { registerPlayer, setChordNumber, setFreePlay, toggleLeadership } from "../conductor/players";
 
 /// Constant values ------------------------------------------------------------
 
@@ -152,12 +154,12 @@ const onNoteOff = ({ note }: { note: Note }) => {
 const onNoteOn = ({ note }: { note: Note }) => {
   console.debug("guitar onNoteOn", note);
   switch (true) {
-    case isDownNote(note):
+    case note.number === DOWN_NOTE:
       currentStrumming.handleDown();
       lastStrumDirection = "DOWN";
       lastStrumAt = performance.now();
       return;
-    case isUpNote(note):
+    case note.number === UP_NOTE:
       currentStrumming.handleUp();
       lastStrumDirection = "UP";
       lastStrumAt = performance.now();
@@ -168,6 +170,12 @@ const onNoteOn = ({ note }: { note: Note }) => {
       return;
     case note.number in STRUMMINGS:
       currentStrumming = STRUMMINGS[note.number];
+      return;
+    case note.number === TOGGLE_LEADER_NOTE:
+      toggleLeadership(player);
+      return;
+    case note.number === SET_FREE_PLAY_NOTE:
+      setFreePlay(player);
       return;
   }
 };

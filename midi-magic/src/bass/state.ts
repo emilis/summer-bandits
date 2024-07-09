@@ -6,11 +6,15 @@ import { getChordByNumber } from "../conductor/state";
 import { registerInput, registerOutput } from "../storage";
 import {
   CHORDS,
+  DOWN_NOTE,
   OPEN_CHORD_NOTE,
+  SET_FREE_PLAY_NOTE,
+  TOGGLE_LEADER_NOTE,
+  UP_NOTE,
   isDownNote,
   isUpNote,
 } from "../guitar/controls";
-import { registerPlayer, setChordNumber } from "../conductor/players";
+import { registerPlayer, setChordNumber, setFreePlay, toggleLeadership } from "../conductor/players";
 
 import { NoteSender, PickedStrumming, Strumming } from "./strumming";
 
@@ -122,10 +126,10 @@ const onNoteOff = ({ note }: { note: Note }) => {
 const onNoteOn = ({ note }: { note: Note }) => {
   console.debug("bass onNoteOn", note);
   switch (true) {
-    case isDownNote(note):
+    case note.number === DOWN_NOTE:
       currentStrumming.handleDown();
       return;
-    case isUpNote(note):
+    case note.number === UP_NOTE:
       currentStrumming.handleUp();
       return;
     case note.number in CHORDS:
@@ -134,6 +138,12 @@ const onNoteOn = ({ note }: { note: Note }) => {
       return;
     case note.number in STRUMMINGS:
       currentStrumming = STRUMMINGS[note.number];
+      return;
+    case note.number === TOGGLE_LEADER_NOTE:
+      toggleLeadership(player);
+      return;
+    case note.number === SET_FREE_PLAY_NOTE:
+      setFreePlay(player);
       return;
   }
 };
