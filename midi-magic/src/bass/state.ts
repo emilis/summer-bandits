@@ -6,7 +6,9 @@ import { getChordByNumber } from "../conductor/state";
 import { registerInput, registerOutput } from "../storage";
 import {
   CHORDS,
+  CROSS_NOTES,
   DOWN_NOTE,
+  FIRST_CROSS_NOTE,
   OPEN_CHORD_NOTE,
   SET_FREE_PLAY_NOTE,
   TOGGLE_LEADER_NOTE,
@@ -23,6 +25,8 @@ import { NoteSender, PickedStrumming, Strumming } from "./strumming";
 
 /// Constant values ------------------------------------------------------------
 
+const CROSS_CC_START = 80;
+const CROSS_VALUE_COUNT = 4;
 const LABEL = "Bass";
 
 /// State ----------------------------------------------------------------------
@@ -42,6 +46,13 @@ type PlayingNote = {
 };
 
 const playingNotes: PlayingNote[] = [];
+
+const crossValues: Record<number,number> = {
+  60: 0,
+  61: 0,
+  62: 0,
+  63: 0,
+};
 
 const noteSender: NoteSender = {
   playNote: (note) => {
@@ -148,8 +159,17 @@ const onNoteOn = ({ note }: { note: Note }) => {
     case note.number === SET_FREE_PLAY_NOTE:
       setFreePlay(player);
       return;
+    case CROSS_NOTES.has(note.number):
+      notesOut.value?.sendControlChange(
+        notes.number - FIRST_CROSS_NOTE + CROSS_CC_START,
+        crossValues[notes.number] = (crossValues[notes.number] + 1) % CROSS_VALUE_COUNT,
+      );
+      return;
   }
 };
+
+const onWhammy = ({ rawValue }: { rawValue: number }) =>
+  notesOut.value?.sendControlChange(1, rawValue);
 
 /// Effects --------------------------------------------------------------------
 
@@ -158,12 +178,14 @@ effect(() => {
   if (input) {
     input.addListener("noteoff", onNoteOff);
     input.addListener("noteon", onNoteOn);
+    input.addListener("controlchange-modulationwheelcoarse", onWhammy);
   }
 
   return () => {
     if (input) {
       input.removeListener("noteoff", onNoteOff);
       input.removeListener("noteon", onNoteOn);
+      input.removeListener("controlchange-modulationwheelcoarse")
     }
   };
 });

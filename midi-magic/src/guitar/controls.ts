@@ -22,6 +22,7 @@ export const UP_NOTE = 58;
 export const DOWN_NOTE = 59;
 export type CROSS_NOTE = 60 | 61 | 62 | 63;
 export const CROSS_NOTES = new Set<number>([60, 61, 62, 63]);
+export const FIRST_CROSS_NOTE = 60;
 export const TOGGLE_LEADER_NOTE = 65;
 export const SET_FREE_PLAY_NOTE = 66;
 export type STRUMMINGS_NOTE = 67 | 68 | 69 | 70 | 71;
