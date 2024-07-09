@@ -25,7 +25,7 @@ import { NoteSender, PickedStrumming, Strumming } from "./strumming";
 
 /// Constant values ------------------------------------------------------------
 
-const CROSS_CC_START = 80;
+const CROSS_CC_START = 20;
 const CROSS_VALUE_COUNT = 4;
 const LABEL = "Bass";
 
@@ -180,16 +180,16 @@ const onWhammy = ({ rawValue }: { rawValue?: number }) => {
 effect(() => {
   const input = bassIn.value;
   if (input) {
+    input.addListener("controlchange-controller1", onWhammy);
     input.addListener("noteoff", onNoteOff);
     input.addListener("noteon", onNoteOn);
-    input.addListener("controlchange-controller1", onWhammy);
   }
 
   return () => {
     if (input) {
+      input.removeListener("controlchange-controller1", onWhammy);
       input.removeListener("noteoff", onNoteOff);
       input.removeListener("noteon", onNoteOn);
-      input.removeListener("controlchange-controller1");
     }
   };
 });
