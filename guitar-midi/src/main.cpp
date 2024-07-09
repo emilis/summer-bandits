@@ -172,4 +172,17 @@ void loop() {
     updateButton(PIN_UP,          59, pinState[11],  *strumDebounce,    now); 
 
     updateSelector(67, pinState[12]);
+
+    /**
+     * Missing controls:
+     *
+     * TOGGLE_LEADER_BUTTON       65
+     * SET_FREE_PLAY_BUTTON       66
+     * CROSS_UP                   60
+     * CROSS_RIGHT                61
+     * CROSS_DOWN                 62
+     * CROSS_LEFT                 63
+     *
+     * Whammy bar:                CC 1
+     */
 }

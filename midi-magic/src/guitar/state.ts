@@ -17,14 +17,25 @@ import { GuitarChord } from "./chords";
 import {
   CHORDS,
   CLOSER_CHORD_NOTES,
+  CROSS_NOTES,
+  DOWN_NOTE,
+  FIRST_CROSS_NOTE,
   OPEN_CHORD_NOTE,
-  isDownNote,
-  isUpNote,
+  SET_FREE_PLAY_NOTE,
+  TOGGLE_LEADER_NOTE,
+  UP_NOTE,
 } from "./controls";
-import { registerPlayer, setChordNumber } from "../conductor/players";
+import {
+  registerPlayer,
+  setChordNumber,
+  setFreePlay,
+  toggleLeadership,
+} from "../conductor/players";
 
 /// Constant values ------------------------------------------------------------
 
+const CROSS_CC_START = 80;
+const CROSS_VALUE_COUNT = 4;
 const LABEL = "Guitar";
 
 /// State ----------------------------------------------------------------------
@@ -54,6 +65,13 @@ type PlayingNote = {
 };
 
 const playingNotes: PlayingNote[] = [];
+
+const crossValues: Record<number, number> = {
+  60: 0,
+  61: 0,
+  62: 0,
+  63: 0,
+};
 
 const noteSender: NoteSender = {
   playNote: (note) => {
@@ -152,12 +170,12 @@ const onNoteOff = ({ note }: { note: Note }) => {
 const onNoteOn = ({ note }: { note: Note }) => {
   console.debug("guitar onNoteOn", note);
   switch (true) {
-    case isDownNote(note):
+    case note.number === DOWN_NOTE:
       currentStrumming.handleDown();
       lastStrumDirection = "DOWN";
       lastStrumAt = performance.now();
       return;
-    case isUpNote(note):
+    case note.number === UP_NOTE:
       currentStrumming.handleUp();
       lastStrumDirection = "UP";
       lastStrumAt = performance.now();
@@ -169,6 +187,25 @@ const onNoteOn = ({ note }: { note: Note }) => {
     case note.number in STRUMMINGS:
       currentStrumming = STRUMMINGS[note.number];
       return;
+    case note.number === TOGGLE_LEADER_NOTE:
+      toggleLeadership(player);
+      return;
+    case note.number === SET_FREE_PLAY_NOTE:
+      setFreePlay(player);
+      return;
+    case CROSS_NOTES.has(note.number):
+      notesOut.value?.sendControlChange(
+        note.number - FIRST_CROSS_NOTE + CROSS_CC_START,
+        (crossValues[note.number] =
+          (crossValues[note.number] + 1) % CROSS_VALUE_COUNT),
+      );
+      return;
+  }
+};
+
+const onWhammy = ({ rawValue }: { rawValue?: number }) => {
+  if (rawValue) {
+    notesOut.value?.sendControlChange(1, rawValue);
   }
 };
 
@@ -198,12 +235,14 @@ effect(() => {
   if (input) {
     input.addListener("noteoff", onNoteOff);
     input.addListener("noteon", onNoteOn);
+    input.addListener("controlchange-controller1", onWhammy);
   }
 
   return () => {
     if (input) {
       input.removeListener("noteoff", onNoteOff);
       input.removeListener("noteon", onNoteOn);
+      input.removeListener("controlchange-controller1");
     }
   };
 });
