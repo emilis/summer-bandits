@@ -77,18 +77,20 @@ void updateButton(int buttonPin, uint8_t midiNote, int& prevState, unsigned long
 }
 
 void updateSelector(uint8_t midiNoteStart, int& prevState) {
-    int16_t state;
+    int16_t pitch;
     #if USE_ADS == true
-    state = ADS.readADC(2);
+    int16_t state = ADS.readADC(2);
     state = map(state, 2300, 15000, 0, 100);
     state = round(state / 25.0);
+    pitch = midiNoteStart + state;
     #else
-    state = analogRead(PIN_SELECTOR);
+    int16_t state = analogRead(PIN_SELECTOR);
+    pitch = state;
     #endif
     if (state == prevState) return;
 
     prevState = state;
-    noteOn(midiNoteStart + state, 127);
+    noteOn(pitch, 127);
 }
 
 void setupPins() {
