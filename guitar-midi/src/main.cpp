@@ -1,24 +1,13 @@
-#include "ADS1X15.h"
+#include <unordered_map>
 #include <WiFi.h>
 #include <esp_now.h>
 #include "esp_wifi.h"
 #include "midi_common.h"
 
-const int PIN_GREEN = 33;
-const int PIN_RED = 27;
-const int PIN_YELLOW = 26;
-const int PIN_BLUE = 18;
-const int PIN_ORANGE = 19;
-
-const int PIN_GREEN_HIGH = 2;
-const int PIN_RED_HIGH = 0;
-const int PIN_YELLOW_HIGH = 4;
-const int PIN_BLUE_HIGH = 16;
-const int PIN_ORANGE_HIGH = 32;
-
-const int PIN_UP = 23;
-const int PIN_DOWN = 5;
-const int PIN_SELECTOR = 19;
+#if USE_ADS == true
+#include "ADS1X15.h"
+ADS1115 ADS(0x48);
+#endif
 
 const long PING_INTERVAL = 1000; 
 const unsigned long DEBOUNCE_MILLIS = 50;
@@ -38,11 +27,10 @@ DeviceType device =
 const int MIDI_CHANNEL = getChannel(device);
 const controller_message PING_MESSAGE = {device, Mode::PING, 0, 0};
 
-ADS1115 ADS(0x48);
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; //Broadcast to all
 unsigned long previousMillis = 0;
-int pinState[64] = {0};
-unsigned long debounceState[64] = {0};
+std::unordered_map<int, int> pinState;
+std::unordered_map<int, unsigned long> debounceState;
 
 void sendEspNowPing() {
     esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &PING_MESSAGE, sizeof(PING_MESSAGE));
@@ -89,13 +77,18 @@ void updateButton(int buttonPin, uint8_t midiNote, int& prevState, unsigned long
 }
 
 void updateSelector(uint8_t midiNoteStart, int& prevState) {
-  int16_t state = ADS.readADC(2);
-  state = map(state, 2300, 15000, 0, 100);
-  state = round(state / 25.0);
-  if (state == prevState) return;
-  
-  prevState = state;
-  noteOn(midiNoteStart + state, 127);
+    int16_t state;
+    #if USE_ADS == true
+    state = ADS.readADC(2);
+    state = map(state, 2300, 15000, 0, 100);
+    state = round(state / 25.0);
+    #else
+    state = digitalRead(PIN_SELECTOR);
+    #endif
+    if (state == prevState) return;
+
+    prevState = state;
+    noteOn(midiNoteStart + state, 127);
 }
 
 void setupPins() {
@@ -114,8 +107,10 @@ void setupPins() {
 
     pinMode(BLUE_LED_PIN, OUTPUT);
 
+    #if USE_ADS == true
     Wire.begin();
     ADS.begin();
+    #endif
 }
 
 void setup() {
