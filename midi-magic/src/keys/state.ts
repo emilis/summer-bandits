@@ -99,6 +99,23 @@ const showSpiceLevelUi = (level: number) => {
 
 /// Note On handlers -----------------------------------------------------------
 
+const onChannelAftertouch = ({ value }: { value?: number | boolean }) => {
+  if (typeof value === "number") {
+    notesOut.value?.sendChannelAftertouch(value);
+  }
+};
+const onControlChange = ({
+  controller: { number },
+  rawValue,
+}: {
+  controller: { number: number };
+  rawValue?: number;
+}) => {
+  if (typeof rawValue === "number") {
+    notesOut.value?.sendControlChange(number, rawValue);
+  }
+};
+
 const onLpNoteOn: NoteEventHandler = ({ note: { number } }) => {
   /// console.debug("keyboard onLpNoteOn", note.number);
 
@@ -153,6 +170,12 @@ const onNoteOn: NoteEventHandler = ({ note }) => {
   notesOut.value?.sendNoteOn(midiNote, note);
 };
 
+const onPitchBend = ({ value }: { value?: number | boolean }) => {
+  if (typeof value === "number") {
+    notesOut.value?.sendPitchBend(value);
+  }
+};
+
 /// Effects --------------------------------------------------------------------
 
 effect(() => {
@@ -185,14 +208,20 @@ effect(() => {
 
   if (notesInput) {
     console.log(LABEL, "effect notesInput truthy");
+    notesInput.addListener("channelaftertouch", onChannelAftertouch);
+    notesInput.addListener("controlchange", onControlChange);
     notesInput.addListener("noteoff", onNoteOff);
     notesInput.addListener("noteon", onNoteOn);
+    notesInput.addListener("pitchbend", onPitchBend);
   }
 
   return () => {
     if (notesInput) {
+      notesInput.removeListener("channelaftertouch", onChannelAftertouch);
+      notesInput.removeListener("controlchange", onControlChange);
       notesInput.removeListener("noteoff", onNoteOff);
       notesInput.removeListener("noteon", onNoteOn);
+      notesInput.removeListener("pitchbend", onPitchBend);
     }
   };
 });
