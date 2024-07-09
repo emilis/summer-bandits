@@ -66,10 +66,6 @@ export const getClosestChordNote = (
   return note;
 };
 
-export const setActiveChord = (chord: ChordNumber) => {
-  activeChordNumber.value = chord;
-};
-
 /// Effects --------------------------------------------------------------------
 
 registerValue(
