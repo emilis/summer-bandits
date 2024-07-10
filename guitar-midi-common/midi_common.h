@@ -15,7 +15,8 @@ enum DeviceType {
 
 enum Mode {
   PING,
-  DATA,
+  NOTE,
+  PITCH,
 };
 
 typedef struct controller_message {
@@ -28,5 +29,6 @@ typedef struct controller_message {
 int getChannel(DeviceType device);
 void serialNoteOn(int channel, uint8_t pitch, uint8_t velocity);
 void serialNoteOff(int channel, uint8_t pitch);
+void serialPitchBend(int channel, int bendValue);
 
 #endif

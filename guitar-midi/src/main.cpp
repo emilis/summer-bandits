@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include <esp_now.h>
 #include "esp_wifi.h"
+#include <cstring> 
 #include "midi_common.h"
 
 #if USE_ADS == true
@@ -11,19 +12,15 @@ ADS1115 ADS(0x48);
 
 const long PING_INTERVAL = 1000; 
 const unsigned long DEBOUNCE_MILLIS = 30;
+const unsigned long WHAMMY_DEBOUNCE_MILLIS = 10;
 
-DeviceType device = 
-    #ifdef DEVICE
-        #if DEVICE == GUITAR
-            DeviceType::GUITAR;
-        #elif DEVICE == BASS
-            DeviceType::BASS;
-        #else
-            #error "Unknown DEVICE. Please set it to either GUITAR or BASS in platformio.ini."
-        #endif
-    #else
-        #error "DEVICE is not defined. Please define it in platformio.ini."
-    #endif
+constexpr DeviceType getDeviceType(const char* deviceType) {
+    return (strcmp(deviceType, "GUITAR") == 0) ? DeviceType::GUITAR :
+           (strcmp(deviceType, "BASS") == 0) ? DeviceType::BASS :
+           static_cast<DeviceType>(-1); // Invalid value
+}
+
+DeviceType device = getDeviceType(DEVICE);
 const int MIDI_CHANNEL = getChannel(device);
 const controller_message PING_MESSAGE = {device, Mode::PING, 0, 0};
 
@@ -32,31 +29,37 @@ unsigned long previousMillis = 0;
 std::unordered_map<int, int> pinState;
 std::unordered_map<int, unsigned long> debounceState;
 
-void sendEspNowPing() {
-    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &PING_MESSAGE, sizeof(PING_MESSAGE));
+void sendEspNowMessage(const controller_message& message) {
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &message, sizeof(message));
     if (result != ESP_OK) {
-        Serial.println("Error pinging");
+        Serial.println("Error sending message");
         Serial.println(result);
     }
 }
 
-void sendEspNowMidi(uint8_t pitch, uint8_t velocity) {
-    controller_message data = {device, Mode::DATA, pitch, velocity};
-    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &data, sizeof(data));
-    if (result != ESP_OK) {
-        Serial.println("Error sending MIDI message");
-        Serial.println(result);
-    }
+void sendEspNowNote(uint8_t pitch, uint8_t velocity) {
+    controller_message data = {device, Mode::NOTE, pitch, velocity};
+    sendEspNowMessage(data);
+}
+
+void sendEspNowPitch(uint8_t pitch) {
+    controller_message data = {device, Mode::PITCH, pitch, 0};
+    sendEspNowMessage(data);
 }
 
 void noteOn(uint8_t pitch, uint8_t velocity) {
     serialNoteOn(MIDI_CHANNEL, pitch, velocity);
-    sendEspNowMidi(pitch, velocity);
+    sendEspNowNote(pitch, velocity);
 }
 
 void noteOff(uint8_t pitch) {
     serialNoteOff(MIDI_CHANNEL, pitch);
-    sendEspNowMidi(pitch, 0);
+    sendEspNowNote(pitch, 0);
+}
+
+void whammyDown(uint8_t bendValue) {
+    serialPitchBend(MIDI_CHANNEL, bendValue);
+    sendEspNowPitch(bendValue);
 }
 
 void updateButton(int buttonPin, uint8_t midiNote, int& prevState, unsigned long& debounceStartedAt, unsigned long now) {
@@ -77,31 +80,49 @@ void updateButton(int buttonPin, uint8_t midiNote, int& prevState, unsigned long
 }
 
 void updateSelector(uint8_t midiNoteStart, int& prevState) {
-    int16_t pitch;
+    int state;
     #if USE_ADS == true
-    int16_t state = ADS.readADC(2);
-    state = map(state, 2300, 15000, 0, 100);
-    state = round(state / 25.0);
-    pitch = midiNoteStart + state;
+    state = ADS.readADC(2);
+    state = map(state, 2300, 15000, 0, 100);              
     #else
-    int16_t state = analogRead(PIN_SELECTOR);
-    pitch = state;
+    state = analogRead(PIN_SELECTOR);
+    state = map(state, 1200, 8191, 0, 100);
     #endif
+    state = round(state / 25.0);
+
     if (state == prevState) return;
 
     prevState = state;
-    noteOn(pitch, 127);
+    noteOn(midiNoteStart + state, 127);
+}
+
+void updateWhammyBar(int& prevState, unsigned long& debounceStartedAt, unsigned long now) {
+    if (now - debounceStartedAt < WHAMMY_DEBOUNCE_MILLIS) return;
+
+    //8192 -> 0 pitching down where 8192 is neutral and 0 is max pitch down in MIDI protocol
+    int state;
+    #if USE_ADS == true
+    state = ADS.readADC(3);
+    state = map(state, 1680, 8191, 8192, 0);  //min 1480 but added 200 dead zonefor safety              
+    #else
+    state = analogRead(PIN_WAMMY_BAR);
+    state = map(state, 1680, 8191, 8192, 0); //min 1480 but added 200 dead zone for safety 
+    #endif
+
+    if (state == prevState) return;
+
+    prevState = state;
+    debounceStartedAt = now;
+
+    whammyDown(state);
 }
 
 void setupPins() {
-    //TODO: remove this condition when guitar is mapped
-    #if DEVICE == BASS
     pinMode(PIN_GREEN, INPUT_PULLUP);
     pinMode(PIN_RED, INPUT_PULLUP);
     pinMode(PIN_YELLOW, INPUT_PULLUP);
     pinMode(PIN_BLUE, INPUT_PULLUP);
     pinMode(PIN_ORANGE, INPUT_PULLUP);
-    #endif
     pinMode(PIN_GREEN_HIGH, INPUT_PULLUP);
     pinMode(PIN_RED_HIGH, INPUT_PULLUP);
     pinMode(PIN_YELLOW_HIGH, INPUT_PULLUP);
@@ -109,6 +130,15 @@ void setupPins() {
     pinMode(PIN_ORANGE_HIGH, INPUT_PULLUP);
     pinMode(PIN_UP, INPUT_PULLUP);
     pinMode(PIN_DOWN, INPUT_PULLUP);
+    //Enabled only for guitar (for now)
+    #if USE_ADS == false
+    pinMode(PIN_CROSS_UP, INPUT_PULLUP);
+    pinMode(PIN_CROSS_RIGHT, INPUT_PULLUP);
+    pinMode(PIN_CROSS_DOWN, INPUT_PULLUP);
+    pinMode(PIN_CROSS_LEFT, INPUT_PULLUP);
+    pinMode(PIN_MENU, INPUT_PULLUP);
+    pinMode(PIN_VIEW, INPUT_PULLUP);
+    #endif
 
     #if USE_BLUE_LED == true
     pinMode(BLUE_LED_PIN, OUTPUT);
@@ -153,17 +183,14 @@ void loop() {
     auto now = millis();
     if (now - previousMillis >= PING_INTERVAL) {
         previousMillis = now;
-        sendEspNowPing();
+        sendEspNowMessage(PING_MESSAGE);
     }
     
-    //TODO: remove this condition when guitar is mapped
-    #if DEVICE == BASS
     updateButton(PIN_GREEN,       48, pinState[0], debounceState[0], now);
     updateButton(PIN_RED,         49, pinState[1], debounceState[1], now);
     updateButton(PIN_YELLOW,      50, pinState[2], debounceState[2], now);
     updateButton(PIN_BLUE,        51, pinState[3], debounceState[3], now);
     updateButton(PIN_ORANGE,      52, pinState[4], debounceState[4], now);  
-    #endif
     updateButton(PIN_GREEN_HIGH,  53, pinState[5], debounceState[5], now);
     updateButton(PIN_RED_HIGH,    54, pinState[6], debounceState[6], now);
     updateButton(PIN_YELLOW_HIGH, 55, pinState[7], debounceState[7], now);
@@ -176,18 +203,16 @@ void loop() {
     updateButton(PIN_DOWN,        58, pinState[10],  *strumDebounce,    now);
     updateButton(PIN_UP,          59, pinState[11],  *strumDebounce,    now); 
 
-    updateSelector(67, pinState[12]);
+    //Enabled only for guitar (for now)
+    #if USE_ADS == false
+    updateButton(PIN_CROSS_UP,    60, pinState[12], debounceState[11], now);  
+    updateButton(PIN_CROSS_RIGHT, 61, pinState[13], debounceState[12], now);
+    updateButton(PIN_CROSS_DOWN,  62, pinState[14], debounceState[13], now);
+    updateButton(PIN_CROSS_LEFT,  63, pinState[15], debounceState[14], now);
+    updateButton(PIN_MENU,        65, pinState[16], debounceState[15], now); //Leader button
+    updateButton(PIN_VIEW,        66, pinState[17], debounceState[16], now); //Set free play button
+    #endif
 
-    /**
-     * Missing controls:
-     *
-     * TOGGLE_LEADER_BUTTON       65
-     * SET_FREE_PLAY_BUTTON       66
-     * CROSS_UP                   60
-     * CROSS_RIGHT                61
-     * CROSS_DOWN                 62
-     * CROSS_LEFT                 63
-     *
-     * Whammy bar:                CC 1
-     */
+    updateSelector(67, pinState[18]);
+    updateWhammyBar(pinState[19], debounceState[17], now);
 }
