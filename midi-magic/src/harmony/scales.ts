@@ -2,11 +2,12 @@ export type NoteNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
 export type Chord = {
   flavour: Flavour;
+  label?: string;
   notes: NoteNumber[];
   levels: NoteNumber[][];
 };
 export type ChordNumber = "i" | "ii" | "iii" | "iv" | "v" | "vi" | "vii";
-export type Flavour = "maj" | "min" | "dim" | "aug";
+export type Flavour = "maj" | "min" | "dim" | "aug" | "unknown";
 
 export type ScaleChords = Record<ChordNumber, Chord>;
 export type Scale = {
@@ -27,6 +28,12 @@ export const CHORD_NUMBERS: ChordNumber[] = [
   "vi",
   "vii",
 ];
+const CHORD_SUFFIXES: Record<Flavour, string> = {
+  maj: "",
+  min: "m",
+  dim: "dim",
+  aug: "aug",
+};
 
 export const NOTE_NAMES = [
   "C",
@@ -301,6 +308,7 @@ export const createScale = (
         chordNum,
         {
           flavour: chord.flavour,
+          label: `${ NOTE_NAMES[chord.notes[0]] }${ CHORD_SUFFIXES[chord.flavour] || "" }`,
           notes: chord.notes.map(getRootedNote(rootNote)),
           levels: chord.levels.map((level) =>
             level.map(getRootedNote(rootNote)),

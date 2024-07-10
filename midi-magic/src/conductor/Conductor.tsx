@@ -1,10 +1,8 @@
 import {
   type ChordNumber,
-  type Flavour,
   type NoteNumber,
   type ScaleType,
   createScale,
-  NOTE_NAMES,
 } from "../harmony/scales";
 import { ChordSelector } from '../chord-selector/ChordSelector';
 
@@ -12,13 +10,6 @@ import { activeScale } from './state';
 import { ConductorPlayerRow } from "./PlayerRow";
 import { players } from "./players";
 import "./Conductor.css";
-
-const CHORD_SUFFIXES: Record<Flavour, string> = {
-  maj: "",
-  min: "m",
-  dim: "dim",
-  aug: "aug",
-};
 
 const onSelectChords = () => {
 
@@ -45,12 +36,9 @@ export function Conductor() {
             { chordNumbers.map(number => <th key={number}>{number}</th> )}
           </tr>
           <tr className="names">
-            <th />
+            <th>{ activeScale.value.label }</th>
             { Object.values(activeScale.value.chords).map(( chord, i ) =>
-              <th key={i}>
-                {NOTE_NAMES[chord.notes[0]]}
-                {CHORD_SUFFIXES[chord.flavour]}
-              </th>
+              <th key={i}>{chord.label}</th>
             )}
           </tr>
         </thead>
