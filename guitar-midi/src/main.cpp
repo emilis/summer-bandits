@@ -62,6 +62,11 @@ void whammyDown(uint8_t bendValue) {
     sendEspNowPitch(bendValue);
 }
 
+void whammyMod(uint8_t bendValue) {
+    serialMod(MIDI_CHANNEL, bendValue);
+    sendEspNowPitch(bendValue);
+}
+
 void updateButton(int buttonPin, uint8_t midiNote, int& prevState, unsigned long& debounceStartedAt, unsigned long now) {
   if (now - debounceStartedAt < DEBOUNCE_MILLIS) return;
 
@@ -96,7 +101,7 @@ void updateSelector(uint8_t midiNoteStart, int& prevState) {
     noteOn(midiNoteStart + state, 127);
 }
 
-void updateWhammyBar(int& prevState, unsigned long& debounceStartedAt, unsigned long now) {
+void updateWhammyPitchDown(int& prevState, unsigned long& debounceStartedAt, unsigned long now) {
     if (now - debounceStartedAt < WHAMMY_DEBOUNCE_MILLIS) return;
 
     //8192 -> 0 pitching down where 8192 is neutral and 0 is max pitch down in MIDI protocol
@@ -115,6 +120,26 @@ void updateWhammyBar(int& prevState, unsigned long& debounceStartedAt, unsigned 
     debounceStartedAt = now;
 
     whammyDown(state);
+}
+
+void updateWhammyMod(int& prevState, unsigned long& debounceStartedAt, unsigned long now) {
+    if (now - debounceStartedAt < WHAMMY_DEBOUNCE_MILLIS) return;
+
+    int state;
+    #if USE_ADS == true
+    state = ADS.readADC(3);
+    state = map(state, 1680, 8191, 0, 127);  //min 1480 but added 200 dead zonefor safety              
+    #else
+    state = analogRead(PIN_WAMMY_BAR);
+    state = map(state, 1680, 8191, 0, 127); //min 1480 but added 200 dead zone for safety 
+    #endif
+
+    if (state == prevState) return;
+
+    prevState = state;
+    debounceStartedAt = now;
+
+    whammyMod(state);
 }
 
 void setupPins() {
@@ -200,8 +225,8 @@ void loop() {
     // When strumming with a particular pattern, the button flies back and opens 
     // the other switch, which is not something we want.
     unsigned long* strumDebounce = &(debounceState[10]);
-    updateButton(PIN_DOWN,        58, pinState[10],  *strumDebounce,    now);
-    updateButton(PIN_UP,          59, pinState[11],  *strumDebounce,    now); 
+    updateButton(PIN_DOWN,        58, pinState[10], *strumDebounce, now);
+    updateButton(PIN_UP,          59, pinState[11], *strumDebounce, now); 
 
     //Enabled only for guitar (for now)
     #if USE_ADS == false
@@ -214,5 +239,9 @@ void loop() {
     #endif
 
     updateSelector(67, pinState[18]);
-    updateWhammyBar(pinState[19], debounceState[17], now);
+    if (WHAMMY_BAR_IS_MOD) {
+        updateWhammyMod(pinState[19], debounceState[17], now);
+    } else {
+        updateWhammyPitchDown(pinState[19], debounceState[17], now);
+    }
 }
