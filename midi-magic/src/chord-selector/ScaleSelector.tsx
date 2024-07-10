@@ -18,7 +18,24 @@ export function ScaleSelector({ onChange, scale }: Props) {
   const [vNote, setNote] = useState<NoteNumber>(scale.root);
   const [vType, setType] = useState<ScaleType>(scale.type);
 
-  const onSetScale = useCallback(() => {
+  const onChangeNote = useCallback(
+    (note: string) => {
+      const noteNumber = parseInt(note, 10) as NoteNumber;
+      setNote(noteNumber);
+      onChange(noteNumber, vType);
+    },
+    [vType],
+  );
+
+  const onChangeType = useCallback(
+    (typeValue: string) => {
+      setType(typeValue as ScaleType);
+      onChange(vNote, typeValue as ScaleType);
+    },
+    [vNote],
+  );
+
+  const onClickReset = useCallback(() => {
     onChange(vNote, vType);
   }, [vNote, vType]);
 
@@ -31,19 +48,25 @@ export function ScaleSelector({ onChange, scale }: Props) {
 
   return (
     <div class="com-chord-selector-scale-selector">
-      <select onChange={onSetScale} value={vNote}>
+      <select
+        onChange={(evt) => onChangeNote(evt.currentTarget.value)}
+        value={vNote}
+      >
         {NOTE_NAMES.map((name, note) => (
           <option value={note} key={note}>
             {name}
           </option>
         ))}
       </select>
-      <select onChange={onSetScale} value={vType}>
+      <select
+        onChange={(evt) => onChangeType(evt.currentTarget.value)}
+        value={vType}
+      >
         {Object.entries(SCALE_TYPES).map(([key, scaleType]) => (
           <option children={scaleType.label} key={key} value={key} />
         ))}
       </select>
-      {scale.type === "chords" && <button onClick={onSetScale}>Reset</button>}
+      {scale.type === "chords" && <button onClick={onClickReset}>Reset</button>}
     </div>
   );
 }
