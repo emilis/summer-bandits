@@ -1,0 +1,33 @@
+.com-chord-selector {
+
+  --background-color:   rgba( 0, 0, 0, 0.125 );
+  --border-color:       rgba( 0, 0, 0, 0.25 );
+
+  & > [role=tablist] {
+
+    line-height:        1;;
+
+    & > [role=tab] {
+
+      background-color:   transparent;
+      border:             1px solid var(--border-color);
+      border-bottom:      0 none transparent;
+      border-radius:      4px 4px 0 0;
+      cursor:             pointer;
+      margin:             0;
+
+      &.is-active {
+
+        background-color:     var(--background-color);
+      }
+    }
+  }
+
+  & > [role=tabpanel] {
+
+    background-color:   var(--background-color);
+    border:             1px solid var(--border-color);
+    border-radius:      0 4px 4px 4px;
+    padding:            calc( 3em / 4 ) 1ch;
+  }
+}

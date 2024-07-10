@@ -1,0 +1,16 @@
+.com-chord-selector-chord-input {
+
+  & > input {
+
+    width:              100%;
+    
+    &.is-usable {
+
+      outline-color:    green;
+    }
+    &.is-unusable:not(:placeholder-shown) {
+
+      outline-color:    red;
+    }
+  }
+}

@@ -18,6 +18,16 @@ export type Scale = {
 };
 export type ScaleType = "major" | "minor" | "harmonic_minor";
 
+export const CHORD_NUMBERS: ChordNumber[] = [
+  "i",
+  "ii",
+  "iii",
+  "iv",
+  "v",
+  "vi",
+  "vii",
+];
+
 export const NOTE_NAMES = [
   "C",
   "C#",
