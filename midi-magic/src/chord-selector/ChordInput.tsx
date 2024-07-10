@@ -41,13 +41,19 @@ export function ChordInput({ onChange }: Props) {
 
   return (
     <form className="com-chord-selector-chord-input" onSubmit={onSubmit}>
-      <input
-        className={clsx(isUsable ? "is-usable" : "is-unusable")}
-        onInput={(evt) => onInput(evt.currentTarget.value)}
-        placeholder="Enter chord names separated by spaces and press Enter"
-        spellcheck={false}
-        value={value}
-      />
+      <label>
+        <div className="label-text">
+          Enter chord names separated by spaces and press Enter:
+        </div>
+        <input
+          className={clsx(
+            isUsable ? "is-usable" : value ? "is-unusable" : "is-empty",
+          )}
+          onInput={(evt) => onInput(evt.currentTarget.value)}
+          spellcheck={false}
+          value={value}
+        />
+      </label>
     </form>
   );
 }

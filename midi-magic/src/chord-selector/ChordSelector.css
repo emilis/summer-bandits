@@ -28,6 +28,12 @@
     background-color:   var(--background-color);
     border:             1px solid var(--border-color);
     border-radius:      0 4px 4px 4px;
+    display:            none;
     padding:            calc( 3em / 4 ) 1ch;
+
+    &.is-active {
+
+      display:          block;
+    }
   }
 }

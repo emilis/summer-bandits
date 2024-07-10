@@ -21,6 +21,7 @@ export function ChordSelector({ onSelectScale, onSelectChords }: Props) {
     <section className="com-chord-selector">
       <div role="tablist">
         <button
+          aria-controls="tabpanel-scale"
           children="Scale"
           className={clsx(tab === "scale" && "is-active")}
           id="tab-scale"
@@ -28,6 +29,7 @@ export function ChordSelector({ onSelectScale, onSelectChords }: Props) {
           role="tab"
         />
         <button
+          aria-controls="tabpanel-chords"
           children="Chords"
           className={clsx(tab === "chords" && "is-active")}
           id="tab-chords"
@@ -35,6 +37,7 @@ export function ChordSelector({ onSelectScale, onSelectChords }: Props) {
           role="tab"
         />
         <button
+          aria-controls="tabpanel-song"
           children="Song"
           className={clsx(tab === "song" && "is-active")}
           disabled
@@ -43,19 +46,30 @@ export function ChordSelector({ onSelectScale, onSelectChords }: Props) {
           role="tab"
         />
       </div>
-      {tab === "scale" ? (
-        <div aria-labelledby="tab-scale" role="tabpanel">
-          <ScaleSelector onChange={onSelectScale} scale={activeScale.value} />
-        </div>
-      ) : tab === "chords" ? (
-        <div aria-labelledby="tab-chords" role="tabpanel">
-          <ChordInput onChange={onSelectChords} />
-        </div>
-      ) : (
-        <div aria-labelledby="tab-song" role="tabpanel">
-          <p className="error">Not implemented yet</p>
-        </div>
-      )}
+      <div
+        aria-labelledby="tab-scale"
+        className={clsx(tab === "scale" && "is-active")}
+        id="tabpanel-scale"
+        role="tabpanel"
+      >
+        <ScaleSelector onChange={onSelectScale} scale={activeScale.value} />
+      </div>
+      <div
+        aria-labelledby="tab-chords"
+        className={clsx(tab === "chords" && "is-active")}
+        id="tabpanel-chords"
+        role="tabpanel"
+      >
+        <ChordInput onChange={onSelectChords} />
+      </div>
+      <div
+        aria-labelledby="tab-song"
+        className={clsx(tab === "song" && "is-active")}
+        id="tabpanel-song"
+        role="tabpanel"
+      >
+        <p className="error">Not implemented yet</p>
+      </div>
     </section>
   );
 }

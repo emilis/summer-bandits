@@ -1,16 +1,25 @@
 .com-chord-selector-chord-input {
 
-  & > input {
+  & > label {
 
-    width:              100%;
+    & > .label-text {
 
-    &.is-usable {
-
-      outline-color:    green;
+      font-size:          0.75rem;
+      line-height:        1rem;
     }
-    &.is-unusable:not(:placeholder-shown) {
 
-      outline-color:    red;
+    & > input {
+
+      width:              100%;
+
+      &.is-usable {
+
+        outline-color:    green;
+      }
+      &.is-unusable:not(:placeholder-shown) {
+
+        outline-color:    red;
+      }
     }
   }
 }
