@@ -1,11 +1,11 @@
-import { useCallback, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 
 import {
-  NOTE_NAMES,
-  NoteNumber,
-  SCALE_TYPES,
+  type NoteNumber,
   type Scale,
-  ScaleType,
+  type ScaleType,
+  NOTE_NAMES,
+  SCALE_TYPES,
 } from "../harmony/scales";
 import "./ScaleSelector.css";
 
@@ -15,28 +15,30 @@ type Props = {
 };
 
 export function ScaleSelector({ onChange, scale }: Props) {
-  const [noteSelect, setNoteSelect] = useState<HTMLSelectElement | null>(null);
-  const [typeSelect, setTypeSelect] = useState<HTMLSelectElement | null>(null);
+  const [vNote, setNote] = useState<NoteNumber>(scale.root);
+  const [vType, setType] = useState<ScaleType>(scale.type);
 
   const onSetScale = useCallback(() => {
-    if (noteSelect && typeSelect) {
-      onChange(
-        parseInt(noteSelect.value) as NoteNumber,
-        typeSelect.value as ScaleType,
-      );
+    onChange(vNote, vType);
+  }, [vNote, vType]);
+
+  useEffect(() => {
+    if (scale.type !== "chords") {
+      setNote(scale.root);
+      setType(scale.type);
     }
-  }, [noteSelect, typeSelect]);
+  }, [scale.root, scale.type]);
 
   return (
     <div class="com-chord-selector-scale-selector">
-      <select onChange={onSetScale} ref={setNoteSelect} value={scale.root}>
+      <select onChange={onSetScale} value={vNote}>
         {NOTE_NAMES.map((name, note) => (
           <option value={note} key={note}>
             {name}
           </option>
         ))}
       </select>
-      <select onChange={onSetScale} ref={setTypeSelect} value={scale.type}>
+      <select onChange={onSetScale} value={vType}>
         {Object.entries(SCALE_TYPES).map(([key, scaleType]) => (
           <option children={scaleType.label} key={key} value={key} />
         ))}
