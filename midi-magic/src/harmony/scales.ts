@@ -324,17 +324,21 @@ export const createScale = (
     type: scale.type,
     notes: scale.notes.map(getRootedNote(rootNote)),
     chords: Object.fromEntries(
-      Object.entries(scale.chords).map(([chordNum, chord]) => [
-        chordNum,
-        {
-          flavour: chord.flavour,
-          label: `${NOTE_NAMES[chord.notes[0]]}${CHORD_SUFFIXES[chord.flavour] || ""}`,
-          notes: chord.notes.map(getRootedNote(rootNote)),
-          levels: chord.levels.map((level) =>
-            level.map(getRootedNote(rootNote)),
-          ),
-        },
-      ]),
+      Object.entries(scale.chords).map(([chordNum, chord]) => {
+        const notes = chord.notes.map(getRootedNote(rootNote));
+
+        return [
+          chordNum,
+          {
+            flavour: chord.flavour,
+            label: `${NOTE_NAMES[notes[0]]}${CHORD_SUFFIXES[chord.flavour] || ""}`,
+            notes,
+            levels: chord.levels.map((level) =>
+              level.map(getRootedNote(rootNote)),
+            ),
+          },
+        ];
+      }),
     ) as ScaleChords,
   };
 };
