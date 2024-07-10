@@ -97,7 +97,8 @@ void noteOffExpiredEspNowMessages(int channel, unsigned long& lastPing, std::uno
           if (currentState.type == Mode::NOTE) {
               noteOff(channel, currentState.protocol, pitch);
           } else if (currentState.type == Mode::PITCH) {
-              pitchBend(channel, currentState.protocol, 0);
+              int offValue = (WHAMMY_BAR_IS_MOD) ? 0 : 8192;
+              pitchBend(channel, currentState.protocol, offValue);
           }
       }
   }

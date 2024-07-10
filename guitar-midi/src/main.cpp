@@ -128,7 +128,7 @@ void updateWhammyMod(int& prevState, unsigned long& debounceStartedAt, unsigned 
     int state;
     #if USE_ADS == true
     state = ADS.readADC(3);
-    state = map(state, 1680, 8191, 0, 127);  //min 1480 but added 200 dead zonefor safety              
+    state = map(state, 1680, 8191, 0, 127);  //min 1480 but added 200 dead zone for safety              
     #else
     state = analogRead(PIN_WAMMY_BAR);
     state = map(state, 1680, 8191, 0, 127); //min 1480 but added 200 dead zone for safety 
