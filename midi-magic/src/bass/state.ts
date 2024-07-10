@@ -103,7 +103,9 @@ const onNoteOn = ({ note: { number } }: { note: Note }) => {
   switch (true) {
     case number === DOWN_NOTE:
       offPlayingNote();
-      activeNote = setOctave(getNextNote[activeStrumming](activeChord.value, true));
+      activeNote = setOctave(
+        getNextNote[activeStrumming](activeChord.value, true),
+      );
       isPlaying = true;
       notesOut.value?.sendNoteOn(activeNote);
       return;
