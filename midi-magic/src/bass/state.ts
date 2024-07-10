@@ -1,15 +1,16 @@
 import { type InputChannel, Note, type OutputChannel } from "webmidi";
 import { computed, effect, signal } from "@preact/signals";
 
+import { type Chord } from "../harmony/scales";
 import { type Instrument } from "../instruments/types";
 import { getChordByNumber } from "../conductor/state";
 import { registerInput, registerOutput } from "../storage";
 import {
+  type STRUMMINGS_NOTE,
   CHORDS,
   CROSS_NOTES,
   DOWN_NOTE,
   FIRST_CROSS_NOTE,
-  OPEN_CHORD_NOTE,
   SET_FREE_PLAY_NOTE,
   TOGGLE_LEADER_NOTE,
   UP_NOTE,
@@ -21,7 +22,9 @@ import {
   toggleLeadership,
 } from "../conductor/players";
 
-import { NoteSender, PickedStrumming, Strumming } from "./strumming";
+/// Types ----------------------------------------------------------------------
+
+type GetNextNote = (chord: Chord, isNoteDown: boolean) => number;
 
 /// Constant values ------------------------------------------------------------
 
@@ -37,16 +40,6 @@ const player = registerPlayer(LABEL, "FREE_PLAY");
 
 const activeChord = computed(() => getChordByNumber(player.value.chordNumber));
 
-let activeNote = OPEN_CHORD_NOTE;
-const notesDown = new Set<number>();
-
-type PlayingNote = {
-  pitch: number;
-  scheduledAt?: number;
-};
-
-const playingNotes: PlayingNote[] = [];
-
 const crossValues: Record<number, number> = {
   60: 0,
   61: 0,
@@ -54,116 +47,96 @@ const crossValues: Record<number, number> = {
   63: 0,
 };
 
-const noteSender: NoteSender = {
-  playNote: (note) => {
-    const { pitch, velocity, delay, exclusive } = note;
-
-    if (exclusive) {
-      noteSender.muteAll();
-    }
-    const now = performance.now();
-    const scheduledAt = delay ? now + delay : undefined;
-    const existingIndex = playingNotes.findIndex(
-      (playing) => playing.pitch == pitch,
-    );
-    // TODO: this doesn't mute notes before retriggering them.
-    // Not sure if it's a problem though.
-    if (existingIndex == -1) {
-      playingNotes.push({ pitch, scheduledAt });
-    } else {
-      // Only keep latest scheduled note to not send multiple notes offs for same note.
-      const alreadyScheduledAt = playingNotes[existingIndex].scheduledAt;
-      if (scheduledAt) {
-        if (!alreadyScheduledAt || scheduledAt > alreadyScheduledAt) {
-          playingNotes[existingIndex] = { pitch, scheduledAt };
-        }
-      }
-    }
-    notesOut.value?.sendNoteOn(new Note(pitch, { attack: velocity }), {
-      time: scheduledAt,
-    });
-  },
-  muteAll: () => {
-    playingNotes.forEach((note) => {
-      const { pitch, scheduledAt } = note;
-      if (scheduledAt) {
-        notesOut.value?.sendNoteOff(pitch, { time: scheduledAt + 0.1 });
-      } else {
-        notesOut.value?.sendNoteOff(pitch);
-      }
-    });
-    playingNotes.length = 0;
-  },
-};
-
-const STRUMMINGS: Record<number, Strumming> = {
-  67: PickedStrumming(activeChord, noteSender, { notes: [0] }),
-  68: PickedStrumming(activeChord, noteSender, { notes: [0, 3] }),
-  69: PickedStrumming(activeChord, noteSender),
-  70: PickedStrumming(activeChord, noteSender, { notes: [0, 2, 3] }),
-  71: PickedStrumming(activeChord, noteSender, {
-    notes: [0, 2, 3],
-    resetOnChordChange: true,
-  }),
-};
-
-let currentStrumming = STRUMMINGS[67];
+let activeNote: number = activeChord.value.notes[0];
+let activeStrumming: STRUMMINGS_NOTE = 67;
+let isPlaying: boolean = false;
+let strumIndex: number = 0;
 
 /// Private functions ----------------------------------------------------------
+
+const setOctave = (note: number): number => note + (note > 8 ? 24 : 36);
+
+const getNextNote: Record<STRUMMINGS_NOTE, GetNextNote> = {
+  67: (chord, isNoteDown) => chord.notes[0] + (isNoteDown ? 0 : 1) * 12,
+  68: (chord, isNoteDown) => chord.notes[isNoteDown ? 0 : 2],
+  69: (chord, isNoteDown) => chord.notes[isNoteDown ? 0 : 1],
+  70: (chord, isNoteDown) => {
+    const notes = chord.notes;
+    const index = isNoteDown ? strumIndex++ : strumIndex--;
+    return notes.at(index % notes.length) as number;
+  },
+  71: (chord, isNoteDown) => {
+    const notes = chord.levels[1] || chord.notes;
+    const index = isNoteDown ? strumIndex++ : strumIndex--;
+    return notes.at(index % notes.length) as number;
+  },
+};
 
 const midiPanic = () => {
   notesOut.value?.sendAllNotesOff();
   notesOut.value?.sendAllSoundOff();
 };
 
-const maybeApplyChordChange = () => {
-  const maxNote =
-    notesDown.size != 0 ? Math.max(...notesDown) : OPEN_CHORD_NOTE;
-  if (maxNote == activeNote) {
-    return;
-  }
-  activeNote = maxNote;
-  noteSender.muteAll();
-  setChordNumber(player, CHORDS[maxNote]);
-};
-
-const onNoteOff = ({ note }: { note: Note }) => {
-  /// console.debug("bass onNoteOff", note);
-  switch (true) {
-    case note.number in CHORDS:
-      notesDown.delete(note.number);
-      maybeApplyChordChange();
-      return;
+const offPlayingNote = () => {
+  if (isPlaying) {
+    notesOut.value?.sendNoteOff(activeNote);
   }
 };
 
-const onNoteOn = ({ note }: { note: Note }) => {
-  /// console.debug("bass onNoteOn", note);
+/// Event handlers -------------------------------------------------------------
+
+const onNoteOff = ({ note: { number } }: { note: Note }) => {
   switch (true) {
-    case note.number === DOWN_NOTE:
-      currentStrumming.handleDown();
+    case number === DOWN_NOTE:
+    case number === UP_NOTE:
+      offPlayingNote();
       return;
-    case note.number === UP_NOTE:
-      currentStrumming.handleUp();
+    case number in CHORDS:
+      offPlayingNote();
+      strumIndex = 0;
+      setChordNumber(player, 0);
       return;
-    case note.number in CHORDS:
-      notesDown.add(note.number);
-      maybeApplyChordChange();
+  }
+};
+
+const onNoteOn = ({ note: { number } }: { note: Note }) => {
+  switch (true) {
+    case number === DOWN_NOTE:
+      offPlayingNote();
+      activeNote = setOctave(getNextNote[activeStrumming](activeChord.value, true));
+      isPlaying = true;
+      notesOut.value?.sendNoteOn(activeNote);
       return;
-    case note.number in STRUMMINGS:
-      currentStrumming = STRUMMINGS[note.number];
+    case number === UP_NOTE:
+      offPlayingNote();
+      activeNote = setOctave(
+        getNextNote[activeStrumming](activeChord.value, false),
+      );
+      isPlaying = true;
+      notesOut.value?.sendNoteOn(activeNote);
       return;
-    case note.number === TOGGLE_LEADER_NOTE:
+    case number in CHORDS:
+      offPlayingNote();
+      strumIndex = 0;
+      setChordNumber(player, CHORDS[number]);
+      return;
+    case number in getNextNote:
+      offPlayingNote();
+      activeStrumming = number as STRUMMINGS_NOTE;
+      strumIndex = 0;
+      return;
+    case number === TOGGLE_LEADER_NOTE:
+      offPlayingNote();
+      strumIndex = 0;
       toggleLeadership(player);
       return;
-    case note.number === SET_FREE_PLAY_NOTE:
+    case number === SET_FREE_PLAY_NOTE:
       setFreePlay(player);
       return;
-    case CROSS_NOTES.has(note.number):
+    case CROSS_NOTES.has(number):
       notesOut.value?.sendControlChange(
-        note.number - FIRST_CROSS_NOTE + CROSS_CC_START,
-        (crossValues[note.number] =
-          (crossValues[note.number] + 1) % CROSS_VALUE_COUNT),
+        number - FIRST_CROSS_NOTE + CROSS_CC_START,
+        (crossValues[number] = (crossValues[number] + 1) % CROSS_VALUE_COUNT),
       );
       return;
   }

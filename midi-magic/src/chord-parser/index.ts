@@ -51,6 +51,7 @@ export const parseChord = (str: string): Chord => {
   }
 
   const notes = cpChord.normalized.notes.map(noteNameToNumber);
+  ///console.log("cpChord", notes, cpChord);
 
   return {
     flavour: qualityToFlavour(cpChord.normalized.quality),
