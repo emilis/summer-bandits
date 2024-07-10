@@ -128,7 +128,7 @@ const maybeApplyChordChange = () => {
 };
 
 const onNoteOff = ({ note }: { note: Note }) => {
-  console.debug("bass onNoteOff", note);
+  /// console.debug("bass onNoteOff", note);
   switch (true) {
     case note.number in CHORDS:
       notesDown.delete(note.number);
@@ -138,7 +138,7 @@ const onNoteOff = ({ note }: { note: Note }) => {
 };
 
 const onNoteOn = ({ note }: { note: Note }) => {
-  console.debug("bass onNoteOn", note);
+  /// console.debug("bass onNoteOn", note);
   switch (true) {
     case note.number === DOWN_NOTE:
       currentStrumming.handleDown();

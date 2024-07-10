@@ -90,7 +90,6 @@ export const setChordNumber = (player: PlayerSignal, chordNumber: number) => {
     }
     if (player.value.mode === "LEAD") {
       const [followers] = groupOtherPlayers(player);
-      console.log("setChordNumber/followers", followers.length);
       for (const follower of followers) {
         changeChordNumber(follower, chordNumber);
       }

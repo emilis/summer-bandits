@@ -153,7 +153,7 @@ const maybeApplyChordChange = () => {
 };
 
 const onNoteOff = ({ note }: { note: Note }) => {
-  console.debug("guitar onNoteOff", note);
+  /// console.debug("guitar onNoteOff", note);
   switch (true) {
     case note.number in CHORDS:
       notesDown.delete(note.number);
@@ -163,7 +163,7 @@ const onNoteOff = ({ note }: { note: Note }) => {
 };
 
 const onNoteOn = ({ note }: { note: Note }) => {
-  console.debug("guitar onNoteOn", note);
+  /// console.debug("guitar onNoteOn", note);
   switch (true) {
     case note.number === DOWN_NOTE:
       currentStrumming.handleDown();
