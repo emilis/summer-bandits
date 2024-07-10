@@ -92,7 +92,7 @@ const openMajorChords: Record<number, number[]> = {
   /* G */ 43: literalChord(3, 2, 0, 0, 3, 3),
   /* A */ 45: makeMajorBarreOnA(A),
   /* C */ 48: literalChord(x, 3, 2, 0, 1, 0),
-  /* D */ 50: literalChord(x, x, 0, 3, 2, 3),
+  /* D */ 50: literalChord(x, x, 0, 2, 3, 2),
 };
 
 const openMinorChords: Record<number, number[]> = {
@@ -161,7 +161,7 @@ const getChordNotes = (chord: Chord): number[] => {
   }
 };
 
-const getSpicyChordNotes = (chord: Chord): number[] => {
+export const getSpicyChordNotes = (chord: Chord): number[] => {
   const root = getRoot(chord);
   switch (chord.flavour) {
     case "maj":
@@ -179,11 +179,10 @@ const getSpicyChordNotes = (chord: Chord): number[] => {
 
 export type GuitarChord = {
   chord: Chord;
-  spicy: boolean;
 };
 
 export const getGuitarChordNotes = (chord: GuitarChord) =>
-  chord.spicy ? getSpicyChordNotes(chord.chord) : getChordNotes(chord.chord);
+  getChordNotes(chord.chord);
 
 export const getPowerChordNotes = (chord: GuitarChord): number[] =>
   calculatedChord((getRoot(chord.chord) - E) as Fret, 0, 2, 2, x, x, x);

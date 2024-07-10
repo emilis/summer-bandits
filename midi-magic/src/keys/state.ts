@@ -1,7 +1,8 @@
 import { type InputChannel, type OutputChannel } from "webmidi";
 import { computed, effect, signal } from "@preact/signals";
 
-import { type ChordNumber } from "../harmony/scales";
+import { activeScale } from "../conductor/state";
+import { type Chord } from "../harmony/scales";
 import { type Instrument, type NoteEventHandler } from "../instruments/types";
 import { LP_COLORS } from "../launchpad/";
 import { getClosestChordNote } from "../conductor/state";
@@ -17,17 +18,19 @@ import {
 
 /// Constant values ------------------------------------------------------------
 
-const { GREEN_HI, GREEN_LO, RED_HI, RED_LO, YELLOW_HI, YELLOW_LO } = LP_COLORS;
+const { BLACK, GREEN_HI, GREEN_LO, RED_HI, RED_LO, YELLOW_HI, YELLOW_LO } =
+  LP_COLORS;
 
 const LABEL = "Keyboard";
-const CHORDS: Record<number, ChordNumber> = {
-  112: "i",
-  113: "ii",
-  114: "iii",
-  115: "iv",
-  116: "v",
-  117: "vi",
-  118: "vii",
+const CHORDS: Record<number, number> = {
+  112: 0,
+  113: 1,
+  114: 2,
+  115: 3,
+  116: 4,
+  117: 5,
+  118: 6,
+  119: 7,
 };
 const CHORD_NOTES = Object.keys(CHORDS).map(Number);
 const CHORD_NUMBER_TO_NOTE = Object.fromEntries(
@@ -64,17 +67,20 @@ const midiPanic = () => {
 const setButtonColor = (noteNum: number, color: number) =>
   lpOut.value?.sendNoteOn(noteNum, { rawAttack: color });
 
-const showChordsUi = (playerValue: Player) => {
+const showChordsUi = (playerValue: Player, chords: Chord[]) => {
   const { chordNumber, isFollower, isFreePlay } = playerValue;
-
   const bgColor = isFollower ? GREEN_LO : isFreePlay ? YELLOW_LO : RED_LO;
   const fgColor = isFollower ? GREEN_HI : isFreePlay ? YELLOW_HI : RED_HI;
-  for (const midiNote of CHORD_NOTES) {
+  CHORD_NOTES.forEach((midiNote, i) =>
     setButtonColor(
       midiNote,
-      midiNote === CHORD_NUMBER_TO_NOTE[chordNumber] ? fgColor : bgColor,
-    );
-  }
+      !(i in chords)
+        ? BLACK
+        : midiNote === CHORD_NUMBER_TO_NOTE[chordNumber]
+          ? fgColor
+          : bgColor,
+    ),
+  );
 };
 
 const showInstrumentsBackground = () => {
@@ -151,13 +157,13 @@ const onLpNoteOn: NoteEventHandler = ({ note: { number } }) => {
 };
 
 const onNoteOff: NoteEventHandler = ({ note }) => {
-  console.debug("keyboard onNoteOff", note.number, note.rawRelease);
+  /// console.debug("keyboard onNoteOff", note.number, note.rawRelease);
 
   notesOut.value?.sendNoteOff(notesOn[note.number], note);
 };
 
 const onNoteOn: NoteEventHandler = ({ note }) => {
-  console.debug("keyboard onNoteOn", note.number, note.rawAttack);
+  /// console.debug("keyboard onNoteOn", note.number, note.rawAttack);
 
   const midiNote = allNotesMode.value
     ? note.number
@@ -182,7 +188,7 @@ effect(() => {
   const lpInput = lpIn.value?.input;
 
   if (lpInput) {
-    console.log(LABEL, "effect lpIn.value truthy");
+    /// console.log(LABEL, "effect lpIn.value truthy");
     lpInput.addListener("noteon", onLpNoteOn);
   }
 
@@ -194,10 +200,10 @@ effect(() => {
 });
 effect(() => {
   if (lpOut.value) {
-    console.log(LABEL, "effect lpOut.value truthy");
+    /// console.log(LABEL, "effect lpOut.value truthy");
 
     lpOut.value.sendControlChange(0, 0); // turn off all buttons
-    showChordsUi(player.peek());
+    showChordsUi(player.peek(), activeScale.peek().chords);
     showInstrumentsBackground();
     showPlayerModeUi(player.peek());
     showSpiceLevelUi(spiceLevel.peek());
@@ -207,7 +213,7 @@ effect(() => {
   const notesInput = notesIn.value;
 
   if (notesInput) {
-    console.log(LABEL, "effect notesInput truthy");
+    /// console.log(LABEL, "effect notesInput truthy");
     notesInput.addListener("channelaftertouch", onChannelAftertouch);
     notesInput.addListener("controlchange", onControlChange);
     notesInput.addListener("noteoff", onNoteOff);
@@ -226,9 +232,9 @@ effect(() => {
   };
 });
 effect(() => {
-  console.log(LABEL, "effect player", player.value);
-
-  showChordsUi(player.value);
+  showChordsUi(player.value, activeScale.value.chords);
+});
+effect(() => {
   showPlayerModeUi(player.value);
 });
 

@@ -1,11 +1,11 @@
 import { batch, signal, type Signal } from "@preact/signals";
 
-import { type ChordNumber } from "../harmony/scales";
+import { activeScale } from "./state";
 
 type LeadershipMode = "LEAD" | "FOLLOW" | "FREE_PLAY";
 
 export type Player = {
-  chordNumber: ChordNumber;
+  chordNumber: number;
   isFollower: boolean;
   isFreePlay: boolean;
   isLeader: boolean;
@@ -20,7 +20,7 @@ export const players: PlayerSignal[] = [];
 const createPlayer = (
   name: string,
   mode: LeadershipMode = "FREE_PLAY",
-  chordNumber: ChordNumber = "i",
+  chordNumber: number = 0,
 ): Player => ({
   chordNumber,
   isFollower: mode === "FOLLOW",
@@ -30,10 +30,10 @@ const createPlayer = (
   name,
 });
 
-const changeChordNumber = (player: PlayerSignal, chordNumber: ChordNumber) => {
+const changeChordNumber = (player: PlayerSignal, chordNumber: number) => {
   player.value = {
     ...player.value,
-    chordNumber,
+    chordNumber: chordNumber % activeScale.value.chords.length,
   };
 };
 
@@ -83,10 +83,7 @@ export const registerPlayer = (
   }
 };
 
-export const setChordNumber = (
-  player: PlayerSignal,
-  chordNumber: ChordNumber,
-) => {
+export const setChordNumber = (player: PlayerSignal, chordNumber: number) => {
   batch(() => {
     if (player.value.mode === "FREE_PLAY" || player.value.mode === "LEAD") {
       changeChordNumber(player, chordNumber);

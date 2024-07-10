@@ -6,20 +6,9 @@ export type Chord = {
   notes: NoteNumber[];
   levels: NoteNumber[][];
 };
-export type ChordNumber =
-  | "i"
-  | "ii"
-  | "iii"
-  | "iv"
-  | "v"
-  | "vi"
-  | "vii"
-  | "viii"
-  | "ix"
-  | "x";
 export type Flavour = "maj" | "min" | "dim" | "aug" | "unknown";
 
-type ScaleChords = Partial<Record<ChordNumber, Chord>>;
+type ScaleChords = Chord[];
 export type Scale = {
   type: ScaleType;
   label: string;
@@ -29,18 +18,6 @@ export type Scale = {
 };
 export type ScaleType = "chords" | "major" | "minor" | "harmonic_minor";
 
-export const CHORD_NUMBERS: ChordNumber[] = [
-  "i",
-  "ii",
-  "iii",
-  "iv",
-  "v",
-  "vi",
-  "vii",
-  "viii",
-  "ix",
-  "x",
-];
 const CHORD_SUFFIXES: Record<Flavour, string> = {
   aug: "aug",
   dim: "dim",
@@ -71,8 +48,9 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
     label: "Major",
     type: "major",
     notes: [0, 2, 4, 5, 7, 9, 11],
-    chords: {
-      i: {
+    chords: [
+      {
+        // I
         flavour: "maj",
         notes: [0, 7, 4],
         levels: [
@@ -82,7 +60,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [0, 7, 4, 11, 2],
         ],
       },
-      ii: {
+      {
+        // II
         flavour: "min",
         notes: [2, 9, 5],
         levels: [
@@ -92,7 +71,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [2, 9, 5, 0, 4],
         ],
       },
-      iii: {
+      {
+        // III
         flavour: "min",
         notes: [4, 11, 7],
         levels: [
@@ -102,7 +82,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [4, 11, 7, 2, 5],
         ],
       },
-      iv: {
+      {
+        // IV
         flavour: "maj",
         notes: [5, 0, 9],
         levels: [
@@ -112,7 +93,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [5, 0, 9, 4, 7],
         ],
       },
-      v: {
+      {
+        // V
         flavour: "maj",
         notes: [7, 2, 11, 5],
         levels: [
@@ -122,7 +104,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [7, 2, 11, 5, 9],
         ],
       },
-      vi: {
+      {
+        // VI
         flavour: "min",
         notes: [9, 4, 0],
         levels: [
@@ -132,7 +115,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [9, 4, 0, 7, 11],
         ],
       },
-      vii: {
+      {
+        // VII
         flavour: "dim",
         notes: [11, 2, 5],
         levels: [
@@ -142,14 +126,15 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [11, 2, 5, 9, 4],
         ],
       },
-    },
+    ],
   },
   minor: {
     label: "Minor",
     type: "minor",
     notes: [0, 2, 3, 5, 7, 8, 10],
-    chords: {
-      i: {
+    chords: [
+      {
+        // I
         flavour: "min",
         notes: [0, 7, 3],
         levels: [
@@ -159,7 +144,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [0, 7, 3, 10, 2],
         ],
       },
-      ii: {
+      {
+        // II
         flavour: "dim",
         notes: [2, 5, 8],
         levels: [
@@ -169,7 +155,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [2, 5, 8, 0, 7],
         ],
       },
-      iii: {
+      {
+        // III
         flavour: "maj",
         notes: [3, 10, 7],
         levels: [
@@ -179,7 +166,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [3, 10, 7, 2, 5],
         ],
       },
-      iv: {
+      {
+        // IV
         flavour: "min",
         notes: [5, 0, 8],
         levels: [
@@ -189,7 +177,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [5, 0, 8, 3, 7],
         ],
       },
-      v: {
+      {
+        // V
         flavour: "min",
         notes: [7, 2, 10],
         levels: [
@@ -199,7 +188,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [7, 2, 10, 5, 8],
         ],
       },
-      vi: {
+      {
+        // VI
         flavour: "maj",
         notes: [8, 3, 0],
         levels: [
@@ -209,7 +199,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [8, 3, 0, 7, 10],
         ],
       },
-      vii: {
+      {
+        // VII
         flavour: "maj",
         notes: [10, 5, 2],
         levels: [
@@ -219,14 +210,15 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [10, 5, 2, 8, 0],
         ],
       },
-    },
+    ],
   },
   harmonic_minor: {
     label: "Harmonic minor",
     type: "harmonic_minor",
     notes: [0, 2, 3, 5, 7, 8, 11],
-    chords: {
-      i: {
+    chords: [
+      {
+        // I
         flavour: "min",
         notes: [0, 7, 3],
         levels: [
@@ -236,7 +228,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [0, 7, 3, 2, 11],
         ],
       },
-      ii: {
+      {
+        // II
         flavour: "dim",
         notes: [2, 5, 8],
         levels: [
@@ -246,7 +239,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [2, 5, 8, 0],
         ],
       },
-      iii: {
+      {
+        // III
         flavour: "aug",
         notes: [3, 11, 7],
         levels: [
@@ -256,7 +250,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [3, 7, 2, 5],
         ],
       },
-      iv: {
+      {
+        // IV
         flavour: "min",
         notes: [5, 0, 8],
         levels: [
@@ -266,7 +261,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [5, 0, 8, 3, 7],
         ],
       },
-      v: {
+      {
+        // V
         flavour: "maj",
         notes: [7, 2, 11, 5],
         levels: [
@@ -276,7 +272,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [7, 11, 3, 5],
         ],
       },
-      vi: {
+      {
+        // VI
         flavour: "maj",
         notes: [8, 3, 0],
         levels: [
@@ -286,7 +283,8 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [8, 0, 7, 2],
         ],
       },
-      vii: {
+      {
+        // VII
         flavour: "dim",
         notes: [11, 5, 2],
         levels: [
@@ -296,7 +294,7 @@ export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
           [11, 2, 5, 8],
         ],
       },
-    },
+    ],
   },
 };
 
@@ -323,23 +321,16 @@ export const createScale = (
     root: rootNote,
     type: scale.type,
     notes: scale.notes.map(getRootedNote(rootNote)),
-    chords: Object.fromEntries(
-      Object.entries(scale.chords).map(([chordNum, chord]) => {
-        const notes = chord.notes.map(getRootedNote(rootNote));
+    chords: scale.chords.map((chord) => {
+      const notes = chord.notes.map(getRootedNote(rootNote));
 
-        return [
-          chordNum,
-          {
-            flavour: chord.flavour,
-            label: `${NOTE_NAMES[notes[0]]}${CHORD_SUFFIXES[chord.flavour] || ""}`,
-            notes,
-            levels: chord.levels.map((level) =>
-              level.map(getRootedNote(rootNote)),
-            ),
-          },
-        ];
-      }),
-    ) as ScaleChords,
+      return {
+        flavour: chord.flavour,
+        label: `${NOTE_NAMES[notes[0]]}${CHORD_SUFFIXES[chord.flavour] || ""}`,
+        notes,
+        levels: chord.levels.map((level) => level.map(getRootedNote(rootNote))),
+      };
+    }),
   };
 };
 
@@ -350,7 +341,5 @@ export const createScaleFromChords = (chords: Chord[]): Scale => ({
   notes: [
     ...new Set<NoteNumber>(chords.flatMap((chord) => chord.notes)),
   ].sort(),
-  chords: Object.fromEntries(
-    chords.map((chord, i) => [CHORD_NUMBERS[i], chord]),
-  ),
+  chords,
 });

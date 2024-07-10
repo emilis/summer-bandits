@@ -1,12 +1,11 @@
 import clsx from "clsx";
 
-import { type ChordNumber } from "../harmony/scales";
-
 import type { PlayerSignal } from "./players";
+import { ROMAN_NUMERALS } from "./constants";
 import "./PlayerRow.css";
 
 type Props = {
-  chordNumbers: ChordNumber[];
+  chordNumbers: string[];
   player: PlayerSignal;
 };
 
@@ -14,7 +13,7 @@ function ChordCell({
   chordNumber,
   isActive,
 }: {
-  chordNumber: ChordNumber;
+  chordNumber: string;
   isActive: boolean;
 }) {
   return (
@@ -31,10 +30,10 @@ export function ConductorPlayerRow({ chordNumbers, player }: Props) {
       className={clsx("com-conductor-player-row", `mode-${mode.toLowerCase()}`)}
     >
       <td className="name">{name}</td>
-      {chordNumbers.map((cellChordNumber: ChordNumber) => (
+      {chordNumbers.map((cellChordNumber: string, i: number) => (
         <ChordCell
-          chordNumber={chordNumber}
-          isActive={chordNumber === cellChordNumber}
+          chordNumber={ROMAN_NUMERALS[chordNumber]}
+          isActive={chordNumber === i}
           key={cellChordNumber}
         />
       ))}

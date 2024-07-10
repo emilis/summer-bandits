@@ -16,7 +16,6 @@ import { registerInput, registerOutput } from "../storage";
 import { GuitarChord } from "./chords";
 import {
   CHORDS,
-  CLOSER_CHORD_NOTES,
   CROSS_NOTES,
   DOWN_NOTE,
   FIRST_CROSS_NOTE,
@@ -44,11 +43,8 @@ const guitarIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
 const player = registerPlayer(LABEL, "LEAD");
 
-const spicy = signal<boolean>(false);
-
 const activeGuitarChord = signal<GuitarChord>({
   chord: getChordByNumber(player.peek().chordNumber),
-  spicy: spicy.peek(),
 });
 
 let activeNote = OPEN_CHORD_NOTE;
@@ -153,7 +149,6 @@ const maybeApplyChordChange = () => {
   activeNote = maxNote;
   batch(() => {
     setChordNumber(player, CHORDS[maxNote]);
-    spicy.value = CLOSER_CHORD_NOTES.has(activeNote);
   });
 };
 
@@ -214,7 +209,6 @@ const onWhammy = ({ rawValue }: { rawValue?: number }) => {
 effect(() => {
   activeGuitarChord.value = {
     chord: getChordByNumber(player.value.chordNumber),
-    spicy: spicy.value,
   };
 });
 

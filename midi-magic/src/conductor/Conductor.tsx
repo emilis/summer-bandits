@@ -1,6 +1,5 @@
 import {
   type Chord,
-  type ChordNumber,
   type NoteNumber,
   type ScaleType,
   createScale,
@@ -11,6 +10,7 @@ import { ChordSelector } from "../chord-selector/ChordSelector";
 import { activeScale } from "./state";
 import { ConductorPlayerRow } from "./PlayerRow";
 import { players } from "./players";
+import { ROMAN_NUMERALS } from "./constants";
 import "./Conductor.css";
 
 const onSelectChords = (chords: Chord[]) => {
@@ -22,7 +22,9 @@ const onSelectScale = (rootNote: NoteNumber, type: ScaleType) => {
 };
 
 export function Conductor() {
-  const chordNumbers = Object.keys(activeScale.value.chords) as ChordNumber[];
+  const chordNumbers = activeScale.value.chords.map(
+    (_, i) => ROMAN_NUMERALS[i],
+  );
 
   return (
     <main className="com-conductor layout-stack">
@@ -34,8 +36,8 @@ export function Conductor() {
         <thead className="chords">
           <tr className="numbers">
             <th />
-            {chordNumbers.map((number) => (
-              <th key={number}>{number}</th>
+            {chordNumbers.map((chordNumber) => (
+              <th key={chordNumber}>{chordNumber}</th>
             ))}
           </tr>
           <tr className="names">
