@@ -2,6 +2,15 @@
     "files.associations": {
         ".fantomasignore": "ignore",
         "*.cpp_bkcp": "c",
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "optional": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "system_error": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp"
     }
 }

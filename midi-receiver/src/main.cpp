@@ -47,8 +47,12 @@ void noteOff(uint8_t channel, Protocol protocol, uint8_t pitch) {
   saveState(channel, protocol, Mode::NOTE, pitch, 0);
 }
 
-void pitchDown(uint8_t channel, Protocol protocol, int pitch) {
-  serialPitchBend(channel, pitch);
+void pitchBend(uint8_t channel, Protocol protocol, int pitch) {
+  if (WHAMMY_BAR_IS_MOD) {
+    serialMod(channel, pitch);
+  } else {
+    serialPitchBend(channel, pitch);
+  }  
   saveState(channel, protocol, Mode::PITCH, 0, pitch);
 }
 
@@ -70,7 +74,7 @@ void processWirelessMidiMessage(controller_message *receivedData) {
       break;
     case PITCH:
       if (now - lastSerialWrite < WIRELESS_IGNORE_AFTER_LAST_SERIAL_WRITE) return;
-      pitchDown(channel, Protocol::ESP_NOW, receivedData->pitch);
+      pitchBend(channel, Protocol::ESP_NOW, receivedData->pitch);
       break;
     default:
       break;
@@ -93,7 +97,7 @@ void noteOffExpiredEspNowMessages(int channel, unsigned long& lastPing, std::uno
           if (currentState.type == Mode::NOTE) {
               noteOff(channel, currentState.protocol, pitch);
           } else if (currentState.type == Mode::PITCH) {
-              pitchDown(channel, currentState.protocol, 0);
+              pitchBend(channel, currentState.protocol, 0);
           }
       }
   }

@@ -45,3 +45,16 @@ void serialPitchBend(int channel, int bendValue) {
   digitalWrite(BLUE_LED_PIN, LOW);
   #endif
 }
+
+void serialMod(int channel, uint8_t modValue) {
+  uint8_t data[MIDI_DATA_LEN] = {
+    static_cast<uint8_t>(0xB0 | (channel & 0x0F)), 
+    0x01,
+    modValue 
+  };
+  MIDI.write(data, MIDI_DATA_LEN);
+  //TODO: use a separate LED pin
+  #if USE_BLUE_LED == true
+  digitalWrite(BLUE_LED_PIN, LOW);
+  #endif
+}
