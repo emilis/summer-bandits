@@ -42,7 +42,11 @@ void serialPitchBend(int channel, int bendValue) {
   MIDI.write(data, MIDI_DATA_LEN);
   //TODO: use a separate LED pin
   #if USE_BLUE_LED == true
-  digitalWrite(BLUE_LED_PIN, LOW);
+  if (bendValue == 8192) {
+    digitalWrite(BLUE_LED_PIN, LOW);
+  } else {
+    digitalWrite(BLUE_LED_PIN, HIGH);
+  }
   #endif
 }
 
@@ -55,6 +59,10 @@ void serialMod(int channel, uint8_t modValue) {
   MIDI.write(data, MIDI_DATA_LEN);
   //TODO: use a separate LED pin
   #if USE_BLUE_LED == true
-  digitalWrite(BLUE_LED_PIN, LOW);
+  if (modValue == 0) {
+    digitalWrite(BLUE_LED_PIN, LOW);
+  } else {
+    digitalWrite(BLUE_LED_PIN, HIGH);
+  }
   #endif
 }

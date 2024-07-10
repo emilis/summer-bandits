@@ -28,6 +28,11 @@ uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; //Broadcast t
 unsigned long previousMillis = 0;
 std::unordered_map<int, int> pinState;
 std::unordered_map<int, unsigned long> debounceState;
+// Pins UP and DOWN share the same debounce state intentionally.
+// When strumming with a particular pattern, the button flies back and opens 
+// the other switch, which is not something we want.
+unsigned long* strumDebounce = &(debounceState[10]);
+unsigned long now = 0;
 
 void sendEspNowMessage(const controller_message& message) {
     esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &message, sizeof(message));
@@ -42,7 +47,7 @@ void sendEspNowNote(uint8_t pitch, uint8_t velocity) {
     sendEspNowMessage(data);
 }
 
-void sendEspNowPitch(uint8_t pitch) {
+void sendEspNowPitch(int pitch) {
     controller_message data = {device, Mode::PITCH, pitch, 0};
     sendEspNowMessage(data);
 }
@@ -57,7 +62,7 @@ void noteOff(uint8_t pitch) {
     sendEspNowNote(pitch, 0);
 }
 
-void whammyDown(uint8_t bendValue) {
+void whammyDown(int bendValue) {
     serialPitchBend(MIDI_CHANNEL, bendValue);
     sendEspNowPitch(bendValue);
 }
@@ -108,11 +113,12 @@ void updateWhammyPitchDown(int& prevState, unsigned long& debounceStartedAt, uns
     int state;
     #if USE_ADS == true
     state = ADS.readADC(3);
-    state = map(state, 1680, 8191, 8192, 0);  //min 1480 but added 200 dead zonefor safety              
+    state = map(state, 1200, 15820, 8192, 0);        
     #else
     state = analogRead(PIN_WAMMY_BAR);
-    state = map(state, 1680, 8191, 8192, 0); //min 1480 but added 200 dead zone for safety 
+    state = map(state, 8191, 1880, 8192, 0);
     #endif
+    state = constrain(state, 0, 8192);
 
     if (state == prevState) return;
 
@@ -128,11 +134,12 @@ void updateWhammyMod(int& prevState, unsigned long& debounceStartedAt, unsigned 
     int state;
     #if USE_ADS == true
     state = ADS.readADC(3);
-    state = map(state, 1680, 8191, 0, 127);  //min 1480 but added 200 dead zone for safety              
+    state = map(state, 1200, 15820, 0, 127);           
     #else
     state = analogRead(PIN_WAMMY_BAR);
-    state = map(state, 1680, 8191, 0, 127); //min 1480 but added 200 dead zone for safety 
+    state = map(state, 8191, 1880, 0, 127);
     #endif
+    state = max(state, 0);
 
     if (state == prevState) return;
 
@@ -161,9 +168,9 @@ void setupPins() {
     pinMode(PIN_CROSS_RIGHT, INPUT_PULLUP);
     pinMode(PIN_CROSS_DOWN, INPUT_PULLUP);
     pinMode(PIN_CROSS_LEFT, INPUT_PULLUP);
+    #endif
     pinMode(PIN_MENU, INPUT_PULLUP);
     pinMode(PIN_VIEW, INPUT_PULLUP);
-    #endif
 
     #if USE_BLUE_LED == true
     pinMode(BLUE_LED_PIN, OUTPUT);
@@ -205,7 +212,7 @@ void setup() {
 }
 
 void loop() {
-    auto now = millis();
+    now = millis();
     if (now - previousMillis >= PING_INTERVAL) {
         previousMillis = now;
         sendEspNowMessage(PING_MESSAGE);
@@ -221,10 +228,6 @@ void loop() {
     updateButton(PIN_YELLOW_HIGH, 55, pinState[7], debounceState[7], now);
     updateButton(PIN_BLUE_HIGH,   56, pinState[8], debounceState[8], now);
     updateButton(PIN_ORANGE_HIGH, 57, pinState[9], debounceState[9], now);
-    // Pins UP and DOWN share the same debounce state intentionally.
-    // When strumming with a particular pattern, the button flies back and opens 
-    // the other switch, which is not something we want.
-    unsigned long* strumDebounce = &(debounceState[10]);
     updateButton(PIN_DOWN,        58, pinState[10], *strumDebounce, now);
     updateButton(PIN_UP,          59, pinState[11], *strumDebounce, now); 
 
@@ -234,9 +237,9 @@ void loop() {
     updateButton(PIN_CROSS_RIGHT, 61, pinState[13], debounceState[12], now);
     updateButton(PIN_CROSS_DOWN,  62, pinState[14], debounceState[13], now);
     updateButton(PIN_CROSS_LEFT,  63, pinState[15], debounceState[14], now);
+    #endif
     updateButton(PIN_MENU,        65, pinState[16], debounceState[15], now); //Leader button
     updateButton(PIN_VIEW,        66, pinState[17], debounceState[16], now); //Set free play button
-    #endif
 
     updateSelector(67, pinState[18]);
     if (WHAMMY_BAR_IS_MOD) {
