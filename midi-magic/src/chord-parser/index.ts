@@ -45,7 +45,6 @@ const chordParser = chordParserFactory();
 
 export const parseChord = (str: string): Chord => {
   const cpChord = chordParser(str);
-  console.log("cpChord", cpChord);
 
   if ("error" in cpChord) {
     throw `Error parsing chord "${str}"`;

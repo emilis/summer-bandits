@@ -1,8 +1,10 @@
 import {
+  type Chord,
   type ChordNumber,
   type NoteNumber,
   type ScaleType,
   createScale,
+  createScaleFromChords,
 } from "../harmony/scales";
 import { ChordSelector } from "../chord-selector/ChordSelector";
 
@@ -11,9 +13,10 @@ import { ConductorPlayerRow } from "./PlayerRow";
 import { players } from "./players";
 import "./Conductor.css";
 
-const onSelectChords = () => {
-  console.log("onSelectChords");
+const onSelectChords = (chords: Chord[]) => {
+  activeScale.value = createScaleFromChords(chords);
 };
+
 const onSelectScale = (rootNote: NoteNumber, type: ScaleType) => {
   activeScale.value = createScale(type, rootNote);
 };
@@ -44,7 +47,11 @@ export function Conductor() {
         </thead>
         <tbody>
           {players.map((player) => (
-            <ConductorPlayerRow key={player.value.name} player={player} />
+            <ConductorPlayerRow
+              chordNumbers={chordNumbers}
+              key={player.value.name}
+              player={player}
+            />
           ))}
         </tbody>
       </table>

@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { useState } from "preact/hooks";
 
 import { parseChord } from "../chord-parser/";
-import type { Chord } from "../harmony/scales";
+import { type Chord, MAX_CHORDS_COUNT } from "../harmony/scales";
 
 import "./ChordInput.css";
 
@@ -21,8 +21,11 @@ export function ChordInput({ onChange }: Props) {
     setValue(newValue);
     try {
       const chords = valueToChords(newValue);
-      console.log("onInput", chords);
-      setIsUsable(!!chords.length && !chords.find((chord) => chord.error));
+      setIsUsable(
+        chords.length > 0 &&
+          chords.length <= MAX_CHORDS_COUNT &&
+          !chords.find((chord) => chord.error),
+      );
     } catch {
       setIsUsable(false);
     }

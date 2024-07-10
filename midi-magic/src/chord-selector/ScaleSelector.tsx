@@ -31,14 +31,13 @@ export function ScaleSelector({ onChange, scale }: Props) {
         ))}
       </select>
       <select onChange={onTypeChange}>
-        {Object.keys(SCALE_TYPES).map((key) => {
-          const scaleType = SCALE_TYPES[key as ScaleType];
-          return (
-            <option value={key} selected={scale.type == scaleType.type}>
-              {scaleType.label}
-            </option>
-          );
-        })}
+        {Object.entries(SCALE_TYPES).map(([key, scaleType]) => (
+          <option
+            children={scaleType.label}
+            selected={scale.type === scaleType.type}
+            value={key}
+          />
+        ))}
       </select>
     </div>
   );

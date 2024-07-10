@@ -17,10 +17,9 @@ const MIDI_COUNT = 128;
 /// State ----------------------------------------------------------------------
 
 export const activeScale = signal<Scale>(createScale("major", 0));
-export const activeChordNumber = signal<ChordNumber>("i");
 
 export const activeChord = computed<Chord>(
-  () => activeScale.value.chords[activeChordNumber.value],
+  () => activeScale.value.chords.i as Chord,
 );
 
 /// Private functions ----------------------------------------------------------
@@ -32,8 +31,13 @@ const midiToNote = (midiNum: number): NoteNumber =>
 
 /// Exported functions ---------------------------------------------------------
 
-export const getChordByNumber = (chordNumber: ChordNumber): Chord =>
-  activeScale.value.chords[chordNumber];
+export const getChordByNumber = (chordNumber: ChordNumber): Chord => {
+  if (chordNumber in activeScale.value.chords) {
+    return activeScale.value.chords[chordNumber] as Chord;
+  } else {
+    return Object.values(activeScale.value.chords)[0];
+  }
+};
 
 export const getClosestChordNote = (
   chordNumber: ChordNumber,
@@ -43,7 +47,7 @@ export const getClosestChordNote = (
   if (level > 6) {
     return note;
   }
-  const chord = activeScale.value.chords[chordNumber];
+  const chord = getChordByNumber(chordNumber);
   const notes = new Set<number>(
     level === 0
       ? chord.notes

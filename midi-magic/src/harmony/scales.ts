@@ -6,10 +6,20 @@ export type Chord = {
   notes: NoteNumber[];
   levels: NoteNumber[][];
 };
-export type ChordNumber = "i" | "ii" | "iii" | "iv" | "v" | "vi" | "vii";
+export type ChordNumber =
+  | "i"
+  | "ii"
+  | "iii"
+  | "iv"
+  | "v"
+  | "vi"
+  | "vii"
+  | "viii"
+  | "ix"
+  | "x";
 export type Flavour = "maj" | "min" | "dim" | "aug" | "unknown";
 
-export type ScaleChords = Record<ChordNumber, Chord>;
+type ScaleChords = Partial<Record<ChordNumber, Chord>>;
 export type Scale = {
   type: ScaleType;
   label: string;
@@ -17,7 +27,7 @@ export type Scale = {
   chords: ScaleChords;
   root: NoteNumber;
 };
-export type ScaleType = "major" | "minor" | "harmonic_minor";
+export type ScaleType = "chords" | "major" | "minor" | "harmonic_minor";
 
 export const CHORD_NUMBERS: ChordNumber[] = [
   "i",
@@ -27,6 +37,9 @@ export const CHORD_NUMBERS: ChordNumber[] = [
   "v",
   "vi",
   "vii",
+  "viii",
+  "ix",
+  "x",
 ];
 const CHORD_SUFFIXES: Record<Flavour, string> = {
   aug: "aug",
@@ -35,6 +48,8 @@ const CHORD_SUFFIXES: Record<Flavour, string> = {
   min: "m",
   unknown: "",
 };
+
+export const MAX_CHORDS_COUNT = 10;
 
 export const NOTE_NAMES = [
   "C",
@@ -51,7 +66,7 @@ export const NOTE_NAMES = [
   "B",
 ];
 
-export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
+export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
   major: {
     label: "Major",
     type: "major",
@@ -299,6 +314,10 @@ export const createScale = (
   const noteName = getNoteName(rootNote);
   const scale = SCALE_TYPES[scaleType];
 
+  if (!scale) {
+    throw `Unable to create the scale of type "${scaleType}".`;
+  }
+
   return {
     label: `${noteName} ${scale.label}`,
     root: rootNote,
@@ -319,3 +338,15 @@ export const createScale = (
     ) as ScaleChords,
   };
 };
+
+export const createScaleFromChords = (chords: Chord[]): Scale => ({
+  label: "Chords",
+  root: 0,
+  type: "chords",
+  notes: [
+    ...new Set<NoteNumber>(chords.flatMap((chord) => chord.notes)),
+  ].sort(),
+  chords: Object.fromEntries(
+    chords.map((chord, i) => [CHORD_NUMBERS[i], chord]),
+  ),
+});
