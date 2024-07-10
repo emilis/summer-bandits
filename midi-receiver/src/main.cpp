@@ -16,6 +16,7 @@ enum Protocol {
 typedef struct state {
   uint8_t value;
   Protocol protocol;
+  Mode type;
 } state;
 
 typedef struct channel_state {
@@ -31,19 +32,24 @@ std::map<int, channel_state> channelStates = {
   {1, {0, 0, {}}}
 };
 
-void saveState(int channel, Protocol protocol, uint8_t pitch, uint8_t velocity) {
+void saveState(int channel, Protocol protocol, Mode type, uint8_t pitch, uint8_t velocity) {
   std::unordered_map<uint8_t, state>& states = channelStates[channel].states;
-  states[pitch] = {velocity, protocol};
+  states[pitch] = {velocity, protocol, type};
 }
 
 void noteOn(uint8_t channel, Protocol protocol, uint8_t pitch, uint8_t velocity) {
   serialNoteOn(channel, pitch, velocity);
-  saveState(channel, protocol, pitch, velocity);
+  saveState(channel, protocol, Mode::NOTE, pitch, velocity);
 }
 
 void noteOff(uint8_t channel, Protocol protocol, uint8_t pitch) {
   serialNoteOff(channel, pitch);
-  saveState(channel, protocol, pitch, 0);
+  saveState(channel, protocol, Mode::NOTE, pitch, 0);
+}
+
+void pitchDown(uint8_t channel, Protocol protocol, int pitch) {
+  serialPitchBend(channel, pitch);
+  saveState(channel, protocol, Mode::PITCH, 0, pitch);
 }
 
 void processWirelessMidiMessage(controller_message *receivedData) {
@@ -54,13 +60,17 @@ void processWirelessMidiMessage(controller_message *receivedData) {
     case PING:
       channelStates[channel].lastWirelessPing = now;
       break;
-    case DATA:
+    case NOTE:
       if (now - lastSerialWrite < WIRELESS_IGNORE_AFTER_LAST_SERIAL_WRITE) return;
       if (receivedData->velocity == 0) {
         noteOff(channel, Protocol::ESP_NOW, receivedData->pitch);
       } else {
         noteOn(channel, Protocol::ESP_NOW, receivedData->pitch, receivedData->velocity);
       }
+      break;
+    case PITCH:
+      if (now - lastSerialWrite < WIRELESS_IGNORE_AFTER_LAST_SERIAL_WRITE) return;
+      pitchDown(channel, Protocol::ESP_NOW, receivedData->pitch);
       break;
     default:
       break;
@@ -80,7 +90,11 @@ void noteOffExpiredEspNowMessages(int channel, unsigned long& lastPing, std::uno
       uint8_t pitch = entry.first;
       const state& currentState = entry.second;
       if (currentState.protocol == Protocol::ESP_NOW && currentState.value != 0) {
-          noteOff(channel, currentState.protocol, pitch);
+          if (currentState.type == Mode::NOTE) {
+              noteOff(channel, currentState.protocol, pitch);
+          } else if (currentState.type == Mode::PITCH) {
+              pitchDown(channel, currentState.protocol, 0);
+          }
       }
   }
 }
@@ -123,7 +137,8 @@ void loop() {
     uint8_t velocity = data[2];
 
     channelStates[channel].lastMidiSerialWrite = now;
-    saveState(channel, Protocol::MIDI_SERIAL, pitch, velocity);
+    //TODO: support serial pitch bend input
+    saveState(channel, Protocol::MIDI_SERIAL, Mode::NOTE, pitch, velocity);
   }
 
   noteOffExpiredEspNowMessages();
