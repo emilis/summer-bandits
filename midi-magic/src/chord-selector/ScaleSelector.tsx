@@ -15,27 +15,17 @@ type Props = {
 
 export function ScaleSelector({ onChange, scale }: Props) {
   const onNoteChange = (evt: JSX.TargetedEvent<HTMLSelectElement>) => {
-    onChange(
-      parseInt(evt.currentTarget.value) as NoteNumber,
-      scale.type,
-    );
-  }
+    onChange(parseInt(evt.currentTarget.value) as NoteNumber, scale.type);
+  };
   const onTypeChange = (evt: JSX.TargetedEvent<HTMLSelectElement>) => {
-    onChange(
-      scale.root,
-      evt.currentTarget.value as ScaleType,
-    );
+    onChange(scale.root, evt.currentTarget.value as ScaleType);
   };
 
   return (
     <div class="com-chord-selector-scale-selector">
       <select onChange={onNoteChange}>
         {NOTE_NAMES.map((name, note) => (
-          <option
-            value={note}
-            selected={scale.root == note}
-            key={note}
-          >
+          <option value={note} selected={scale.root == note} key={note}>
             {name}
           </option>
         ))}
@@ -44,10 +34,7 @@ export function ScaleSelector({ onChange, scale }: Props) {
         {Object.keys(SCALE_TYPES).map((key) => {
           const scaleType = SCALE_TYPES[key as ScaleType];
           return (
-            <option
-              value={key}
-              selected={scale.type == scaleType.type}
-            >
+            <option value={key} selected={scale.type == scaleType.type}>
               {scaleType.label}
             </option>
           );

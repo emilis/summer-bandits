@@ -29,10 +29,11 @@ export const CHORD_NUMBERS: ChordNumber[] = [
   "vii",
 ];
 const CHORD_SUFFIXES: Record<Flavour, string> = {
+  aug: "aug",
+  dim: "dim",
   maj: "",
   min: "m",
-  dim: "dim",
-  aug: "aug",
+  unknown: "",
 };
 
 export const NOTE_NAMES = [
@@ -308,7 +309,7 @@ export const createScale = (
         chordNum,
         {
           flavour: chord.flavour,
-          label: `${ NOTE_NAMES[chord.notes[0]] }${ CHORD_SUFFIXES[chord.flavour] || "" }`,
+          label: `${NOTE_NAMES[chord.notes[0]]}${CHORD_SUFFIXES[chord.flavour] || ""}`,
           notes: chord.notes.map(getRootedNote(rootNote)),
           levels: chord.levels.map((level) =>
             level.map(getRootedNote(rootNote)),
