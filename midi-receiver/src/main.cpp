@@ -1,4 +1,5 @@
 #include <WiFi.h>
+#include <map>
 #include <unordered_map>
 #include <esp_now.h>
 #include "esp_wifi.h" 
@@ -12,24 +13,27 @@ enum Protocol {
   ESP_NOW,
 };
 
-struct State {
+typedef struct state {
   uint8_t value;
   Protocol protocol;
   Mode type;
-};
+} state;
 
-struct ChannelState {
+typedef struct channel_state {
   unsigned long lastWirelessPing;
   unsigned long lastMidiSerialWrite;
-  std::unordered_map<uint8_t, State> states;
-};
+  std::unordered_map<uint8_t, state> states;
+} channel_state;
 
 unsigned long now = 0;
 
-ChannelState channelStates[2] = {};
+std::map<int, channel_state> channelStates = {
+  {0, {0, 0, {}}},
+  {1, {0, 0, {}}}
+};
 
 void saveState(int channel, Protocol protocol, Mode type, uint8_t pitch, uint8_t velocity) {
-  auto& states = channelStates[channel].states;
+  std::unordered_map<uint8_t, state>& states = channelStates[channel].states;
   states[pitch] = {velocity, protocol, type};
 }
 
@@ -52,20 +56,16 @@ void pitchBend(uint8_t channel, Protocol protocol, int pitch) {
   saveState(channel, protocol, Mode::PITCH, 0, pitch);
 }
 
-void processWirelessMidiMessage(ControllerMessage *receivedData) {
+void processWirelessMidiMessage(controller_message *receivedData) {
   int channel = getChannel(receivedData->device);
-  auto& channelState = channelStates[channel];
-  auto lastSerialWrite = channelState.lastMidiSerialWrite;
-
-  if (now - lastSerialWrite < WIRELESS_IGNORE_AFTER_LAST_SERIAL_WRITE) return;
-
-  if (receivedData->mode == PING) {
-    channelState.lastWirelessPing = now;
-    return;
-  }
+  auto lastSerialWrite = channelStates[channel].lastMidiSerialWrite;
 
   switch (receivedData->mode) {
+    case PING:
+      channelStates[channel].lastWirelessPing = now;
+      break;
     case NOTE:
+      if (now - lastSerialWrite < WIRELESS_IGNORE_AFTER_LAST_SERIAL_WRITE) return;
       if (receivedData->velocity == 0) {
         noteOff(channel, Protocol::ESP_NOW, receivedData->pitch);
       } else {
@@ -73,37 +73,42 @@ void processWirelessMidiMessage(ControllerMessage *receivedData) {
       }
       break;
     case PITCH:
+      if (now - lastSerialWrite < WIRELESS_IGNORE_AFTER_LAST_SERIAL_WRITE) return;
       pitchBend(channel, Protocol::ESP_NOW, receivedData->pitch);
       break;
     default:
-      DEBUG_PRINT("Mode: UNKNOWN");
+      break;
+      Serial.println("Mode: UNKNOWN");
   }
 }
 
 void OnDataReceived(const uint8_t * mac, const uint8_t *espNowData, int len) {
-  processWirelessMidiMessage((ControllerMessage *)espNowData);
+  controller_message *receivedData = (controller_message *)espNowData;
+  processWirelessMidiMessage(receivedData);
 }
 
-void noteOffExpiredEspNowMessages(int channel, ChannelState& channelState) {
-  if (now - channelState.lastWirelessPing < WIRELESS_TIMEOUT_MILLIS) return;
+void noteOffExpiredEspNowMessages(int channel, unsigned long& lastPing, std::unordered_map<uint8_t, state>& states) {
+  if (now - lastPing < WIRELESS_TIMEOUT_MILLIS) return;
 
-  auto& states = channelState.states;
-  for (auto& entry : states) {
-    auto& currentState = entry.second;
-    if (currentState.protocol == Protocol::ESP_NOW && currentState.value != 0) {
-      if (currentState.type == Mode::NOTE) {
-        noteOff(channel, currentState.protocol, entry.first);
-      } else if (currentState.type == Mode::PITCH) {
-        int offValue = (WHAMMY_BAR_IS_MOD) ? 0 : 8192;
-        pitchBend(channel, currentState.protocol, offValue);
+  for (const auto& entry : states) {
+      uint8_t pitch = entry.first;
+      const state& currentState = entry.second;
+      if (currentState.protocol == Protocol::ESP_NOW && currentState.value != 0) {
+          if (currentState.type == Mode::NOTE) {
+              noteOff(channel, currentState.protocol, pitch);
+          } else if (currentState.type == Mode::PITCH) {
+              int offValue = (WHAMMY_BAR_IS_MOD) ? 0 : 8192;
+              pitchBend(channel, currentState.protocol, offValue);
+          }
       }
-    }
   }
 }
 
 void noteOffExpiredEspNowMessages() {
-  for (int channel = 0; channel < 2; ++channel) {
-    noteOffExpiredEspNowMessages(channel, channelStates[channel]);
+  for (auto& entry : channelStates) {
+      int channel = entry.first;
+      channel_state& currentState = entry.second;
+      noteOffExpiredEspNowMessages(entry.first, currentState.lastWirelessPing, currentState.states);
   }
 }
 
@@ -114,15 +119,15 @@ void setup() {
 
   WiFi.mode(WIFI_STA);
   esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
-  esp_wifi_start();
 
+  esp_wifi_start();
   if (esp_now_init() != ESP_OK) {
-    DEBUG_PRINT("Error initializing ESP-NOW");
+    Serial.println("Error initializing ESP-NOW");
     return;
   }
   esp_now_register_recv_cb(OnDataReceived);
   
-  DEBUG_PRINT("Receiver booted up.");
+  Serial.println("Receiver booted up.");
 }
 
 void loop() {

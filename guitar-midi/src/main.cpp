@@ -1,6 +1,8 @@
+#include <unordered_map>
 #include <WiFi.h>
 #include <esp_now.h>
 #include "esp_wifi.h"
+#include <cstring> 
 #include "midi_common.h"
 
 #if USE_ADS == true
@@ -20,52 +22,52 @@ constexpr DeviceType getDeviceType(const char* deviceType) {
 
 DeviceType device = getDeviceType(DEVICE);
 const int MIDI_CHANNEL = getChannel(device);
-const ControllerMessage PING_MESSAGE = {device, Mode::PING, 0, 0};
+const controller_message PING_MESSAGE = {device, Mode::PING, 0, 0};
 
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; //Broadcast to all
 unsigned long previousMillis = 0;
-int pinState[20] = {};
-unsigned long debounceState[19] = {};
+std::unordered_map<int, int> pinState;
+std::unordered_map<int, unsigned long> debounceState;
 // Pins UP and DOWN share the same debounce state intentionally.
 // When strumming with a particular pattern, the button flies back and opens 
 // the other switch, which is not something we want.
 unsigned long* strumDebounce = &(debounceState[10]);
 unsigned long now = 0;
 
-inline void sendEspNowMessage(const ControllerMessage& message) {
+void sendEspNowMessage(const controller_message& message) {
     esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &message, sizeof(message));
     if (result != ESP_OK) {
-        DEBUG_PRINT("Error sending message");
-        DEBUG_PRINT(result);
+        Serial.println("Error sending message");
+        Serial.println(result);
     }
 }
 
-inline void sendEspNowNote(uint8_t pitch, uint8_t velocity) {
-    ControllerMessage data = {device, Mode::NOTE, pitch, velocity};
+void sendEspNowNote(uint8_t pitch, uint8_t velocity) {
+    controller_message data = {device, Mode::NOTE, pitch, velocity};
     sendEspNowMessage(data);
 }
 
-inline void sendEspNowPitch(int pitch) {
-    ControllerMessage data = {device, Mode::PITCH, pitch, 0};
+void sendEspNowPitch(int pitch) {
+    controller_message data = {device, Mode::PITCH, pitch, 0};
     sendEspNowMessage(data);
 }
 
-inline void noteOn(uint8_t pitch, uint8_t velocity) {
+void noteOn(uint8_t pitch, uint8_t velocity) {
     serialNoteOn(MIDI_CHANNEL, pitch, velocity);
     sendEspNowNote(pitch, velocity);
 }
 
-inline void noteOff(uint8_t pitch) {
+void noteOff(uint8_t pitch) {
     serialNoteOff(MIDI_CHANNEL, pitch);
     sendEspNowNote(pitch, 0);
 }
 
-inline void whammyDown(int bendValue) {
+void whammyDown(int bendValue) {
     serialPitchBend(MIDI_CHANNEL, bendValue);
     sendEspNowPitch(bendValue);
 }
 
-inline void whammyMod(uint8_t bendValue) {
+void whammyMod(uint8_t bendValue) {
     serialMod(MIDI_CHANNEL, bendValue);
     sendEspNowPitch(bendValue);
 }
@@ -188,7 +190,7 @@ void setup() {
     esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
     esp_wifi_start();
     if (esp_now_init() != ESP_OK) {
-        DEBUG_PRINT("Error initializing ESP-NOW");
+        Serial.println("Error initializing ESP-NOW");
         return;
     }
 
@@ -200,13 +202,13 @@ void setup() {
     broadcastPeer.encrypt = false;
 
     if (esp_now_add_peer(&broadcastPeer) != ESP_OK) {
-        DEBUG_PRINT("Failed to add broadcast peer");
+        Serial.println("Failed to add broadcast peer");
         return;
     }
 
     setupPins();
 
-    DEBUG_PRINT("Controller booted up.");
+    Serial.println("Controller booted up.");
 }
 
 void loop() {
@@ -236,13 +238,13 @@ void loop() {
     updateButton(PIN_CROSS_DOWN,  62, pinState[14], debounceState[13], now);
     updateButton(PIN_CROSS_LEFT,  63, pinState[15], debounceState[14], now);
     #endif
-    updateButton(PIN_VIEW,        65, pinState[17], debounceState[15], now);
-    updateButton(PIN_MENU,        66, pinState[16], debounceState[16], now);
+    updateButton(PIN_MENU,        65, pinState[16], debounceState[15], now); //Leader button
+    updateButton(PIN_VIEW,        66, pinState[17], debounceState[16], now); //Set free play button
 
-    updateSelector(67, pinState[17]);
+    updateSelector(67, pinState[18]);
     if (WHAMMY_BAR_IS_MOD) {
-        updateWhammyMod(pinState[19], debounceState[18], now);
+        updateWhammyMod(pinState[19], debounceState[17], now);
     } else {
-        updateWhammyPitchDown(pinState[19], debounceState[18], now);
+        updateWhammyPitchDown(pinState[19], debounceState[17], now);
     }
 }
