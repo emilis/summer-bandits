@@ -73,7 +73,7 @@ void processWirelessMidiMessage(ControllerMessage *receivedData) {
       }
       break;
     case PITCH:
-      pitchBend(channel, Protocol::ESP_NOW, receivedData->pitch);
+      pitchBend(channel, Protocol::ESP_NOW, receivedData->velocity);
       break;
     default:
       DEBUG_PRINT("Mode: UNKNOWN");

@@ -46,7 +46,7 @@ inline void sendEspNowNote(uint8_t pitch, uint8_t velocity) {
 }
 
 inline void sendEspNowPitch(int pitch) {
-    ControllerMessage data = {device, Mode::PITCH, pitch, 0};
+    ControllerMessage data = {device, Mode::PITCH, 0, pitch};
     sendEspNowMessage(data);
 }
 
