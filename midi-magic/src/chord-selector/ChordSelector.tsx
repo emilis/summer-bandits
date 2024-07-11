@@ -44,6 +44,7 @@ export function ChordSelector({ onSelectScale, onSelectChords }: Props) {
           id="tab-song"
           onClick={() => setTab("song")}
           role="tab"
+          style={{ display: "none" }}
         />
       </div>
       <div
