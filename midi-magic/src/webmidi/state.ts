@@ -1,4 +1,4 @@
-import { EventEmitter } from "djipevents";
+///import { EventEmitter } from "djipevents";
 import { signal } from "@preact/signals";
 import { WebMidi } from "webmidi";
 
@@ -8,7 +8,7 @@ export const midiInputs = signal(WebMidi.inputs);
 export const midiOutputs = signal(WebMidi.outputs);
 export { WebMidi };
 
-WebMidi.addListener(EventEmitter.ANY_EVENT, console.debug);
+/// WebMidi.addListener(EventEmitter.ANY_EVENT, console.debug);
 
 WebMidi.addListener("portschanged", () => {
   midiInputs.value = WebMidi.inputs.filter(

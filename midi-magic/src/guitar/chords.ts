@@ -1,3 +1,4 @@
+import { getPermutations } from "../array/get-permutations";
 import { Chord } from "../harmony/scales";
 
 const E = 40;
@@ -8,6 +9,7 @@ const B = 59;
 const Ehigh = 64;
 
 const LOWEST_GUITAR_NOTE = E;
+const ALL_STRINGS = [E, A, D, G, B, Ehigh];
 
 const x: "x" = "x";
 
@@ -92,7 +94,7 @@ const openMajorChords: Record<number, number[]> = {
   /* G */ 43: literalChord(3, 2, 0, 0, 3, 3),
   /* A */ 45: makeMajorBarreOnA(A),
   /* C */ 48: literalChord(x, 3, 2, 0, 1, 0),
-  /* D */ 50: literalChord(x, x, 0, 3, 2, 3),
+  /* D */ 50: literalChord(x, x, 0, 2, 3, 2),
 };
 
 const openMinorChords: Record<number, number[]> = {
@@ -145,45 +147,104 @@ const getRoot = (chord: Chord) => {
   return root;
 };
 
+const getFretCount = (targetNote: number, stringNote: number): Fret => {
+  const normalizedTarget = targetNote % 12;
+  const normalizedString = stringNote % 12;
+  const diff = normalizedTarget - normalizedString;
+  return (diff < 0 ? diff + 12 : diff) as Fret;
+};
+
+/** Maps 1st note on one of the first two strings (E, A).
+ * Then 2d or 3rd chord note on the other fo the first two strings.
+ * Then maps the rest of the chord notes on the remaining four strings.
+ */
+const mapAnyChord = (chord: Chord): number[] => {
+  const [root, third, fifth, ...restNotes] = chord.notes;
+  const [E, A] = ALL_STRINGS;
+
+  const frets: Fret[] = [];
+  let lastFourNotes: number[] = restNotes.slice(0, 3);
+
+  const fcRootE = getFretCount(root, E);
+  const fcRootA = getFretCount(root, A);
+
+  if (fcRootE < fcRootA) {
+    const fcThirdA = getFretCount(third, A);
+    const fcFifthA = getFretCount(fifth, A);
+
+    if (fcThirdA < fcFifthA) {
+      frets.push(fcRootE, fcThirdA);
+      lastFourNotes.push(fifth);
+    } else {
+      frets.push(fcRootE, fcFifthA);
+      lastFourNotes.push(third);
+    }
+  } else {
+    const fcThirdE = getFretCount(third, E);
+    const fcFifthE = getFretCount(fifth, E);
+
+    if (fcThirdE < fcFifthE) {
+      frets.push(fcThirdE, fcRootA);
+      lastFourNotes.push(fifth);
+    } else {
+      frets.push(fcFifthE, fcRootA);
+      lastFourNotes.push(third);
+    }
+  }
+
+  /// map the last four notes:
+  if (lastFourNotes.length < 4) {
+    lastFourNotes.push(root);
+  }
+  const lastStrings = ALL_STRINGS.slice(2, 2 + lastFourNotes.length);
+  const permutations = getPermutations(lastFourNotes);
+
+  const minFrets = permutations.reduce(
+    (acc, lastNotes) => {
+      const maxFret = Math.max(
+        ...lastNotes.map((note, i) => getFretCount(note, lastStrings[i])),
+      );
+      if (maxFret >= acc.maxFret) {
+        return acc;
+      } else {
+        return { maxFret, lastNotes };
+      }
+    },
+    { maxFret: Infinity, lastNotes: lastFourNotes },
+  );
+
+  // convert frets to notes:
+  return [...frets, ...minFrets.lastNotes].map(
+    (fretCount, i) => ALL_STRINGS[i] + fretCount,
+  );
+};
+
 const getChordNotes = (chord: Chord): number[] => {
   const root = getRoot(chord);
   switch (chord.flavour) {
+    case "aug":
+      return makeAugmented(root);
+    case "dim":
+      return makeDiminished(root);
     case "maj":
       return openMajorChords[root] || makeMajorBarre(root);
-    case "min":
-      return openMinorChords[root] || makeMinorBarre(root);
-    case "dim":
-      return makeDiminished(root);
-    case "aug":
-      return makeAugmented(root);
-    default:
-      return [];
-  }
-};
-
-const getSpicyChordNotes = (chord: Chord): number[] => {
-  const root = getRoot(chord);
-  switch (chord.flavour) {
-    case "maj":
+    case "maj7":
       return openMajor7Chords[root] || makeMajor7Barre(root);
     case "min":
+      return openMinorChords[root] || makeMinorBarre(root);
+    case "min7":
       return openMinor7Chords[root] || makeMinor7Barre(root);
-    case "dim":
-      return makeDiminished(root);
-    case "aug":
-      return makeAugmented(root);
     default:
-      return [];
+      return mapAnyChord(chord);
   }
 };
 
 export type GuitarChord = {
   chord: Chord;
-  spicy: boolean;
 };
 
 export const getGuitarChordNotes = (chord: GuitarChord) =>
-  chord.spicy ? getSpicyChordNotes(chord.chord) : getChordNotes(chord.chord);
+  getChordNotes(chord.chord);
 
 export const getPowerChordNotes = (chord: GuitarChord): number[] =>
   calculatedChord((getRoot(chord.chord) - E) as Fret, 0, 2, 2, x, x, x);

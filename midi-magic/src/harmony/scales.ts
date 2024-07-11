@@ -2,13 +2,13 @@ export type NoteNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
 export type Chord = {
   flavour: Flavour;
-  notes: NoteNumber[];
+  label?: string;
   levels: NoteNumber[][];
+  notes: NoteNumber[];
 };
-export type ChordNumber = "i" | "ii" | "iii" | "iv" | "v" | "vi" | "vii";
-export type Flavour = "maj" | "min" | "dim" | "aug";
+export type Flavour = "aug" | "dim" | "maj" | "maj7" | "min" | "min7" | "other";
 
-export type ScaleChords = Record<ChordNumber, Chord>;
+type ScaleChords = Chord[];
 export type Scale = {
   type: ScaleType;
   label: string;
@@ -16,7 +16,19 @@ export type Scale = {
   chords: ScaleChords;
   root: NoteNumber;
 };
-export type ScaleType = "major" | "minor" | "harmonic_minor";
+export type ScaleType = "chords" | "major" | "minor" | "harmonic_minor";
+
+const CHORD_SUFFIXES: Record<Flavour, string> = {
+  aug: "aug",
+  dim: "dim",
+  maj: "",
+  maj7: "M7",
+  min: "m",
+  min7: "m7",
+  other: "",
+};
+
+export const MAX_CHORDS_COUNT = 10;
 
 export const NOTE_NAMES = [
   "C",
@@ -33,73 +45,80 @@ export const NOTE_NAMES = [
   "B",
 ];
 
-export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
+export const SCALE_TYPES: Partial<Record<ScaleType, Omit<Scale, "root">>> = {
   major: {
     label: "Major",
     type: "major",
     notes: [0, 2, 4, 5, 7, 9, 11],
-    chords: {
-      i: {
+    chords: [
+      {
+        // I
         flavour: "maj",
-        notes: [0, 7, 4],
+        notes: [0, 4, 7],
         levels: [
-          [0, 7, 4, 2],
-          [0, 7, 4, 2, 9],
-          [0, 7, 4, 11],
-          [0, 7, 4, 11, 2],
+          [0, 4, 7, 2],
+          [0, 4, 7, 9, 2],
+          [0, 4, 7, 11],
+          [0, 4, 7, 11, 2],
         ],
       },
-      ii: {
+      {
+        // II
         flavour: "min",
-        notes: [2, 9, 5],
+        notes: [2, 5, 9],
         levels: [
-          [2, 9, 5, 0],
-          [2, 9, 5, 0, 7],
-          [2, 9, 5, 0],
-          [2, 9, 5, 0, 4],
+          [2, 5, 9, 0],
+          [2, 5, 9, 0, 7],
+          [2, 5, 9, 0],
+          [2, 5, 9, 0, 4],
         ],
       },
-      iii: {
+      {
+        // III
         flavour: "min",
-        notes: [4, 11, 7],
+        notes: [4, 7, 11],
         levels: [
-          [4, 11, 7, 2],
-          [4, 11, 7, 2, 9],
-          [4, 11, 7, 2],
-          [4, 11, 7, 2, 5],
+          [4, 7, 11, 2],
+          [4, 7, 11, 2, 9],
+          [4, 7, 11, 2],
+          [4, 7, 11, 2, 5],
         ],
       },
-      iv: {
+      {
+        // IV
         flavour: "maj",
-        notes: [5, 0, 9],
+        notes: [5, 9, 0],
         levels: [
-          [5, 0, 9, 7],
-          [5, 0, 9, 7, 2],
-          [5, 0, 9, 4],
-          [5, 0, 9, 4, 7],
+          [5, 9, 0, 7],
+          [5, 9, 0, 2, 7],
+          [5, 9, 0, 4],
+          [5, 9, 0, 4, 7],
         ],
       },
-      v: {
+      {
+        // V
         flavour: "maj",
-        notes: [7, 2, 11, 5],
+        notes: [7, 11, 2],
         levels: [
-          [7, 2, 11, 9],
-          [7, 2, 11, 9, 4],
-          [7, 2, 11, 5],
-          [7, 2, 11, 5, 9],
+          [7, 11, 2, 9],
+          [7, 11, 2, 4, 9],
+          [7, 11, 2, 5],
+          [7, 11, 2, 5, 9],
         ],
       },
-      vi: {
+      {
+        // VI
         flavour: "min",
-        notes: [9, 4, 0],
+        notes: [9, 0, 4],
         levels: [
-          [9, 4, 0, 7],
-          [9, 4, 0, 7, 2],
-          [9, 4, 0, 7],
-          [9, 4, 0, 7, 11],
+          [9, 0, 4, 7],
+          [9, 0, 4, 7, 2],
+          [9, 0, 4, 7],
+          [9, 0, 4, 7, 11],
         ],
       },
-      vii: {
+      {
+        // VII
         flavour: "dim",
         notes: [11, 2, 5],
         levels: [
@@ -109,24 +128,26 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
           [11, 2, 5, 9, 4],
         ],
       },
-    },
+    ],
   },
   minor: {
     label: "Minor",
     type: "minor",
     notes: [0, 2, 3, 5, 7, 8, 10],
-    chords: {
-      i: {
+    chords: [
+      {
+        // I
         flavour: "min",
-        notes: [0, 7, 3],
+        notes: [0, 3, 7],
         levels: [
-          [0, 7, 3, 10],
-          [0, 7, 3, 10, 5],
-          [0, 7, 3, 10],
-          [0, 7, 3, 10, 2],
+          [0, 3, 7, 10],
+          [0, 3, 7, 10, 5],
+          [0, 3, 7, 10],
+          [0, 3, 7, 10, 2],
         ],
       },
-      ii: {
+      {
+        // II
         flavour: "dim",
         notes: [2, 5, 8],
         levels: [
@@ -136,74 +157,81 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
           [2, 5, 8, 0, 7],
         ],
       },
-      iii: {
+      {
+        // III
         flavour: "maj",
-        notes: [3, 10, 7],
+        notes: [3, 7, 10],
         levels: [
-          [3, 10, 7, 5],
-          [3, 10, 7, 5, 0],
-          [3, 10, 7, 2],
-          [3, 10, 7, 2, 5],
+          [3, 7, 10, 5],
+          [3, 7, 10, 0, 5],
+          [3, 7, 10, 2],
+          [3, 7, 10, 2, 5],
         ],
       },
-      iv: {
+      {
+        // IV
         flavour: "min",
-        notes: [5, 0, 8],
+        notes: [5, 8, 0],
         levels: [
-          [5, 0, 8, 3],
-          [5, 0, 8, 3, 10],
-          [5, 0, 8, 3],
-          [5, 0, 8, 3, 7],
+          [5, 8, 0, 3],
+          [5, 8, 0, 3, 10],
+          [5, 8, 0, 3],
+          [5, 8, 0, 3, 7],
         ],
       },
-      v: {
+      {
+        // V
         flavour: "min",
-        notes: [7, 2, 10],
+        notes: [7, 10, 2],
         levels: [
-          [7, 2, 10, 5],
-          [7, 2, 10, 5, 0],
-          [7, 2, 10, 5],
-          [7, 2, 10, 5, 8],
+          [7, 10, 2, 5],
+          [7, 10, 2, 5, 0],
+          [7, 10, 2, 5],
+          [7, 10, 2, 5, 8],
         ],
       },
-      vi: {
+      {
+        // VI
         flavour: "maj",
-        notes: [8, 3, 0],
+        notes: [8, 0, 3],
         levels: [
-          [8, 3, 0, 10],
-          [8, 3, 0, 10, 5],
-          [8, 3, 0, 7],
-          [8, 3, 0, 7, 10],
+          [8, 0, 3, 10],
+          [8, 0, 3, 5, 10],
+          [8, 0, 3, 7],
+          [8, 0, 3, 7, 10],
         ],
       },
-      vii: {
+      {
+        // VII
         flavour: "maj",
-        notes: [10, 5, 2],
+        notes: [10, 2, 5],
         levels: [
-          [10, 5, 2, 0],
-          [10, 5, 2, 0, 7],
-          [10, 5, 2, 8],
-          [10, 5, 2, 8, 0],
+          [10, 2, 5, 0],
+          [10, 2, 5, 7, 0],
+          [10, 2, 5, 8],
+          [10, 2, 5, 8, 0],
         ],
       },
-    },
+    ],
   },
   harmonic_minor: {
     label: "Harmonic minor",
     type: "harmonic_minor",
     notes: [0, 2, 3, 5, 7, 8, 11],
-    chords: {
-      i: {
+    chords: [
+      {
+        // I
         flavour: "min",
-        notes: [0, 7, 3],
+        notes: [0, 3, 7],
         levels: [
-          [0, 7, 3, 5],
-          [0, 7, 3, 5],
-          [0, 7, 3, 2],
-          [0, 7, 3, 2, 11],
+          [0, 3, 7, 5],
+          [0, 3, 7, 5],
+          [0, 3, 7, 2],
+          [0, 3, 7, 11, 2],
         ],
       },
-      ii: {
+      {
+        // II
         flavour: "dim",
         notes: [2, 5, 8],
         levels: [
@@ -213,49 +241,54 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
           [2, 5, 8, 0],
         ],
       },
-      iii: {
+      {
+        // III
         flavour: "aug",
-        notes: [3, 11, 7],
+        notes: [3, 7, 11],
         levels: [
-          [3, 7, 5],
-          [3, 7, 5, 0],
+          [3, 5, 7],
+          [3, 5, 7, 0],
           [3, 7, 11, 2],
           [3, 7, 2, 5],
         ],
       },
-      iv: {
+      {
+        // IV
         flavour: "min",
-        notes: [5, 0, 8],
+        notes: [5, 8, 0],
         levels: [
-          [5, 0, 8, 3],
-          [5, 0, 8, 3],
-          [5, 0, 8, 3],
-          [5, 0, 8, 3, 7],
+          [5, 8, 0, 3],
+          [5, 8, 0, 3],
+          [5, 8, 0, 3],
+          [5, 8, 0, 3, 7],
         ],
       },
-      v: {
+      {
+        // V
         flavour: "maj",
-        notes: [7, 2, 11, 5],
+        notes: [7, 11, 2, 5],
         levels: [
           [7, 2, 5],
-          [7, 2, 5, 0],
-          [7, 2, 11, 5],
-          [7, 11, 3, 5],
+          [7, 0, 2, 5],
+          [7, 11, 2, 5],
+          [7, 11, 2, 5],
         ],
       },
-      vi: {
+      {
+        // VI
         flavour: "maj",
-        notes: [8, 3, 0],
+        notes: [8, 0, 3],
         levels: [
-          [8, 3, 0],
-          [8, 3, 0, 5],
-          [8, 3, 0, 7],
-          [8, 0, 7, 2],
+          [8, 0, 3],
+          [8, 0, 3, 5],
+          [8, 0, 3, 7],
+          [8, 0, 2, 7],
         ],
       },
-      vii: {
+      {
+        // VII
         flavour: "dim",
-        notes: [11, 5, 2],
+        notes: [11, 2, 5],
         levels: [
           [11, 3, 7],
           [11, 3, 7],
@@ -263,7 +296,7 @@ export const SCALE_TYPES: Record<ScaleType, Omit<Scale, "root">> = {
           [11, 2, 5, 8],
         ],
       },
-    },
+    ],
   },
 };
 
@@ -281,22 +314,34 @@ export const createScale = (
   const noteName = getNoteName(rootNote);
   const scale = SCALE_TYPES[scaleType];
 
+  if (!scale) {
+    throw `Unable to create the scale of type "${scaleType}".`;
+  }
+
   return {
     label: `${noteName} ${scale.label}`,
     root: rootNote,
     type: scale.type,
     notes: scale.notes.map(getRootedNote(rootNote)),
-    chords: Object.fromEntries(
-      Object.entries(scale.chords).map(([chordNum, chord]) => [
-        chordNum,
-        {
-          flavour: chord.flavour,
-          notes: chord.notes.map(getRootedNote(rootNote)),
-          levels: chord.levels.map((level) =>
-            level.map(getRootedNote(rootNote)),
-          ),
-        },
-      ]),
-    ) as ScaleChords,
+    chords: scale.chords.map((chord) => {
+      const notes = chord.notes.map(getRootedNote(rootNote));
+
+      return {
+        flavour: chord.flavour,
+        label: `${NOTE_NAMES[notes[0]]}${CHORD_SUFFIXES[chord.flavour] || ""}`,
+        notes,
+        levels: chord.levels.map((level) => level.map(getRootedNote(rootNote))),
+      };
+    }),
   };
 };
+
+export const createScaleFromChords = (chords: Chord[]): Scale => ({
+  label: "Chords",
+  root: 0,
+  type: "chords",
+  notes: [
+    ...new Set<NoteNumber>(chords.flatMap((chord) => chord.notes)),
+  ].sort(),
+  chords,
+});

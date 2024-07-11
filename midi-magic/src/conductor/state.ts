@@ -1,8 +1,7 @@
-import { computed, signal } from "@preact/signals";
+import { signal } from "@preact/signals";
 
 import {
   type Chord,
-  type ChordNumber,
   type NoteNumber,
   type Scale,
   createScale,
@@ -17,11 +16,6 @@ const MIDI_COUNT = 128;
 /// State ----------------------------------------------------------------------
 
 export const activeScale = signal<Scale>(createScale("major", 0));
-export const activeChordNumber = signal<ChordNumber>("i");
-
-export const activeChord = computed<Chord>(
-  () => activeScale.value.chords[activeChordNumber.value],
-);
 
 /// Private functions ----------------------------------------------------------
 
@@ -32,18 +26,20 @@ const midiToNote = (midiNum: number): NoteNumber =>
 
 /// Exported functions ---------------------------------------------------------
 
-export const getChordByNumber = (chordNumber: ChordNumber): Chord =>
-  activeScale.value.chords[chordNumber];
+export const getChordByNumber = (chordNumber: number): Chord => {
+  const { chords } = activeScale.value;
+  return chords[chordNumber % chords.length];
+};
 
 export const getClosestChordNote = (
-  chordNumber: ChordNumber,
+  chordNumber: number,
   note: number,
   level: number = 0,
 ): number => {
   if (level > 6) {
     return note;
   }
-  const chord = activeScale.value.chords[chordNumber];
+  const chord = getChordByNumber(chordNumber);
   const notes = new Set<number>(
     level === 0
       ? chord.notes
@@ -64,10 +60,6 @@ export const getClosestChordNote = (
   }
 
   return note;
-};
-
-export const setActiveChord = (chord: ChordNumber) => {
-  activeChordNumber.value = chord;
 };
 
 /// Effects --------------------------------------------------------------------

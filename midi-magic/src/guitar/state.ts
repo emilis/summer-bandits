@@ -16,7 +16,6 @@ import { registerInput, registerOutput } from "../storage";
 import { GuitarChord } from "./chords";
 import {
   CHORDS,
-  CLOSER_CHORD_NOTES,
   CROSS_NOTES,
   DOWN_NOTE,
   FIRST_CROSS_NOTE,
@@ -44,11 +43,8 @@ const guitarIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
 const player = registerPlayer(LABEL, "LEAD");
 
-const spicy = signal<boolean>(false);
-
 const activeGuitarChord = signal<GuitarChord>({
   chord: getChordByNumber(player.peek().chordNumber),
-  spicy: spicy.peek(),
 });
 
 let activeNote = OPEN_CHORD_NOTE;
@@ -153,12 +149,11 @@ const maybeApplyChordChange = () => {
   activeNote = maxNote;
   batch(() => {
     setChordNumber(player, CHORDS[maxNote]);
-    spicy.value = CLOSER_CHORD_NOTES.has(activeNote);
   });
 };
 
 const onNoteOff = ({ note }: { note: Note }) => {
-  console.debug("guitar onNoteOff", note);
+  /// console.debug("guitar onNoteOff", note);
   switch (true) {
     case note.number in CHORDS:
       notesDown.delete(note.number);
@@ -168,7 +163,7 @@ const onNoteOff = ({ note }: { note: Note }) => {
 };
 
 const onNoteOn = ({ note }: { note: Note }) => {
-  console.debug("guitar onNoteOn", note);
+  /// console.debug("guitar onNoteOn", note);
   switch (true) {
     case note.number === DOWN_NOTE:
       currentStrumming.handleDown();
@@ -205,7 +200,8 @@ const onNoteOn = ({ note }: { note: Note }) => {
 
 const onWhammy = ({ rawValue }: { rawValue?: number }) => {
   if (rawValue) {
-    notesOut.value?.sendControlChange(1, rawValue);
+    /// notesOut.value?.sendControlChange(1, rawValue);
+    notesOut.value?.sendPitchBend(rawValue / -127);
   }
 };
 
@@ -214,7 +210,6 @@ const onWhammy = ({ rawValue }: { rawValue?: number }) => {
 effect(() => {
   activeGuitarChord.value = {
     chord: getChordByNumber(player.value.chordNumber),
-    spicy: spicy.value,
   };
 });
 

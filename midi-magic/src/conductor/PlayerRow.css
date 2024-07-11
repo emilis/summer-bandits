@@ -18,7 +18,9 @@
 
     &.chord {
 
+      font-family:      serif;
       text-align:       center;
+      text-transform:   uppercase;
 
       &.is-active {
 
