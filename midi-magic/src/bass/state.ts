@@ -54,7 +54,7 @@ let strumIndex: number = 0;
 
 /// Private functions ----------------------------------------------------------
 
-const setOctave = (note: number): number => note + (note > 8 ? 24 : 36);
+const setOctave = (note: number): number => note + (note % 12 > 8 ? 24 : 36);
 
 const getNextNote: Record<STRUMMINGS_NOTE, GetNextNote> = {
   67: (chord, isNoteDown) => chord.notes[0] + (isNoteDown ? 0 : 1) * 12,
@@ -104,7 +104,7 @@ const onNoteOn = ({ note: { number } }: { note: Note }) => {
     case number === DOWN_NOTE:
       offPlayingNote();
       activeNote = setOctave(
-        getNextNote[activeStrumming](activeChord.value, true),
+        getNextNote[activeStrumming](activeChord.value, !true),
       );
       isPlaying = true;
       notesOut.value?.sendNoteOn(activeNote);
@@ -112,7 +112,7 @@ const onNoteOn = ({ note: { number } }: { note: Note }) => {
     case number === UP_NOTE:
       offPlayingNote();
       activeNote = setOctave(
-        getNextNote[activeStrumming](activeChord.value, false),
+        getNextNote[activeStrumming](activeChord.value, !false),
       );
       isPlaying = true;
       notesOut.value?.sendNoteOn(activeNote);
@@ -146,8 +146,7 @@ const onNoteOn = ({ note: { number } }: { note: Note }) => {
 
 const onWhammy = ({ rawValue }: { rawValue?: number }) => {
   if (rawValue) {
-    /// notesOut.value?.sendControlChange(1, rawValue);
-    notesOut.value?.sendPitchBend(-127 / (rawValue || 1));
+    notesOut.value?.sendPitchBend(rawValue / -127);
   }
 };
 

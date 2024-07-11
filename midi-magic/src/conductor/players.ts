@@ -127,6 +127,7 @@ export const setFreePlay = (player: PlayerSignal) => {
         return;
       } else {
         changeMode(nextLeader, "LEAD");
+        changeMode(player, "FREE_PLAY");
         for (const follower of followers) {
           changeChordNumber(follower, nextLeader.value.chordNumber);
         }

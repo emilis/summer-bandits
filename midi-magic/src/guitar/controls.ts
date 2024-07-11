@@ -14,8 +14,8 @@ export const CHORDS: Record<number, number> = {
   56: 9,
   57: 10,
 };
-export const UP_NOTE = 58;
-export const DOWN_NOTE = 59;
+export const DOWN_NOTE = 58;
+export const UP_NOTE = 59;
 export type CROSS_NOTE = 60 | 61 | 62 | 63;
 export const CROSS_NOTES = new Set<number>([60, 61, 62, 63]);
 export const FIRST_CROSS_NOTE = 60;
