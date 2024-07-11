@@ -10,7 +10,7 @@ ADS1115 ADS(0x48);
 
 const unsigned long PING_INTERVAL = 1000; 
 const unsigned long DEBOUNCE_MILLIS = 30;
-const unsigned long WHAMMY_DEBOUNCE_MILLIS = 50;
+const unsigned long WHAMMY_DEBOUNCE_MILLIS = 30;
 
 constexpr DeviceType getDeviceType(const char* deviceType) {
     return (strcmp(deviceType, "GUITAR") == 0) ? DeviceType::GUITAR :
@@ -132,12 +132,12 @@ void updateWhammyMod(int& prevState, unsigned long& debounceStartedAt, unsigned 
     int state;
     #if USE_ADS == true
     state = ADS.readADC(3);
-    state = map(state, 1200, 15820, 0, 127);           
+    state = map(state, 1200, 15820, 0, 127);       
     #else
     state = analogRead(PIN_WAMMY_BAR);
     state = map(state, 8191, 1880, 0, 127);
     #endif
-    state = max(state, 0);
+    state = max(state, 0);    
 
     if (state == prevState) return;
 
