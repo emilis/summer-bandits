@@ -6,14 +6,7 @@ export type Chord = {
   levels: NoteNumber[][];
   notes: NoteNumber[];
 };
-export type Flavour =
-  | "aug"
-  | "dim"
-  | "maj"
-  | "maj7"
-  | "min"
-  | "min7"
-  | "other";
+export type Flavour = "aug" | "dim" | "maj" | "maj7" | "min" | "min7" | "other";
 
 type ScaleChords = Chord[];
 export type Scale = {
