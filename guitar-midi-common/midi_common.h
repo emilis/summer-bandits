@@ -23,7 +23,7 @@ enum Mode {
 struct ControllerMessage {
   DeviceType device;
   Mode mode;
-  uint8_t pitch;
+  int pitch;
   int velocity;
 };
 
