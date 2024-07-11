@@ -33,7 +33,6 @@ export function ChordInput({ onChange }: Props) {
 
   const onSubmit = (evt: any) => {
     evt.preventDefault();
-    console.log("onSubmit", isUsable, value);
     if (isUsable) {
       onChange(valueToChords(value));
     }
