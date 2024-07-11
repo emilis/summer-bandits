@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workspace>
+<Workspace xmlns="http://www.qlcplus.org/Workspace" CurrentWindow="SimpleDesk">
+ <Creator>
+  <Name>Q Light Controller Plus</Name>
+  <Version>4.13.1</Version>
+  <Author>Guoda Kaminskė</Author>
+ </Creator>
+ <Engine>
+  <InputOutputMap>
+   <BeatGenerator BeatType="Disabled" BPM="0"/>
+   <Universe Name="Universe 1" ID="0">
+    <Input Plugin="ArtNet" UID="127.0.0.1" Line="0" Profile="Unknown Manufacturer Unknown Model"/>
+    <Output Plugin="DMX USB" UID="FT232R USB UART (S/N: A50285BI)" Line="0">
+     <PluginParameters UniverseChannels="60"/>
+    </Output>
+   </Universe>
+   <Universe Name="Universe 2" ID="1"/>
+   <Universe Name="Universe 3" ID="2"/>
+   <Universe Name="Universe 4" ID="3"/>
+  </InputOutputMap>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>0</ID>
+   <Name>DRGB 1</Name>
+   <Universe>0</Universe>
+   <Address>0</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>1</ID>
+   <Name>DRGB 2</Name>
+   <Universe>0</Universe>
+   <Address>8</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>2</ID>
+   <Name>DRGB 3</Name>
+   <Universe>0</Universe>
+   <Address>16</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>3</ID>
+   <Name>DRGB 4</Name>
+   <Universe>0</Universe>
+   <Address>24</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>4</ID>
+   <Name>DRGB 5</Name>
+   <Universe>0</Universe>
+   <Address>32</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>5</ID>
+   <Name>DRGB 6</Name>
+   <Universe>0</Universe>
+   <Address>40</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>6</ID>
+   <Name>DRGB 7</Name>
+   <Universe>0</Universe>
+   <Address>48</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>7</ID>
+   <Name>DRGB 8</Name>
+   <Universe>0</Universe>
+   <Address>56</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <FixtureGroup ID="0">
+   <Name>Makers Scene</Name>
+   <Size X="7" Y="7"/>
+   <Head X="0" Y="0" Fixture="3">0</Head>
+   <Head X="1" Y="0" Fixture="2">0</Head>
+   <Head X="2" Y="0" Fixture="4">0</Head>
+   <Head X="3" Y="0" Fixture="5">0</Head>
+   <Head X="4" Y="0" Fixture="6">0</Head>
+   <Head X="5" Y="0" Fixture="7">0</Head>
+   <Head X="0" Y="1" Fixture="1">0</Head>
+   <Head X="0" Y="2" Fixture="0">0</Head>
+  </FixtureGroup>
+  <ChannelsGroup ID="0" Name="Reds" Value="0">0,1,1,1,2,1</ChannelsGroup>
+  <Function ID="0" Type="Scene" Name="Red">
+   <Speed FadeIn="2000" FadeOut="2000" Duration="0"/>
+   <ChannelGroupsVal>0,150</ChannelGroupsVal>
+   <FixtureVal ID="0">0,200,1,150</FixtureVal>
+   <FixtureVal ID="1">0,200,1,150</FixtureVal>
+   <FixtureVal ID="2">0,200,1,150</FixtureVal>
+  </Function>
+  <Function ID="1" Type="Chaser" Name="Snake">
+   <Speed FadeIn="300" FadeOut="300" Duration="500"/>
+   <Direction>Forward</Direction>
+   <RunOrder>Loop</RunOrder>
+   <SpeedModes FadeIn="Common" FadeOut="Common" Duration="Common"/>
+   <Step Number="0" FadeIn="400" Hold="200" FadeOut="400">2</Step>
+   <Step Number="1" FadeIn="0" Hold="200" FadeOut="0">3</Step>
+   <Step Number="2" FadeIn="0" Hold="200" FadeOut="0">4</Step>
+  </Function>
+  <Function ID="2" Type="Scene" Name="DRGB 1 white" Path="One by one white">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <FixtureVal ID="0">0,200,1,255,2,255,3,255</FixtureVal>
+  </Function>
+  <Function ID="3" Type="Scene" Name="DRGB 2 White" Path="One by one white">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <FixtureVal ID="1">0,200,1,255,2,255,3,255</FixtureVal>
+  </Function>
+  <Function ID="4" Type="Scene" Name="DRGB 3 White" Path="One by one white">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <FixtureVal ID="2">0,200,1,255,2,255,3,255</FixtureVal>
+  </Function>
+  <Monitor DisplayMode="0" ShowLabels="0">
+   <Font>Arial,12,-1,5,50,0,0,0,0,0</Font>
+   <ChannelStyle>0</ChannelStyle>
+   <ValueStyle>0</ValueStyle>
+   <Grid Width="5" Height="3" Depth="5" Units="0"/>
+  </Monitor>
+ </Engine>
+ <VirtualConsole>
+  <Frame Caption="">
+   <Appearance>
+    <FrameStyle>None</FrameStyle>
+    <ForegroundColor>Default</ForegroundColor>
+    <BackgroundColor>Default</BackgroundColor>
+    <BackgroundImage>None</BackgroundImage>
+    <Font>Default</Font>
+   </Appearance>
+   <Button Caption="Snake" ID="0" Icon="">
+    <WindowState Visible="False" X="135" Y="95" Width="155" Height="130"/>
+    <Appearance>
+     <FrameStyle>None</FrameStyle>
+     <ForegroundColor>Default</ForegroundColor>
+     <BackgroundColor>Default</BackgroundColor>
+     <BackgroundImage>None</BackgroundImage>
+     <Font>Default</Font>
+    </Appearance>
+    <Function ID="1"/>
+    <Action>Toggle</Action>
+    <Intensity Adjust="False">100</Intensity>
+   </Button>
+  </Frame>
+  <Properties>
+   <Size Width="1920" Height="1080"/>
+   <GrandMaster ChannelMode="Intensity" ValueMode="Reduce" SliderMode="Normal"/>
+  </Properties>
+ </VirtualConsole>
+ <SimpleDesk>
+  <Engine/>
+ </SimpleDesk>
+</Workspace>
