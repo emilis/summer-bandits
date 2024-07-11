@@ -20,12 +20,18 @@ enum Mode {
   PITCH,
 };
 
-typedef struct controller_message {
+struct ControllerMessage {
   DeviceType device;
   Mode mode;
-  int pitch;
+  uint8_t pitch;
   int velocity;
-} controller_message;
+};
+
+#ifdef DEBUG
+  #define DEBUG_PRINT(message) Serial.println(message)
+#else
+  #define DEBUG_PRINT(message)
+#endif
 
 int getChannel(DeviceType device);
 void serialNoteOn(int channel, uint8_t pitch, uint8_t velocity);
