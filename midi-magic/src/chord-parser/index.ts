@@ -1,4 +1,4 @@
-import { chordParserFactory } from "chord-symbol";
+import { type Chord as CpChord, chordParserFactory } from "chord-symbol";
 
 import { Flavour, type Chord, type NoteNumber } from "../harmony/scales";
 
@@ -26,16 +26,34 @@ const NOTE_NUMBERS: Record<string, NoteNumber> = {
 
 const noteNameToNumber = (str: string): NoteNumber => NOTE_NUMBERS[str];
 
-const qualityToFlavour = (quality: string): Flavour =>
-  quality.match(/^major/)
-    ? "maj"
-    : quality.match(/^minor/)
-      ? "min"
-      : quality.match(/^aug/)
-        ? "aug"
-        : quality.match(/^dim/)
-          ? "dim"
-          : "unknown";
+const getFlavour = (cpChord: CpChord): Flavour => {
+  const {
+    normalized: { adds, alterations, extensions, isSuspended, omits, quality },
+  } = cpChord;
+
+  const isCustom =
+    adds.length ||
+    alterations.length ||
+    extensions.length ||
+    isSuspended ||
+    omits.length;
+
+  return isCustom
+    ? "unknown"
+    : quality === "augmented"
+      ? "aug"
+      : quality.startsWith("diminished")
+        ? "dim"
+        : quality.startsWith("major7")
+          ? "maj7"
+          : quality.startsWith("major")
+            ? "maj"
+            : quality.startsWith("minor7")
+              ? "min7"
+              : quality.startsWith("minor")
+                ? "min"
+                : "unknown";
+};
 
 /// State ----------------------------------------------------------------------
 
@@ -51,12 +69,12 @@ export const parseChord = (str: string): Chord => {
   }
 
   const notes = cpChord.normalized.notes.map(noteNameToNumber);
-  ///console.log("cpChord", notes, cpChord);
+  /// console.debug("cpChord", getFlavour(cpChord), notes, cpChord);
 
   return {
-    flavour: qualityToFlavour(cpChord.normalized.quality),
+    flavour: getFlavour(cpChord),
     label: cpChord.input.symbol,
-    notes,
     levels: [notes, notes, notes, notes],
+    notes,
   };
 };

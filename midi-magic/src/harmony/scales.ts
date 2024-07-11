@@ -3,10 +3,17 @@ export type NoteNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 export type Chord = {
   flavour: Flavour;
   label?: string;
-  notes: NoteNumber[];
   levels: NoteNumber[][];
+  notes: NoteNumber[];
 };
-export type Flavour = "maj" | "min" | "dim" | "aug" | "unknown";
+export type Flavour =
+  | "aug"
+  | "dim"
+  | "maj"
+  | "maj7"
+  | "min"
+  | "min7"
+  | "unknown";
 
 type ScaleChords = Chord[];
 export type Scale = {
@@ -22,7 +29,9 @@ const CHORD_SUFFIXES: Record<Flavour, string> = {
   aug: "aug",
   dim: "dim",
   maj: "",
+  maj7: "M7",
   min: "m",
+  min7: "m7",
   unknown: "",
 };
 
