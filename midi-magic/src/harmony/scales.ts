@@ -13,7 +13,7 @@ export type Flavour =
   | "maj7"
   | "min"
   | "min7"
-  | "unknown";
+  | "other";
 
 type ScaleChords = Chord[];
 export type Scale = {
@@ -32,7 +32,7 @@ const CHORD_SUFFIXES: Record<Flavour, string> = {
   maj7: "M7",
   min: "m",
   min7: "m7",
-  unknown: "",
+  other: "",
 };
 
 export const MAX_CHORDS_COUNT = 10;

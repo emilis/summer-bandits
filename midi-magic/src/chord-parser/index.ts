@@ -39,7 +39,7 @@ const getFlavour = (cpChord: CpChord): Flavour => {
     omits.length;
 
   return isCustom
-    ? "unknown"
+    ? "other"
     : quality === "augmented"
       ? "aug"
       : quality.startsWith("diminished")
@@ -52,7 +52,7 @@ const getFlavour = (cpChord: CpChord): Flavour => {
               ? "min7"
               : quality.startsWith("minor")
                 ? "min"
-                : "unknown";
+                : "other";
 };
 
 /// State ----------------------------------------------------------------------
