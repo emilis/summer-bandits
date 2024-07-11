@@ -238,8 +238,8 @@ void loop() {
     updateButton(PIN_CROSS_DOWN,  62, pinState[14], debounceState[13], now);
     updateButton(PIN_CROSS_LEFT,  63, pinState[15], debounceState[14], now);
     #endif
-    updateButton(PIN_MENU,        65, pinState[16], debounceState[15], now); //Leader button
-    updateButton(PIN_VIEW,        66, pinState[17], debounceState[16], now); //Set free play button
+    updateButton(PIN_VIEW,        65, pinState[17], debounceState[15], now);
+    updateButton(PIN_MENU,        66, pinState[16], debounceState[16], now);
 
     updateSelector(67, pinState[18]);
     if (WHAMMY_BAR_IS_MOD) {
