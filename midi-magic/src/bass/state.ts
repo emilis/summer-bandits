@@ -36,7 +36,7 @@ const LABEL = "Bass";
 
 const bassIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
-const player = registerPlayer(LABEL, "FREE_PLAY");
+const player = registerPlayer(LABEL, "FOLLOW");
 
 const activeChord = computed(() => getChordByNumber(player.value.chordNumber));
 
