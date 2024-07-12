@@ -40,7 +40,7 @@ const player = registerPlayer(LABEL, "FREE_PLAY");
 
 const activeChord = computed(() => getChordByNumber(player.value.chordNumber));
 
-const chordsOn = new Set<number>;
+const chordsOn = new Set<number>();
 const crossValues: Record<number, number> = {
   60: 0,
   61: 0,

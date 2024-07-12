@@ -7,6 +7,7 @@ export function App() {
   return (
     <div className="com-app layout-stack">
       <Conductor />
+      <div style={{ height: "200vh" }} />
       <Instruments />
     </div>
   );

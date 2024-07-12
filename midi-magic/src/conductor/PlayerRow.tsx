@@ -29,7 +29,16 @@ export function ConductorPlayerRow({ chordNumbers, player }: Props) {
     <tr
       className={clsx("com-conductor-player-row", `mode-${mode.toLowerCase()}`)}
     >
-      <td className="name">{name}</td>
+      <td className="name">
+        {name}
+        {` (${
+          mode === "FOLLOW"
+            ? "follower"
+            : mode === "FREE_PLAY"
+              ? "free"
+              : "leader"
+        })`}
+      </td>
       {chordNumbers.map((cellChordNumber: string, i: number) => (
         <ChordCell
           chordNumber={ROMAN_NUMERALS[chordNumber]}
