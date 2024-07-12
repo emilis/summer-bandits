@@ -31,13 +31,13 @@ export function ConductorPlayerRow({ chordNumbers, player }: Props) {
     >
       <td className="name">
         {name}
-        {` (${
+        <span className="mode">{`(${
           mode === "FOLLOW"
             ? "follower"
             : mode === "FREE_PLAY"
               ? "free"
               : "leader"
-        })`}
+        })`}</span>
       </td>
       {chordNumbers.map((cellChordNumber: string, i: number) => (
         <ChordCell
