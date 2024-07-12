@@ -84,9 +84,123 @@ osc(10, 0.2, 0.5)
 // .posterize(10)
 // 	.out()
 
-// Video usage
-s0.initVideo(trees)
-src(s0).out()
+// // by ΔNDR0M3DΔ
+// // https://www.instagram.com/androm3_da/
+// noise(3,0.3,3).thresh(0.3,0.03).diff(o3,0.3).out(o1)
+// gradient([0.3,0.3,3]).diff(o0).blend(o1).out(o3)
+// voronoi(33,3,30).rotate(3,0.3,0).modulateScale(o2,0.3).color(-3,3,0).brightness(3).out(o0)
+// shape(30,0.3,1).invert(({time})=>Math.sin(time)*3).out(o2)
+// render(o3)
+
+
+
+
+// // licensed with CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
+// // ameba 
+// // @mokitzo
+// noise(3,.9)
+// .repeat([1,2,3], [1,2], () => Math.sin(time/2), () => Math.sin(time/2))
+// .color(2,5,3.5)
+// .out(o0)
+
+// // licensed with CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
+// //DANIELA CAÑIZARES
+// s0.initCam()
+// src(s0).modulate(noise(10,0.3)).diff(o0)
+// .out(o1)
+// a.setBins(4)
+// osc(()=>a.fft[0],-0.0018,0.17).diff(osc(20,0.00008,1).rotate(Math.sin(time)).add(o0,0.8))
+// .modulateScale(noise(20,0.18).modulatePixelate(gradient(({time})=>Math.sin(time),2).rotate(()=>Math.sin(time*0.6))),0.2,0.5)
+// .posterize(1) .rotate(1, 0.2, 0.01, 0.001)
+// .color([5, 3,3],[5, 5,3],[5, 3,3]).diff(o0,0.9).contrast(0.18, 0.3, 0.1, 0.2, 0.03, 1).modulate(osc(13,0,1)
+//   .kaleid()
+//   .scale(0.7)
+//   .rotate(()=>time)) 
+//               .out(o0)
+// a.show()
+// render(o1)
+
+
+// // licensed with CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
+// // @woshibide
+
+// let ch1 = ()=>a.fft[0]
+// let ch2 = ()=>a.fft[1]
+// let ch3 = ()=>a.fft[2]
+// let ch4 = ()=>a.fft[3]
+
+// a.show()
+// a.setSmooth(0.9)
+// a.setCutoff(0.3)
+// a.setScale(10)
+
+// osc(4, 0.3, 1)
+//   .modulate(osc(4,0,0))
+//   .modulateScale(voronoi(ch4))
+//   .modulateKaleid(noise(Math.cos(Math.cos(time/2))),20,3)
+//   .modulateRepeat(osc(Math.tan(time)), 30)
+//   .modulateKaleid(noise(Math.cos(Math.sin(time/2))),20,3)
+//   .out()
+
+
+// // licensed with CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
+// // ee_1 . EYE IN THE SKY
+// //example of mask and function modulation
+// // e_e // @eerie_ear
+// noise(18)
+//   .colorama(4)
+//   .posterize(2)
+//   .kaleid(50)
+//   .mask(
+//     shape(28, 0.25).modulateScale(
+//       noise(200.5, 0.5)
+//     )
+//   )
+//   .mask(shape(400, 1, 2.125))
+//   .modulateScale(osc(6, 0.125, 0.05).kaleid(60))
+//   .mult(osc(20, 0.05, 2.4).kaleid(50), 0.25)
+//   .scale(1.75, 0.65, 0.5)
+//   .modulate(noise(3.5))
+//   .saturate(6)
+//   .posterize(7, 0.2)
+//   .scale(1.5)
+//   .out();
+
+
+// src(s0).modulate(o0, ()=>a.fft[1]*0.25).pixelate(100,100).diff(o0).color(-2,0.2,-1).modulate(o0).out()
+
+
+
+
+// //clouds of passage
+// //by Nesso
+// //www.nesso.xyz
+
+// shape([4,5,6].fast(0.1).smooth(1),0.000001,[0.2,0.7].smooth(1))
+// .color(0.2,0.4,0.3)
+// .scrollX(()=>Math.sin(time*0.27))
+// .add(
+//   shape([4,5,6].fast(0.1).smooth(1),0.000001,[0.2,0.7,0.5,0.3].smooth(1))
+//   .color(0.6,0.2,0.5)
+//   .scrollY(0.35)
+//   .scrollX(()=>Math.sin(time*0.33)))
+// .add(
+//   shape([4,5,6].fast(0.1).smooth(1),0.000001,[0.2,0.7,0.3].smooth(1))
+//   .color(0.2,0.4,0.6)
+//   .scrollY(-0.35)
+//   .scrollX(()=>Math.sin(time*0.41)*-1))
+// .add(
+//       src(o0).shift(0.001,0.01,0.001)
+//       .scrollX([0.05,-0.05].fast(0.1).smooth(1))
+//       .scale([1.05,0.9].fast(0.3).smooth(1),[1.05,0.9,1].fast(0.29).smooth(1))
+//       ,0.85)
+// .modulate(voronoi(10,2,2))
+// .out()
+
+
+// // Video usage
+// s0.initVideo(trees)
+// src(s0).out()
 
 // Tutorial
 // Video generators:
