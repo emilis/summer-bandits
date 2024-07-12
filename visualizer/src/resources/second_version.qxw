@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workspace>
+<Workspace xmlns="http://www.qlcplus.org/Workspace" CurrentWindow="FunctionManager">
+ <Creator>
+  <Name>Q Light Controller Plus</Name>
+  <Version>4.13.1</Version>
+  <Author>Guoda Kaminskė</Author>
+ </Creator>
+ <Engine>
+  <InputOutputMap>
+   <BeatGenerator BeatType="Disabled" BPM="0"/>
+   <Universe Name="Universe 1" ID="0">
+    <Input Plugin="ArtNet" UID="127.0.0.1" Line="0" Profile="Unknown Manufacturer Unknown Model"/>
+    <Output Plugin="DMX USB" UID="FT232R USB UART (S/N: A50285BI)" Line="0">
+     <PluginParameters UniverseChannels="60"/>
+    </Output>
+   </Universe>
+   <Universe Name="Universe 2" ID="1"/>
+   <Universe Name="Universe 3" ID="2"/>
+   <Universe Name="Universe 4" ID="3"/>
+  </InputOutputMap>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>0</ID>
+   <Name>DRGB 1</Name>
+   <Universe>0</Universe>
+   <Address>0</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>1</ID>
+   <Name>DRGB 2</Name>
+   <Universe>0</Universe>
+   <Address>8</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>2</ID>
+   <Name>DRGB 3</Name>
+   <Universe>0</Universe>
+   <Address>16</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>3</ID>
+   <Name>DRGB 4</Name>
+   <Universe>0</Universe>
+   <Address>24</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>4</ID>
+   <Name>DRGB 5</Name>
+   <Universe>0</Universe>
+   <Address>32</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>5</ID>
+   <Name>DRGB 6</Name>
+   <Universe>0</Universe>
+   <Address>40</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>6</ID>
+   <Name>DRGB 7</Name>
+   <Universe>0</Universe>
+   <Address>48</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>Generic RGB</Model>
+   <Mode>Dimmer RGB</Mode>
+   <ID>7</ID>
+   <Name>DRGB 8</Name>
+   <Universe>0</Universe>
+   <Address>56</Address>
+   <Channels>4</Channels>
+  </Fixture>
+  <FixtureGroup ID="0">
+   <Name>Makers Scene</Name>
+   <Size X="7" Y="7"/>
+   <Head X="1" Y="0" Fixture="2">0</Head>
+   <Head X="2" Y="0" Fixture="3">0</Head>
+   <Head X="4" Y="0" Fixture="4">0</Head>
+   <Head X="5" Y="0" Fixture="5">0</Head>
+   <Head X="0" Y="1" Fixture="1">0</Head>
+   <Head X="6" Y="1" Fixture="6">0</Head>
+   <Head X="0" Y="2" Fixture="0">0</Head>
+   <Head X="6" Y="2" Fixture="7">0</Head>
+  </FixtureGroup>
+  <ChannelsGroup ID="0" Name="Red" Value="0">0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1</ChannelsGroup>
+  <ChannelsGroup ID="1" Name="Blue" Value="0">0,3,1,3,2,3,3,3,4,3,5,3,6,3,7,3</ChannelsGroup>
+  <Function ID="0" Type="Scene" Name="Red">
+   <Speed FadeIn="2000" FadeOut="2000" Duration="0"/>
+   <ChannelGroupsVal>0,255</ChannelGroupsVal>
+   <FixtureVal ID="0">0,200,1,255</FixtureVal>
+   <FixtureVal ID="1">0,200,1,255</FixtureVal>
+   <FixtureVal ID="2">0,200,1,255</FixtureVal>
+   <FixtureVal ID="3">1,255</FixtureVal>
+   <FixtureVal ID="4">1,255</FixtureVal>
+   <FixtureVal ID="5">1,255</FixtureVal>
+   <FixtureVal ID="6">1,255</FixtureVal>
+   <FixtureVal ID="7">1,255</FixtureVal>
+  </Function>
+  <Function ID="5" Type="RGBMatrix" Name="Strobe red" Path="Strobes">
+   <Speed FadeIn="500" FadeOut="500" Duration="854"/>
+   <Direction>Forward</Direction>
+   <RunOrder>Loop</RunOrder>
+   <Algorithm Type="Script">Strobe</Algorithm>
+   <MonoColor>4294901760</MonoColor>
+   <ControlMode>RGB</ControlMode>
+   <FixtureGroup>0</FixtureGroup>
+   <Property Name="frequency" Value="2"/>
+  </Function>
+  <Function ID="6" Type="RGBMatrix" Name="Fill red from center., loop">
+   <Speed FadeIn="0" FadeOut="0" Duration="500"/>
+   <Direction>Forward</Direction>
+   <RunOrder>Loop</RunOrder>
+   <Algorithm Type="Script">Fill From Center</Algorithm>
+   <MonoColor>4294901760</MonoColor>
+   <ControlMode>RGB</ControlMode>
+   <FixtureGroup>0</FixtureGroup>
+  </Function>
+  <Function ID="7" Type="Chaser" Name="RedOn">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <Direction>Forward</Direction>
+   <RunOrder>SingleShot</RunOrder>
+   <SpeedModes FadeIn="Default" FadeOut="Default" Duration="PerStep"/>
+   <Step Number="0" FadeIn="0" Hold="4294967294" FadeOut="0">0</Step>
+   <Step Number="1" FadeIn="0" Hold="4294967294" FadeOut="0">8</Step>
+  </Function>
+  <Function ID="8" Type="Scene" Name="Blue">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <ChannelGroupsVal>1,214</ChannelGroupsVal>
+   <FixtureVal ID="0">0,255,3,214</FixtureVal>
+   <FixtureVal ID="1">0,255,3,214</FixtureVal>
+   <FixtureVal ID="2">0,255,3,214</FixtureVal>
+   <FixtureVal ID="3">0,255,3,214</FixtureVal>
+   <FixtureVal ID="4">0,255,3,214</FixtureVal>
+   <FixtureVal ID="5">0,255,3,214</FixtureVal>
+   <FixtureVal ID="6">0,255,3,214</FixtureVal>
+   <FixtureVal ID="7">0,255,3,214</FixtureVal>
+  </Function>
+  <Function ID="9" Type="RGBMatrix" Name="Strobe blue" Path="Strobes">
+   <Speed FadeIn="0" FadeOut="50" Duration="100"/>
+   <Direction>Forward</Direction>
+   <RunOrder>Loop</RunOrder>
+   <Algorithm Type="Script">Strobe</Algorithm>
+   <MonoColor>4282012141</MonoColor>
+   <ControlMode>RGB</ControlMode>
+   <FixtureGroup>0</FixtureGroup>
+   <Property Name="frequency" Value="2"/>
+  </Function>
+  <Monitor DisplayMode="1" ShowLabels="1">
+   <Font>Arial,12,-1,5,50,0,0,0,0,0</Font>
+   <ChannelStyle>0</ChannelStyle>
+   <ValueStyle>0</ValueStyle>
+   <Grid Width="5" Height="3" Depth="5" Units="0"/>
+   <FxItem ID="0" XPos="183.872" YPos="1982.97"/>
+   <FxItem ID="1" XPos="246.969" YPos="1059.71"/>
+   <FxItem ID="2" XPos="529.627" YPos="148.364"/>
+   <FxItem ID="3" XPos="1240.22" YPos="-364.562"/>
+   <FxItem ID="4" XPos="3056.05" YPos="-395.676"/>
+   <FxItem ID="5" XPos="3637.73" YPos="107.184"/>
+   <FxItem ID="6" XPos="4096.65" YPos="764.048"/>
+   <FxItem ID="7" XPos="4199.58" YPos="1827.68"/>
+  </Monitor>
+ </Engine>
+ <VirtualConsole>
+  <Frame Caption="">
+   <Appearance>
+    <FrameStyle>None</FrameStyle>
+    <ForegroundColor>Default</ForegroundColor>
+    <BackgroundColor>4281413937</BackgroundColor>
+    <BackgroundImage>None</BackgroundImage>
+    <Font>Default</Font>
+   </Appearance>
+   <Button Caption="Snake" ID="0" Icon="">
+    <WindowState Visible="False" X="130" Y="510" Width="155" Height="130"/>
+    <Appearance>
+     <FrameStyle>None</FrameStyle>
+     <ForegroundColor>Default</ForegroundColor>
+     <BackgroundColor>Default</BackgroundColor>
+     <BackgroundImage>None</BackgroundImage>
+     <Font>Default</Font>
+    </Appearance>
+    <Function ID="4294967295"/>
+    <Action>Toggle</Action>
+    <Intensity Adjust="False">100</Intensity>
+   </Button>
+   <Frame Caption="Strobes" ID="1">
+    <Appearance>
+     <FrameStyle>Sunken</FrameStyle>
+     <ForegroundColor>Default</ForegroundColor>
+     <BackgroundColor>4288322202</BackgroundColor>
+     <BackgroundImage>None</BackgroundImage>
+     <Font>Default</Font>
+    </Appearance>
+    <WindowState Visible="False" X="25" Y="20" Width="460" Height="335"/>
+    <AllowChildren>True</AllowChildren>
+    <AllowResize>True</AllowResize>
+    <ShowHeader>True</ShowHeader>
+    <ShowEnableButton>True</ShowEnableButton>
+    <Collapsed>False</Collapsed>
+    <Disabled>False</Disabled>
+    <Button Caption="Strobe red" ID="2" Icon="">
+     <WindowState Visible="False" X="10" Y="50" Width="130" Height="85"/>
+     <Appearance>
+      <FrameStyle>None</FrameStyle>
+      <ForegroundColor>Default</ForegroundColor>
+      <BackgroundColor>4293942370</BackgroundColor>
+      <BackgroundImage>None</BackgroundImage>
+      <Font>Default</Font>
+     </Appearance>
+     <Function ID="5"/>
+     <Action>Toggle</Action>
+     <Intensity Adjust="False">100</Intensity>
+    </Button>
+   </Frame>
+   <CueList Caption="Red Blue" ID="4">
+    <WindowState Visible="False" X="510" Y="55" Width="270" Height="225"/>
+    <Appearance>
+     <FrameStyle>Sunken</FrameStyle>
+     <ForegroundColor>Default</ForegroundColor>
+     <BackgroundColor>Default</BackgroundColor>
+     <BackgroundImage>None</BackgroundImage>
+     <Font>Default</Font>
+    </Appearance>
+    <Chaser>7</Chaser>
+    <NextPrevBehavior>0</NextPrevBehavior>
+    <Next/>
+    <Previous/>
+    <Playback/>
+    <Stop/>
+    <SlidersMode>Steps</SlidersMode>
+   </CueList>
+   <AudioTriggers BarsNumber="5" Caption="Audio" ID="5">
+    <WindowState Visible="False" X="800" Y="55" Width="200" Height="200"/>
+    <Appearance>
+     <FrameStyle>Sunken</FrameStyle>
+     <ForegroundColor>Default</ForegroundColor>
+     <BackgroundColor>Default</BackgroundColor>
+     <BackgroundImage>None</BackgroundImage>
+     <Font>Default</Font>
+    </Appearance>
+    <SpectrumBar Name="#1 (0Hz - 1000Hz)" Type="3" MinThreshold="51" MaxThreshold="204" Divisor="1" Index="0" WidgetID="4"/>
+    <SpectrumBar Name="#5 (4000Hz - 5000Hz)" Type="2" MinThreshold="51" MaxThreshold="204" Divisor="1" Index="4" FunctionID="48"/>
+   </AudioTriggers>
+  </Frame>
+  <Properties>
+   <Size Width="1920" Height="1080"/>
+   <GrandMaster ChannelMode="Intensity" ValueMode="Reduce" SliderMode="Normal"/>
+  </Properties>
+ </VirtualConsole>
+ <SimpleDesk>
+  <Engine/>
+ </SimpleDesk>
+</Workspace>
