@@ -40,13 +40,13 @@ const player = registerPlayer(LABEL, "FREE_PLAY");
 
 const activeChord = computed(() => getChordByNumber(player.value.chordNumber));
 
+const chordsOn = new Set<number>;
 const crossValues: Record<number, number> = {
   60: 0,
   61: 0,
   62: 0,
   63: 0,
 };
-
 let activeNote: number = activeChord.value.notes[0];
 let activeStrumming: STRUMMINGS_NOTE = 67;
 let isPlaying: boolean = false;
@@ -94,7 +94,8 @@ const onNoteOff = ({ note: { number } }: { note: Note }) => {
     case number in CHORDS:
       offPlayingNote();
       strumIndex = 0;
-      setChordNumber(player, 0);
+      chordsOn.remove(number);
+      setChordNumber(player, Math.max(0, ...chordsOn));
       return;
   }
 };
@@ -120,7 +121,8 @@ const onNoteOn = ({ note: { number } }: { note: Note }) => {
     case number in CHORDS:
       offPlayingNote();
       strumIndex = 0;
-      setChordNumber(player, CHORDS[number]);
+      chordsOn.add(CHORDS[number]);
+      setChordNumber(player, Math.max(...chordsOn));
       return;
     case number in getNextNote:
       offPlayingNote();
