@@ -75,6 +75,9 @@ const getNextNote: Record<STRUMMINGS_NOTE, GetNextNote> = {
 const midiPanic = () => {
   notesOut.value?.sendAllNotesOff();
   notesOut.value?.sendAllSoundOff();
+  chordsOn.clear();
+  strumIndex = 0;
+  setChordNumber(player, 0);
 };
 
 const offPlayingNote = () => {
@@ -94,7 +97,7 @@ const onNoteOff = ({ note: { number } }: { note: Note }) => {
     case number in CHORDS:
       offPlayingNote();
       strumIndex = 0;
-      chordsOn.remove(number);
+      chordsOn.delete(CHORDS[number]);
       setChordNumber(player, Math.max(0, ...chordsOn));
       return;
   }
