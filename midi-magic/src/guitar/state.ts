@@ -228,14 +228,14 @@ effect(() => {
 effect(() => {
   const input = guitarIn.value;
   if (input) {
-    input.addListener("controlchange-controller1", onWhammy);
+    /// input.addListener("controlchange-controller1", onWhammy);
     input.addListener("noteoff", onNoteOff);
     input.addListener("noteon", onNoteOn);
   }
 
   return () => {
     if (input) {
-      input.removeListener("controlchange-controller1", onWhammy);
+      /// input.removeListener("controlchange-controller1", onWhammy);
       input.removeListener("noteoff", onNoteOff);
       input.removeListener("noteon", onNoteOn);
     }
