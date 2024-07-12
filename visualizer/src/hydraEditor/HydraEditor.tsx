@@ -3,29 +3,54 @@ import {Button, Monaco} from '../components'
 import {useHydraPreview} from './useHydraPreview'
 
 const defaultCode = `
-// licensed with CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
-// by Zach Krall
-// http://zachkrall.online/
+// var stirnos = 'https://video.wixstatic.com/video/2c9010_90f4926836334c988232ab4faef3aaa5/1080p/mp4/file.mp4'
+// var jura = 'https://video.wixstatic.com/video/2c9010_4c6de5ad340a49ae8f26e0845413bd2b/1080p/mp4/file.mp4'
+// var arkliai = 'https://video.wixstatic.com/video/2c9010_c28a4492132a40fab92f2f4c8637a501/1080p/mp4/file.mp4'
+// var trees = 'https://video.wixstatic.com/video/2c9010_1b3af35af9a74b2ea8d5fe7e3840ae5a/1080p/mp4/file.mp4'
+// var moon = 'https://video.wixstatic.com/video/2c9010_50940192a2734df088967d51f1123ad3/720p/mp4/file.mp4'
 
-osc(10, 0.9, 300)
-.color(0.9, 0.7, 0.8)
-.diff(
-  osc(45, 0.3, 100)
-  .color(0.9, 0.9, 0.9)
-  .rotate(0.18)
-  .pixelate(12)
-  .kaleid()
-)
-.scrollX(10)
-.colorama()
+//Example, sound reactive oscilator
+a.setScale(10)
+a.setBins(6)
+a.setSmooth(0.8)
+a.show()
+osc(10, 0.2, 0.5)
+.hue(0.1)
 .luma()
-.repeatX(4)
-.repeatY(4)
-.modulate(
-  osc(1, -0.9, 300)
-)
-.scale(2)
-.out()
+.modulate(osc().rotate(30))
+.modulateRotate(noise(3))
+.layer(
+  solid(1, 0, 0.2)
+  .mask(shape(5).modulate(noise(10, 0.6), 0.2, 0.1).scale(() => a.fft[0] * 6))
+  .rotate(() => Math.sin(time)))
+  .out()
+
+// Video usage
+s0.initVideo(trees)
+src(s0).out()
+
+// Tutorial
+// Video generators:
+
+// OSCILLATOR
+// osc(freq, speed, color_offset) e.g. 
+// osc(20, 0.2, 0.5).out()
+
+// NOISE (perlin noise generator)
+// noise(number, speed) e.g. 
+// noise(3, 0.5).out()
+
+// VORONOI
+// voronoi(number, speed) e.g.
+// voronoi(20, 0.5).out()
+
+// SHAPE
+// shape(sides,radius,smoothing), e.g.
+// shape(3, 0.01)
+
+
+
+
 `.trim()
 
 // FIXME:
