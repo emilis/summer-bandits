@@ -198,12 +198,14 @@ const onNoteOn = ({ note }: { note: Note }) => {
   }
 };
 
+/*
 const onWhammy = ({ rawValue }: { rawValue?: number }) => {
   if (rawValue) {
     /// notesOut.value?.sendControlChange(1, rawValue);
     notesOut.value?.sendPitchBend(rawValue / -127);
   }
 };
+*/
 
 /// Effects --------------------------------------------------------------------
 
