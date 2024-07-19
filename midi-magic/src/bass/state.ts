@@ -36,17 +36,17 @@ const LABEL = "Bass";
 
 const bassIn = signal<InputChannel | null>(null);
 const notesOut = signal<OutputChannel | null>(null);
-const player = registerPlayer(LABEL, "FREE_PLAY");
+const player = registerPlayer(LABEL, "FOLLOW");
 
 const activeChord = computed(() => getChordByNumber(player.value.chordNumber));
 
+const chordsOn = new Set<number>();
 const crossValues: Record<number, number> = {
   60: 0,
   61: 0,
   62: 0,
   63: 0,
 };
-
 let activeNote: number = activeChord.value.notes[0];
 let activeStrumming: STRUMMINGS_NOTE = 67;
 let isPlaying: boolean = false;
@@ -75,6 +75,9 @@ const getNextNote: Record<STRUMMINGS_NOTE, GetNextNote> = {
 const midiPanic = () => {
   notesOut.value?.sendAllNotesOff();
   notesOut.value?.sendAllSoundOff();
+  chordsOn.clear();
+  strumIndex = 0;
+  setChordNumber(player, 0);
 };
 
 const offPlayingNote = () => {
@@ -94,7 +97,8 @@ const onNoteOff = ({ note: { number } }: { note: Note }) => {
     case number in CHORDS:
       offPlayingNote();
       strumIndex = 0;
-      setChordNumber(player, 0);
+      chordsOn.delete(CHORDS[number]);
+      setChordNumber(player, Math.max(0, ...chordsOn));
       return;
   }
 };
@@ -120,7 +124,8 @@ const onNoteOn = ({ note: { number } }: { note: Note }) => {
     case number in CHORDS:
       offPlayingNote();
       strumIndex = 0;
-      setChordNumber(player, CHORDS[number]);
+      chordsOn.add(CHORDS[number]);
+      setChordNumber(player, Math.max(...chordsOn));
       return;
     case number in getNextNote:
       offPlayingNote();
@@ -144,25 +149,27 @@ const onNoteOn = ({ note: { number } }: { note: Note }) => {
   }
 };
 
+/*
 const onWhammy = ({ rawValue }: { rawValue?: number }) => {
   if (rawValue) {
     notesOut.value?.sendPitchBend(rawValue / -127);
   }
 };
+*/
 
 /// Effects --------------------------------------------------------------------
 
 effect(() => {
   const input = bassIn.value;
   if (input) {
-    input.addListener("controlchange-controller1", onWhammy);
+    /// input.addListener("controlchange-controller1", onWhammy);
     input.addListener("noteoff", onNoteOff);
     input.addListener("noteon", onNoteOn);
   }
 
   return () => {
     if (input) {
-      input.removeListener("controlchange-controller1", onWhammy);
+      /// input.removeListener("controlchange-controller1", onWhammy);
       input.removeListener("noteoff", onNoteOff);
       input.removeListener("noteon", onNoteOn);
     }

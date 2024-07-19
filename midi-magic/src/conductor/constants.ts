@@ -9,4 +9,10 @@ export const ROMAN_NUMERALS = [
   "VIII",
   "IX",
   "X",
+  "XI",
+  "XII",
+  "XIII",
+  "XIV",
+  "XV",
+  "XVI",
 ];

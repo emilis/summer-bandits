@@ -28,7 +28,7 @@ const CHORD_SUFFIXES: Record<Flavour, string> = {
   other: "",
 };
 
-export const MAX_CHORDS_COUNT = 10;
+export const MAX_CHORDS_COUNT = 11;
 
 export const NOTE_NAMES = [
   "C",
