@@ -199,22 +199,23 @@ const mapAnyChord = (chord: Chord): number[] => {
   const lastStrings = ALL_STRINGS.slice(2, 2 + lastFourNotes.length);
   const permutations = getPermutations(lastFourNotes);
 
-  const minFrets = permutations.reduce(
+  const minFrets = permutations.reduce<{ frets: number[]; maxFret: number }>(
     (acc, lastNotes) => {
-      const maxFret = Math.max(
-        ...lastNotes.map((note, i) => getFretCount(note, lastStrings[i])),
+      const frets = lastNotes.map((note, i) =>
+        getFretCount(note, lastStrings[i]),
       );
+      const maxFret = Math.max(...frets);
       if (maxFret >= acc.maxFret) {
         return acc;
       } else {
-        return { maxFret, lastNotes };
+        return { frets, maxFret };
       }
     },
-    { maxFret: Infinity, lastNotes: lastFourNotes },
+    { frets: [], maxFret: Infinity },
   );
 
   // convert frets to notes:
-  return [...frets, ...minFrets.lastNotes].map(
+  return [...frets, ...minFrets.frets].map(
     (fretCount, i) => ALL_STRINGS[i] + fretCount,
   );
 };
