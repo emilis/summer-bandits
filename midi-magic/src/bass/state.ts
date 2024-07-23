@@ -149,27 +149,25 @@ const onNoteOn = ({ note: { number } }: { note: Note }) => {
   }
 };
 
-/*
 const onWhammy = ({ rawValue }: { rawValue?: number }) => {
-  if (rawValue) {
+  if (typeof rawValue === "number") {
     notesOut.value?.sendPitchBend(rawValue / -127);
   }
 };
-*/
 
 /// Effects --------------------------------------------------------------------
 
 effect(() => {
   const input = bassIn.value;
   if (input) {
-    /// input.addListener("controlchange-controller1", onWhammy);
+    input.addListener("controlchange-controller1", onWhammy);
     input.addListener("noteoff", onNoteOff);
     input.addListener("noteon", onNoteOn);
   }
 
   return () => {
     if (input) {
-      /// input.removeListener("controlchange-controller1", onWhammy);
+      input.removeListener("controlchange-controller1", onWhammy);
       input.removeListener("noteoff", onNoteOff);
       input.removeListener("noteon", onNoteOn);
     }
