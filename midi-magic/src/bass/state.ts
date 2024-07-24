@@ -151,7 +151,7 @@ const onNoteOn = ({ note: { number } }: { note: Note }) => {
 
 const onWhammy = ({ rawValue }: { rawValue?: number }) => {
   if (typeof rawValue === "number") {
-    notesOut.value?.sendPitchBend(rawValue / -127);
+    notesOut.value?.sendControlChange(1, rawValue);
   }
 };
 
