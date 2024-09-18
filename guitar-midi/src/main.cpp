@@ -181,7 +181,12 @@ void setupPins() {
 }
 
 void setup() {
+    #if USE_ADS == true
     MIDI.begin(MIDI_SERIAL_RATE);
+    #else
+    MIDI.begin(MIDI_SERIAL_RATE, SERIAL_8N1, 16, 1);
+    #endif
+
 
     WiFi.mode(WIFI_STA);
 
