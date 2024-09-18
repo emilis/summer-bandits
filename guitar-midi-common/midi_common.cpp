@@ -1,8 +1,7 @@
 #include <Arduino.h>
 #include "midi_common.h"
 
-static HardwareSerial SerialZero(0);
-HardwareSerial MIDI = SerialZero;
+HardwareSerial MIDI(1);
 
 int getChannel(DeviceType device) {
   switch (device) {
