@@ -8,13 +8,18 @@
 ADS1115 ADS(0x48);
 #endif
 
+const unsigned long WIFI_SLEEP_INTERVAL = 5000;
 const unsigned long PING_INTERVAL = 1000; 
 const unsigned long DEBOUNCE_MILLIS = 30;
 const unsigned long WHAMMY_DEBOUNCE_MILLIS = 30;
 
+constexpr bool str_equal(const char* a, const char* b) {
+    return *a == *b && (*a == '\0' || str_equal(a + 1, b + 1));
+}
+
 constexpr DeviceType getDeviceType(const char* deviceType) {
-    return (strcmp(deviceType, "GUITAR") == 0) ? DeviceType::GUITAR :
-           (strcmp(deviceType, "BASS") == 0) ? DeviceType::BASS :
+    return str_equal(deviceType, "GUITAR") ? DeviceType::GUITAR :
+           str_equal(deviceType, "BASS") ? DeviceType::BASS :
            static_cast<DeviceType>(-1); // Invalid value
 }
 
@@ -30,9 +35,26 @@ unsigned long debounceState[30] = {0};
 // When strumming with a particular pattern, the button flies back and opens 
 // the other switch, which is not something we want.
 unsigned long* strumDebounce = &(debounceState[10]);
+unsigned long lastWifiActivity = 0;
 unsigned long now = 0;
+bool isWifiEnabled = true;
 
-inline void sendEspNowMessage(const ControllerMessage& message) {
+inline void enableWifi() {
+    esp_wifi_start();
+    isWifiEnabled = true;
+    DEBUG_PRINT("WiFi enabled.");
+}
+
+inline void sendEspNowMessage(const ControllerMessage& message, bool isPing = false) {
+    if (!isPing) {
+        lastWifiActivity = now;
+    }
+
+    if (!isWifiEnabled) {
+        enableWifi();
+    }
+
+
     esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &message, sizeof(message));
     if (result != ESP_OK) {
         DEBUG_PRINT("Error sending message");
@@ -71,20 +93,20 @@ inline void whammyMod(uint8_t bendValue) {
 }
 
 void updateButton(int buttonPin, uint8_t midiNote, int& prevState, unsigned long& debounceStartedAt, unsigned long now) {
-  if (now - debounceStartedAt < DEBOUNCE_MILLIS) return;
+    if (now - debounceStartedAt < DEBOUNCE_MILLIS) return;
 
-  auto state = digitalRead(buttonPin);
+    auto state = digitalRead(buttonPin);
 
-  if (state == prevState) return;
-  
-  prevState = state;
-  debounceStartedAt = now;
+    if (state == prevState) return;
 
-  if (state == LOW) {
-    noteOn(midiNote, 127);
-  } else {
-    noteOff(midiNote);
-  }
+    prevState = state;
+    debounceStartedAt = now;
+
+    if (state == LOW) {
+        noteOn(midiNote, 127);
+    } else {
+        noteOff(midiNote);
+    }
 }
 
 void updateSelector(uint8_t midiNoteStart, int& prevState) {
@@ -187,9 +209,7 @@ void setup() {
     MIDI.begin(MIDI_SERIAL_RATE, SERIAL_8N1, 16, 1);
     #endif
 
-
     WiFi.mode(WIFI_STA);
-
     esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
     esp_wifi_start();
     if (esp_now_init() != ESP_OK) {
@@ -214,13 +234,29 @@ void setup() {
     DEBUG_PRINT("Controller booted up.");
 }
 
+void disableWiFiIfNeeded() {
+    if (isWifiEnabled && now - lastWifiActivity > WIFI_SLEEP_INTERVAL) {
+        esp_wifi_stop();
+        DEBUG_PRINT("WiFi disabled to save power.");
+        isWifiEnabled = false;
+    } else if (!isWifiEnabled && now - lastWifiActivity <= WIFI_SLEEP_INTERVAL) {
+        enableWifi();
+    }
+}
+
+void espPing() {
+    if (now - previousMillis >= PING_INTERVAL && now - lastWifiActivity <= WIFI_SLEEP_INTERVAL) {
+        previousMillis = now;
+        sendEspNowMessage(PING_MESSAGE, true);
+    }
+}
+
 void loop() {
     now = millis();
-    if (now - previousMillis >= PING_INTERVAL) {
-        previousMillis = now;
-        sendEspNowMessage(PING_MESSAGE);
-    }
-    
+
+    disableWiFiIfNeeded();
+    espPing();
+
     updateButton(PIN_GREEN,       48, pinState[0], debounceState[0], now);
     updateButton(PIN_RED,         49, pinState[1], debounceState[1], now);
     updateButton(PIN_YELLOW,      50, pinState[2], debounceState[2], now);

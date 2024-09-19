@@ -1,7 +1,11 @@
 #include <Arduino.h>
 #include "midi_common.h"
 
-HardwareSerial MIDI(1);
+#if USE_SERIAL_1 == true
+HardwareSerial MIDI(1); 
+#else
+HardwareSerial MIDI(0); //TODO: check this.
+#endif
 
 int getChannel(DeviceType device) {
   switch (device) {

@@ -1,0 +1,1 @@
+../../guitar-midi-common/midi_common.h
