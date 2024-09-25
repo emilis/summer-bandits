@@ -39,13 +39,32 @@ unsigned long lastWifiActivity = 0;
 unsigned long now = 0;
 bool isWifiEnabled = true;
 
-inline void enableWifi() {
+void enableWifi() {
+    WiFi.mode(WIFI_STA);
+    esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
     esp_wifi_start();
+    if (esp_now_init() != ESP_OK) {
+        DEBUG_PRINT("Error initializing ESP-NOW");
+        return;
+    }
+
+    esp_now_peer_info_t broadcastPeer;
+    memset(&broadcastPeer, 0, sizeof(broadcastPeer));
+    memcpy(broadcastPeer.peer_addr, broadcastAddress, 6);
+    broadcastPeer.channel = WIFI_CHANNEL;
+    broadcastPeer.ifidx = WIFI_IF_STA;
+    broadcastPeer.encrypt = false;
+
+    if (esp_now_add_peer(&broadcastPeer) != ESP_OK) {
+        DEBUG_PRINT("Failed to add broadcast peer");
+        return;
+    }
+
     isWifiEnabled = true;
     DEBUG_PRINT("WiFi enabled.");
 }
 
-inline void sendEspNowMessage(const ControllerMessage& message, bool isPing = false) {
+void sendEspNowMessage(const ControllerMessage& message, bool isPing = false) {
     if (!isPing) {
         lastWifiActivity = now;
     }
@@ -209,25 +228,7 @@ void setup() {
     MIDI.begin(MIDI_SERIAL_RATE, SERIAL_8N1, 16, 1);
     #endif
 
-    WiFi.mode(WIFI_STA);
-    esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
-    esp_wifi_start();
-    if (esp_now_init() != ESP_OK) {
-        DEBUG_PRINT("Error initializing ESP-NOW");
-        return;
-    }
-
-    esp_now_peer_info_t broadcastPeer;
-    memset(&broadcastPeer, 0, sizeof(broadcastPeer));
-    memcpy(broadcastPeer.peer_addr, broadcastAddress, 6);
-    broadcastPeer.channel = WIFI_CHANNEL;
-    broadcastPeer.ifidx = WIFI_IF_STA;
-    broadcastPeer.encrypt = false;
-
-    if (esp_now_add_peer(&broadcastPeer) != ESP_OK) {
-        DEBUG_PRINT("Failed to add broadcast peer");
-        return;
-    }
+    enableWifi();
 
     setupPins();
 
@@ -236,7 +237,7 @@ void setup() {
 
 void disableWiFiIfNeeded() {
     if (isWifiEnabled && now - lastWifiActivity > WIFI_SLEEP_INTERVAL) {
-        esp_wifi_stop();
+        WiFi.mode(WIFI_OFF);
         DEBUG_PRINT("WiFi disabled to save power.");
         isWifiEnabled = false;
     } else if (!isWifiEnabled && now - lastWifiActivity <= WIFI_SLEEP_INTERVAL) {
