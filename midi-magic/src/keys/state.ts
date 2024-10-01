@@ -15,6 +15,10 @@ import {
   setFreePlay,
   setLeader,
 } from "../conductor/players";
+import {
+  play as playerPlay,
+  stop as playerStop,
+} from './player';
 
 /// Constant values ------------------------------------------------------------
 
@@ -157,13 +161,17 @@ const onLpNoteOn: NoteEventHandler = ({ note: { number } }) => {
 };
 
 const onNoteOff: NoteEventHandler = ({ note }) => {
-  /// console.debug("keyboard onNoteOff", note.number, note.rawRelease);
+  console.debug("keyboard onNoteOff", note.number, note.rawRelease);
+  playerStop();
+  return;
 
   notesOut.value?.sendNoteOff(notesOn[note.number], note);
 };
 
 const onNoteOn: NoteEventHandler = ({ note }) => {
-  /// console.debug("keyboard onNoteOn", note.number, note.rawAttack);
+  console.debug("keyboard onNoteOn", note.number, note.rawAttack);
+  playerPlay(note.identifier);
+  return;
 
   const midiNote = allNotesMode.value
     ? note.number
