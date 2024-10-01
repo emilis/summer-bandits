@@ -10,6 +10,15 @@ instrument.value = await SoundFont.instrument(
      'electric_guitar_clean',
 );
 
+/** TODO:
+  *   // You can connect the instrument to a midi input:
+  window.navigator.requestMIDIAccess().then(function (midiAccess) {
+    midiAccess.inputs.forEach(function (midiInput) {
+      clavinet.listenToMidi(midiInput)
+    })
+  })
+*/
+
 type Play = (
   note: string,
   { duration }?: { duration?: number },
